@@ -106,6 +106,11 @@ class OrderService
             return (int)$order->id;
         });
 
+        // 支付事务提交后再推送打印，避免占用会员/库存行锁；打印失败不影响下单结果
+        if ($payType === Order::PAY_TYPE_BALANCE) {
+            PrinterService::autoPrint($orderId);
+        }
+
         return self::payResult($memberId, $orderId);
     }
 
@@ -133,6 +138,10 @@ class OrderService
                 self::payByBalance($member, $order, self::giftPayableAmountOfOrder($order));
             }
         });
+
+        if ($payType === Order::PAY_TYPE_BALANCE) {
+            PrinterService::autoPrint($orderId);
+        }
 
         return self::payResult($memberId, $orderId);
     }
@@ -162,13 +171,13 @@ class OrderService
      */
     public static function markPaidByWechat(string $orderNo, string $transactionId, int $paidAmount): void
     {
-        Db::connection()->transaction(static function () use ($orderNo, $transactionId, $paidAmount): void {
+        $orderId = Db::connection()->transaction(static function () use ($orderNo, $transactionId, $paidAmount): ?int {
             $order = Order::query()->where('order_no', $orderNo)->lockForUpdate()->first();
             if ($order === null) {
                 throw new BusinessException('订单不存在', Result::NOT_FOUND);
             }
             if ((int)$order->pay_status === Order::PAY_STATUS_PAID) {
-                return;
+                return null;
             }
             if ($paidAmount !== (int)$order->pay_amount) {
                 throw new BusinessException('支付金额与订单不一致');
@@ -183,7 +192,14 @@ class OrderService
 
             $member = AccountService::lockMember((int)$order->member_id);
             self::afterPaid($member, $order);
+
+            return (int)$order->id;
         });
+
+        // 事务提交后再推送打印，且已支付过（幂等命中）时不重复打印
+        if ($orderId !== null) {
+            PrinterService::autoPrint($orderId);
+        }
     }
 
     /**

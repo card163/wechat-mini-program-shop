@@ -14,6 +14,7 @@ import {
   Wallet,
   Present,
   Picture,
+  Printer,
   Setting,
   UserFilled,
 } from '@element-plus/icons-vue'
@@ -36,6 +37,7 @@ const menus = [
   { path: '/recharge-packages', title: '充值套餐', icon: Wallet, super: true },
   { path: '/exchange-goods', title: '兑换商品', icon: Present, super: true },
   { path: '/banners', title: '轮播图', icon: Picture, super: true },
+  { path: '/printers', title: '打印机管理', icon: Printer, super: true },
   { path: '/settings', title: '系统配置', icon: Setting, super: true },
   { path: '/admin-users', title: '账号管理', icon: UserFilled, super: true },
 ]

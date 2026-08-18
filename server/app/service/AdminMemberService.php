@@ -76,6 +76,26 @@ class AdminMemberService
         $member->save();
     }
 
+    public static function updatePhone(int $memberId, string $phone): void
+    {
+        $phone = trim($phone);
+        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
+            throw new BusinessException('手机号格式不正确');
+        }
+
+        $exists = Member::query()
+            ->where('phone', $phone)
+            ->where('id', '!=', $memberId)
+            ->exists();
+        if ($exists) {
+            throw new BusinessException('该手机号已被其他会员使用');
+        }
+
+        $member = Member::query()->findOrFail($memberId);
+        $member->phone = $phone;
+        $member->save();
+    }
+
     /**
      * 调整本金余额，$amount 正数增加、负数扣减
      */

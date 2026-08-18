@@ -42,6 +42,13 @@ class MemberController
         return Result::success(null, '操作成功');
     }
 
+    public function updatePhone(Request $request, int $id): Response
+    {
+        AdminMemberService::updatePhone($id, (string)$request->post('phone', ''));
+
+        return Result::success(null, '修改成功');
+    }
+
     public function adjustBalance(Request $request, int $id): Response
     {
         AdminMemberService::adjustBalance(

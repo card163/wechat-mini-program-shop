@@ -72,6 +72,15 @@ function refund(row: any) {
     })
     .catch(() => {})
 }
+
+async function reprint(row: any) {
+  const res: any = await orderApi.print(row.id)
+  if (res.failed === 0 && res.success === 0) {
+    ElMessage.warning('没有已启用的打印机，请先在打印机管理中配置')
+  } else {
+    ElMessage.success(`已推送打印机 ${res.success} 台，失败 ${res.failed} 台`)
+  }
+}
 </script>
 
 <template>
@@ -104,9 +113,10 @@ function refund(row: any) {
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="下单时间" width="170" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="280" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="showDetail(row)">详情</el-button>
+          <el-button v-if="row.pay_status === 1" link type="primary" @click="reprint(row)">补打印</el-button>
           <el-button v-if="row.order_status === 1" link type="success" @click="finish(row)">完成</el-button>
           <el-button v-if="auth.isSuper() && row.pay_status === 1" link type="danger" @click="refund(row)">退款</el-button>
         </template>

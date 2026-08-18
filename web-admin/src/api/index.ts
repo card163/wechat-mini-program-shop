@@ -25,6 +25,7 @@ export const memberApi = {
   list: (params: Record<string, any>) => get<PageResult<any>>('/admin/members', params),
   detail: (id: number) => get(`/admin/members/${id}`),
   status: (id: number, status: number) => post(`/admin/members/${id}/status`, { status }),
+  updatePhone: (id: number, phone: string) => post(`/admin/members/${id}/phone`, { phone }),
   adjustBalance: (id: number, amount: number, remark: string) =>
     post(`/admin/members/${id}/balance/adjust`, { amount, remark }),
   grantGift: (id: number, amount: number, expireDays: number, remark: string) =>
@@ -42,6 +43,7 @@ export const orderApi = {
   detail: (id: number) => get(`/admin/orders/${id}`),
   finish: (id: number) => post(`/admin/orders/${id}/finish`),
   refund: (id: number, remark: string) => post(`/admin/orders/${id}/refund`, { remark }),
+  print: (id: number) => post(`/admin/orders/${id}/print`),
 }
 
 /** 后台同构资源的标准 CRUD */
@@ -82,6 +84,15 @@ export const adminUserApi = {
   create: (data: Record<string, any>) => post('/admin/admin-users', data),
   update: (id: number, data: Record<string, any>) => put(`/admin/admin-users/${id}`, data),
   remove: (id: number) => del(`/admin/admin-users/${id}`),
+}
+
+export const printerApi = {
+  ...crudApi('/admin/printers'),
+  testPrint: (id: number) => post(`/admin/printers/${id}/test-print`),
+}
+
+export const printLogApi = {
+  list: (params: Record<string, any>) => get<PageResult<any>>('/admin/print-logs', params),
 }
 
 export const uploadUrl = '/admin/upload/image'

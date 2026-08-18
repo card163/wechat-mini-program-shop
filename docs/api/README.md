@@ -99,3 +99,4 @@ HTTP 状态码恒为 `200`（网络层错误除外），业务结果由 `code` �
 | [exchange.md](exchange.md) | 记分牌兑换 | `me-exchage-sorce.png` |
 | [wine.md](wine.md) | 存酒、取酒 | `me-store-drink.png`、`me-store-drink-qrcode.png` |
 | [admin.md](admin.md) | 管理后台与店员核销 | — |
+| [printer.md](printer.md) | 接单打印机配置与自动出单 | — |

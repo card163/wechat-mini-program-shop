@@ -161,6 +161,7 @@
 | GET | `/admin/orders/{id}` | 订单详情 · 店员可用 |
 | POST | `/admin/orders/{id}/finish` | 标记已完成（出品完成）· 店员可用 |
 | POST | `/admin/orders/{id}/refund` | 退款，按原路退回本金/赠金批次，落流水 |
+| POST | `/admin/orders/{id}/print` | 补打印小票（推送至全部启用的打印机）· 店员可用，详见 [printer.md](printer.md) |
 
 ### 充值与兑换
 
@@ -191,6 +192,10 @@
 | PUT | `/admin/settings/{group}` | 保存配置分组 |
 | GET/POST | `/admin/admin-users` | 管理员与店员账号管理 |
 | POST | `/admin/upload/image` | 图片上传，返回可访问地址 · 店员可用 |
+| GET/POST | `/admin/printers` | 接单打印机列表 / 新增，详见 [printer.md](printer.md) |
+| PUT/DELETE | `/admin/printers/{id}` | 编辑 / 删除打印机 |
+| POST | `/admin/printers/{id}/test-print` | 测试打印 |
+| GET | `/admin/print-logs` | 打印日志 |
 
 ### 统计
 

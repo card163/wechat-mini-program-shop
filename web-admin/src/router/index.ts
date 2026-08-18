@@ -21,6 +21,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'recharge-packages', name: 'recharge-packages', component: () => import('@/views/RechargePackageView.vue'), meta: { title: '充值套餐', super: true } },
       { path: 'exchange-goods', name: 'exchange-goods', component: () => import('@/views/ExchangeGoodsView.vue'), meta: { title: '兑换商品', super: true } },
       { path: 'banners', name: 'banners', component: () => import('@/views/BannerView.vue'), meta: { title: '轮播图', super: true } },
+      { path: 'printers', name: 'printers', component: () => import('@/views/PrinterView.vue'), meta: { title: '打印机管理', super: true } },
       { path: 'settings', name: 'settings', component: () => import('@/views/SettingView.vue'), meta: { title: '系统配置', super: true } },
       { path: 'admin-users', name: 'admin-users', component: () => import('@/views/AdminUserView.vue'), meta: { title: '账号管理', super: true } },
     ],

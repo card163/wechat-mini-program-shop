@@ -40,6 +40,11 @@ class OrderController
         return Result::success(null, '订单已完成');
     }
 
+    public function print(Request $request, int $id): Response
+    {
+        return Result::success(AdminOrderService::print($id));
+    }
+
     public function refund(Request $request, int $id): Response
     {
         AdminOrderService::refund($id, (string)$request->post('remark', ''), (int)$request->adminId);

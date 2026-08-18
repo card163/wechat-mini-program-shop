@@ -85,6 +85,16 @@ class AdminOrderService
     }
 
     /**
+     * 补打印：向全部已启用打印机重新推送一次
+     *
+     * @return array{success: int, failed: int}
+     */
+    public static function print(int $orderId): array
+    {
+        return PrinterService::reprint($orderId);
+    }
+
+    /**
      * 退款：赠金与本金原路退回，微信支付部分调用微信退款接口
      */
     public static function refund(int $orderId, string $remark, int $operatorId): void

@@ -20,6 +20,8 @@ use app\controller\admin\GoodsCategoryController;
 use app\controller\admin\GoodsController as AdminGoodsController;
 use app\controller\admin\MemberController as AdminMemberController;
 use app\controller\admin\OrderController as AdminOrderController;
+use app\controller\admin\PrinterController;
+use app\controller\admin\PrintLogController;
 use app\controller\admin\RechargePackageController;
 use app\controller\admin\SettingController;
 use app\controller\admin\StatController;
@@ -126,6 +128,7 @@ Route::group('/admin', function (): void {
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/orders/{id:\d+}', [AdminOrderController::class, 'show']);
     Route::post('/orders/{id:\d+}/finish', [AdminOrderController::class, 'finish']);
+    Route::post('/orders/{id:\d+}/print', [AdminOrderController::class, 'print']);
 
     Route::post('/upload/image', [UploadController::class, 'image']);
 })->middleware([AdminAuth::class]);
@@ -137,6 +140,7 @@ Route::group('/admin', function () use ($crud): void {
     Route::get('/members', [AdminMemberController::class, 'index']);
     Route::get('/members/{id:\d+}', [AdminMemberController::class, 'show']);
     Route::post('/members/{id:\d+}/status', [AdminMemberController::class, 'status']);
+    Route::post('/members/{id:\d+}/phone', [AdminMemberController::class, 'updatePhone']);
     Route::post('/members/{id:\d+}/balance/adjust', [AdminMemberController::class, 'adjustBalance']);
     Route::post('/members/{id:\d+}/gift/grant', [AdminMemberController::class, 'grantGift']);
     Route::post('/members/{id:\d+}/point/adjust', [AdminMemberController::class, 'adjustPoint']);
@@ -158,6 +162,10 @@ Route::group('/admin', function () use ($crud): void {
     Route::post('/admin-users', [AdminUserController::class, 'store']);
     Route::put('/admin-users/{id:\d+}', [AdminUserController::class, 'update']);
     Route::delete('/admin-users/{id:\d+}', [AdminUserController::class, 'destroy']);
+
+    $crud('/printers', PrinterController::class);
+    Route::post('/printers/{id:\d+}/test-print', [PrinterController::class, 'testPrint']);
+    Route::get('/print-logs', [PrintLogController::class, 'index']);
 
     Route::get('/stat/overview', [StatController::class, 'overview']);
     Route::get('/stat/trend', [StatController::class, 'trend']);

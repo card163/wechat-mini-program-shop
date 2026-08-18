@@ -18,6 +18,10 @@ const adjustVisible = ref(false)
 const adjustType = ref<'balance' | 'gift' | 'point'>('balance')
 const adjustForm = reactive({ amount: '', point: 0, expire_days: 0, remark: '' })
 
+const phoneVisible = ref(false)
+const phoneRow = ref<any>(null)
+const phoneForm = reactive({ phone: '' })
+
 onMounted(load)
 
 async function load() {
@@ -56,6 +60,24 @@ function toggleStatus(row: any) {
       load()
     })
     .catch(() => {})
+}
+
+function openPhoneEdit(row: any) {
+  phoneRow.value = row
+  phoneForm.phone = row.phone
+  phoneVisible.value = true
+}
+
+async function submitPhone() {
+  if (!/^1[3-9]\d{9}$/.test(phoneForm.phone)) {
+    ElMessage.warning('请输入正确的手机号')
+    return
+  }
+
+  await memberApi.updatePhone(phoneRow.value.id, phoneForm.phone)
+  ElMessage.success('修改成功')
+  phoneVisible.value = false
+  load()
 }
 
 function openAdjust(row: any, type: 'balance' | 'gift' | 'point') {
@@ -116,7 +138,11 @@ async function submitAdjust() {
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="phone" label="手机号" width="130" />
+      <el-table-column label="手机号" width="130">
+        <template #default="{ row }">
+          <el-button link type="primary" @click="openPhoneEdit(row)">{{ row.phone || '未绑定' }}</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="余额" width="110">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.balance) }}</span></template>
       </el-table-column>
@@ -207,6 +233,18 @@ async function submitAdjust() {
         </el-tabs>
       </template>
     </el-drawer>
+
+    <el-dialog v-model="phoneVisible" title="修改手机号" width="400px">
+      <el-form label-width="80px">
+        <el-form-item label="手机号">
+          <el-input v-model="phoneForm.phone" placeholder="请输入11位手机号" maxlength="11" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="phoneVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPhone">确定</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="adjustVisible" :title="adjustType === 'balance' ? '调整余额' : adjustType === 'gift' ? '发放赠金' : '调整记分牌'" width="460px">
       <el-form label-width="100px">
