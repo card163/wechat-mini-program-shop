@@ -4,9 +4,18 @@ Page({
   data: {
     storages: [],
     takes: [],
-    tabIndex: 0,
     loading: true,
     takeCode: null,
+    takesVisible: false,
+    storeCodeVisible: false,
+    storeQrcode: '',
+    storeScene: '',
+  },
+
+  onLoad(query) {
+    if (query.autoCode) {
+      this.goStoreCode();
+    }
   },
 
   onShow() {
@@ -26,12 +35,24 @@ Page({
       .catch(() => this.setData({ loading: false }));
   },
 
-  onTabTap(e) {
-    this.setData({ tabIndex: Number(e.currentTarget.dataset.index) });
+  showTakes() {
+    this.setData({ takesVisible: true });
+  },
+  hideTakes() {
+    this.setData({ takesVisible: false });
   },
 
   goStoreCode() {
-    wx.navigateTo({ url: '/pages/wine/code' });
+    this.setData({ storeCodeVisible: true, storeQrcode: '', storeScene: '' });
+    memberApi.wineStoreCode().then((data) => {
+      this.setData({
+        storeQrcode: data.qrcode,
+        storeScene: data.scene,
+      });
+    });
+  },
+  closeStoreCode() {
+    this.setData({ storeCodeVisible: false });
   },
 
   onTake(e) {

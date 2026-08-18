@@ -1,8 +1,7 @@
-.summary { text-align: center; padding: 40rpx 0; }
-.summary-num { font-size: 64rpx; font-weight: 700; margin: 12rpx 0; }
+.summary-num { font-size: 48rpx; font-weight: 700; margin: 8rpx 0; }
 
-.batch { padding: 24rpx 0; border-bottom: 1rpx solid var(--line); }
-.batch:last-child { border-bottom: none; }
-.batch-body { margin: 10rpx 0; }
+.rule-line { line-height: 44rpx; }
 
-.rule .sub { line-height: 44rpx; }
+.section-title { font-size: 28rpx; font-weight: 700; margin: 8rpx 0 16rpx; }
+
+.batch { margin-bottom: 16rpx; }

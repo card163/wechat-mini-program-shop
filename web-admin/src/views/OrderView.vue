@@ -86,14 +86,14 @@ function refund(row: any) {
       <el-button type="primary" @click="search">查询</el-button>
     </div>
 
-    <el-table :data="rows" v-loading="loading" border stripe>
-      <el-table-column prop="order_no" label="订单号" width="210" />
+    <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
+      <el-table-column prop="order_no" label="订单号" min-width="180" />
       <el-table-column prop="table_name" label="桌号" width="90" />
       <el-table-column prop="member_id" label="会员ID" width="90" />
-      <el-table-column label="金额" width="120">
+      <el-table-column label="金额" width="110">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.pay_amount) }}</span></template>
       </el-table-column>
-      <el-table-column label="支付构成" width="240">
+      <el-table-column label="支付构成" min-width="260">
         <template #default="{ row }">
           <span>微信 ¥{{ fen2yuan(row.pay_wechat) }} / 余额 ¥{{ fen2yuan(row.pay_balance) }} / 赠金 ¥{{ fen2yuan(row.pay_gift) }}</span>
         </template>
@@ -103,7 +103,7 @@ function refund(row: any) {
           <el-tag :type="statusMeta(row.order_status).type as any">{{ statusMeta(row.order_status).label }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created_at" label="下单时间" width="180" />
+      <el-table-column prop="created_at" label="下单时间" width="170" />
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="showDetail(row)">详情</el-button>

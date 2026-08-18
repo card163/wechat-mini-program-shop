@@ -1,18 +1,8 @@
 const shopApi = require('../../api/shop');
 const { fen2yuan } = require('../../utils/format');
 
-const TABS = [
-  { label: '全部', status: '' },
-  { label: '待支付', status: 0 },
-  { label: '已支付', status: 1 },
-  { label: '已完成', status: 2 },
-  { label: '已取消', status: 3 },
-];
-
 Page({
   data: {
-    tabs: TABS,
-    tabIndex: 0,
     list: [],
     page: 1,
     hasMore: true,
@@ -27,10 +17,6 @@ Page({
     this.loadMore();
   },
 
-  onTabTap(e) {
-    this.setData({ tabIndex: Number(e.currentTarget.dataset.index) }, () => this.reload());
-  },
-
   reload() {
     this.setData({ list: [], page: 1, hasMore: true });
     return this.loadMore();
@@ -41,8 +27,6 @@ Page({
     this.setData({ loading: true });
 
     const params = { page: this.data.page, page_size: 10 };
-    const status = TABS[this.data.tabIndex].status;
-    if (status !== '') params.status = status;
 
     return getApp()
       .ensureLogin()

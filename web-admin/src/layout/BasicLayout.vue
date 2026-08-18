@@ -2,6 +2,21 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Odometer,
+  List,
+  Checked,
+  GobletFull,
+  User,
+  Goods,
+  Menu as MenuIcon,
+  Grid,
+  Wallet,
+  Present,
+  Picture,
+  Setting,
+  UserFilled,
+} from '@element-plus/icons-vue'
 import { authApi } from '@/api'
 import { ROLE_SUPER, useAuthStore } from '@/stores/auth'
 
@@ -10,19 +25,19 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const menus = [
-  { path: '/dashboard', title: '数据概览' },
-  { path: '/orders', title: '订单管理' },
-  { path: '/verify', title: '店员核销' },
-  { path: '/wine', title: '存酒管理' },
-  { path: '/members', title: '会员管理', super: true },
-  { path: '/goods', title: '商品管理', super: true },
-  { path: '/categories', title: '商品分类', super: true },
-  { path: '/tables', title: '桌号管理', super: true },
-  { path: '/recharge-packages', title: '充值套餐', super: true },
-  { path: '/exchange-goods', title: '兑换商品', super: true },
-  { path: '/banners', title: '轮播图', super: true },
-  { path: '/settings', title: '系统配置', super: true },
-  { path: '/admin-users', title: '账号管理', super: true },
+  { path: '/dashboard', title: '数据概览', icon: Odometer },
+  { path: '/orders', title: '订单管理', icon: List },
+  { path: '/verify', title: '店员核销', icon: Checked },
+  { path: '/wine', title: '存酒管理', icon: GobletFull },
+  { path: '/members', title: '会员管理', icon: User, super: true },
+  { path: '/goods', title: '商品管理', icon: Goods, super: true },
+  { path: '/categories', title: '商品分类', icon: MenuIcon, super: true },
+  { path: '/tables', title: '桌号管理', icon: Grid, super: true },
+  { path: '/recharge-packages', title: '充值套餐', icon: Wallet, super: true },
+  { path: '/exchange-goods', title: '兑换商品', icon: Present, super: true },
+  { path: '/banners', title: '轮播图', icon: Picture, super: true },
+  { path: '/settings', title: '系统配置', icon: Setting, super: true },
+  { path: '/admin-users', title: '账号管理', icon: UserFilled, super: true },
 ]
 
 const visibleMenus = computed(() =>
@@ -56,10 +71,11 @@ function logout() {
 <template>
   <el-container class="layout">
     <el-aside width="200px" class="aside">
-      <div class="logo">Nice Fold</div>
+      <div class="logo">六六弗尔豪斯</div>
       <el-menu :default-active="route.path" router background-color="#1f2329" text-color="#c9cdd4" active-text-color="#d4af37">
         <el-menu-item v-for="menu in visibleMenus" :key="menu.path" :index="menu.path">
-          {{ menu.title }}
+          <el-icon><component :is="menu.icon" /></el-icon>
+          <span>{{ menu.title }}</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

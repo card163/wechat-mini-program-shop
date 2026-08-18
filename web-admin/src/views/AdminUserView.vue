@@ -84,9 +84,9 @@ function remove(row: any) {
       <el-button type="primary" @click="openCreate">新增账号</el-button>
     </div>
 
-    <el-table :data="rows" v-loading="loading" border stripe>
+    <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
       <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column prop="username" label="账号" width="160" />
+      <el-table-column prop="username" label="账号" min-width="160" />
       <el-table-column prop="real_name" label="姓名" width="140" />
       <el-table-column prop="phone" label="手机号" width="140" />
       <el-table-column label="角色" width="130">

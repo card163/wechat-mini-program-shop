@@ -1,12 +1,11 @@
 const { home } = require('../../api/auth');
-const { money } = require('../../utils/format');
 
 Page({
   data: {
     shop: {},
-    banners: [],
     member: null,
     loading: true,
+    noticeVisible: false,
   },
 
   onShow() {
@@ -26,10 +25,7 @@ Page({
       .then((data) => {
         this.setData({
           shop: data.shop,
-          banners: data.banners,
           member: data.member,
-          balanceText: data.member ? money(data.member.balance) : '0',
-          giftText: data.member ? money(data.member.gift_balance) : '0',
           loading: false,
         });
       })
@@ -37,27 +33,17 @@ Page({
   },
 
   goShop() {
-    wx.switchTab({ url: '/pages/shop/index' });
+    wx.navigateTo({ url: '/pages/shop/index' });
   },
   goRecharge() {
     wx.navigateTo({ url: '/pages/recharge/index' });
   },
-  goWine() {
-    wx.navigateTo({ url: '/pages/wine/index' });
+  showNotice() {
+    this.setData({ noticeVisible: true });
   },
-  goExchange() {
-    wx.navigateTo({ url: '/pages/me/exchange' });
+  hideNotice() {
+    this.setData({ noticeVisible: false });
   },
-  goRanking() {
-    wx.switchTab({ url: '/pages/ranking/index' });
-  },
-  onBannerTap(e) {
-    const { link } = e.currentTarget.dataset;
-    if (link) wx.navigateTo({ url: link });
-  },
-  callShop() {
-    if (this.data.shop.phone) {
-      wx.makePhoneCall({ phoneNumber: this.data.shop.phone });
-    }
-  },
+  noop() {},
 });
+

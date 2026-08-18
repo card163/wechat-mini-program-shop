@@ -1,3 +1,9 @@
+<view class="shop-header">
+  <view class="shop-logo">66</view>
+  <view class="shop-name flex-1">{{shop.name || '六六弗尔豪斯休闲酒馆'}}</view>
+  <view class="shop-hours" wx:if="{{shop.business_hours}}">营业时间：{{shop.business_hours}}</view>
+</view>
+
 <view class="shop">
   <scroll-view class="side" scroll-y>
     <view
@@ -16,7 +22,7 @@
       <image class="goods-img" src="{{item.cover}}" mode="aspectFill" />
       <view class="goods-info">
         <view class="goods-name">{{item.name}}</view>
-        <view class="sub">{{item.subtitle}}</view>
+        <view class="sub goods-desc">{{item.subtitle}}</view>
         <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持赠金支付</view>
         <view class="row-between goods-bottom">
           <view class="price">¥{{item.priceText}}</view>
@@ -34,9 +40,9 @@
 
 <view class="cart-bar">
   <view class="cart-info">
-    <view class="cart-count">已选 {{cartCount}} 件</view>
-    <view class="price">合计 ¥{{cartAmountText}}</view>
+    <view class="price">¥{{cartAmountText}}</view>
+    <view class="sub">共{{cartCount}}件</view>
   </view>
-  <view class="cart-clear" bindtap="clearCart" wx:if="{{cartCount > 0}}">清空</view>
   <view class="cart-btn {{cartCount ? '' : 'disabled'}}" bindtap="goCheckout">去结算</view>
 </view>
+

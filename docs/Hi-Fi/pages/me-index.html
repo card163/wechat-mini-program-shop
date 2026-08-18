@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的 · 六六弗尔豪斯</title>
+<link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="screen-body">
+  <div class="screen-root">
+    <div class="statusbar"><span>9:41</span><span>●●● 5G 100%</span></div>
+
+    <div class="content" style="position:relative;">
+      <div class="profile-row">
+        <div class="avatar lg">牌</div>
+        <div class="flex-1">
+          <div class="title" style="margin-bottom:2px;font-size:16px;">牌友</div>
+          <div class="sub">ID:1</div>
+        </div>
+        <a class="wine-code-entry" href="me-wine.html">
+          <img class="wine-code-icon" src="../assets/me/icon-qr.png" />
+          <div>存酒码</div>
+        </a>
+      </div>
+
+      <a class="asset-card" href="recharge.html">
+        <div class="asset-badge">点击充值</div>
+        <div class="asset-row">
+          <div class="asset-item"><div class="asset-num">¥328.00</div><div class="sub">余额</div></div>
+          <div class="asset-sep"></div>
+          <div class="asset-item"><div class="asset-num">1200</div><div class="sub">积分</div></div>
+          <div class="asset-sep"></div>
+          <div class="asset-item"><div class="asset-num">¥100.00</div><div class="sub">有效赠金</div></div>
+        </div>
+      </a>
+
+      <div class="card">
+        <div class="title" style="font-size:14px;margin-bottom:14px;">常用功能</div>
+        <div class="func-row">
+          <a class="func-item" href="me-wine.html"><div class="func-icon"><img class="func-icon-img" src="../assets/me/icon-wine.png" /></div><div class="sub">我的存酒</div></a>
+          <a class="func-item" href="#" onclick="document.getElementById('exchange').style.display='flex';return false;"><div class="func-icon"><img class="func-icon-img" src="../assets/me/icon-coin.png" /></div><div class="sub">取积分</div></a>
+          <a class="func-item" href="me-orders.html"><div class="func-icon"><img class="func-icon-img" src="../assets/me/icon-doc.png" /></div><div class="sub">订单列表</div></a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <div class="row shop-row">
+            <div class="shop-logo">66</div>
+            <div class="title" style="font-size:15px;">六六弗尔豪斯休闲酒馆</div>
+          </div>
+          <div class="contact-btn">📞 联系我们</div>
+        </div>
+        <div class="service-text">尊敬的客户，您好：有任何疑问可直接联系我们客服电话/微信咨询，也可直接咨询我们现场服务人员。</div>
+      </div>
+
+      <div class="card">
+        <a class="list-cell" href="me-point-logs.html"><div class="flex-1">积分流水</div><div class="arrow">›</div></a>
+        <a class="list-cell" href="me-gift-logs.html"><div class="flex-1">赠金记录</div><div class="arrow">›</div></a>
+      </div>
+
+      <div class="modal-mask" id="exchange" style="display:none;">
+        <div class="modal-box">
+          <a href="#" class="modal-close" onclick="document.getElementById('exchange').style.display='none';return false;">✕</a>
+          <div class="modal-title">取积分</div>
+          <div class="exchange-tip">当前可用积分：1200</div>
+          <input class="modal-input" placeholder="请输入取积分数量" />
+          <div class="modal-actions">
+            <a href="#" class="btn-ghost" onclick="document.getElementById('exchange').style.display='none';return false;">取消</a>
+            <a href="#" class="btn-gold" onclick="document.getElementById('exchange').style.display='none';return false;">确认取积分</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <a href="index.html"><span class="icon">🏠</span>首页</a>
+      <a href="ranking.html"><span class="icon">🏆</span>排行榜</a>
+      <a class="active" href="me-index.html"><span class="icon">👤</span>我的</a>
+    </div>
+  </div>
+</body>
+</html>

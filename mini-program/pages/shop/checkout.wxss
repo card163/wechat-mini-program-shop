@@ -1,19 +1,35 @@
-.container { padding-bottom: 160rpx; }
+.container { padding: 24rpx; padding-bottom: 160rpx; }
 
-.item { padding: 12rpx 0; }
-.item-price { margin-left: 20rpx; }
+.section-label { font-size: 28rpx; color: var(--text-sub); margin: 24rpx 0 12rpx; }
+.section-label:first-child { margin-top: 0; }
 
-.pay {
-  display: flex; align-items: center;
+.select-box {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-card-2); border-radius: 12rpx;
+  padding: 26rpx 24rpx; font-size: 30rpx;
+}
+.select-arrow { color: var(--text-sub); }
+
+.pay-option {
   padding: 24rpx; margin-bottom: 16rpx;
   border-radius: 16rpx; background: var(--bg-card-2);
-  border: 1rpx solid transparent;
+  border: 2rpx solid transparent;
 }
-.pay.active { border-color: var(--accent); }
-.radio { color: var(--accent); font-size: 32rpx; margin-left: 20rpx; }
+.pay-option.active { border-color: #e05b5b; }
+.pay-name { font-size: 30rpx; font-weight: 700; }
+.balance-option .sub { line-height: 40rpx; }
 .warn { color: #e05b5b; }
 
-.remark { height: 72rpx; font-size: 28rpx; }
+.item-box { background: var(--bg-card-2); border-radius: 16rpx; padding: 8rpx 20rpx; }
+.item-row { padding: 20rpx 0; border-bottom: 1rpx solid var(--line); }
+.item-row:last-child { border-bottom: none; }
+.item-img { width: 96rpx; height: 96rpx; border-radius: 12rpx; margin-right: 20rpx; background: #2a2a2a; }
+
+.remark-box {
+  width: 100%; min-height: 200rpx;
+  background: var(--bg-card-2); border-radius: 16rpx;
+  padding: 20rpx; font-size: 28rpx; color: var(--text);
+}
 
 .footer {
   position: fixed; left: 0; right: 0; bottom: 0;
@@ -21,13 +37,10 @@
   padding: 0 24rpx; background: #1a1a1a; border-top: 1rpx solid var(--line);
 }
 .price.big { font-size: 38rpx; }
-.submit { width: 260rpx; height: 80rpx; line-height: 80rpx; }
+.submit { width: 220rpx; height: 80rpx; line-height: 80rpx; text-align: center; background: #d2574f; }
 
-.mask {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, .6);
-  display: flex; align-items: flex-end;
+.table-option {
+  padding: 26rpx; margin-top: 20rpx; text-align: center;
+  border: 1rpx solid var(--line); border-radius: 12rpx; color: var(--text); font-size: 28rpx;
 }
-.sheet { width: 100%; background: var(--bg-card); border-radius: 24rpx 24rpx 0 0; padding: 32rpx 0 48rpx; }
-.sheet-title { text-align: center; font-size: 30rpx; margin-bottom: 16rpx; }
-.sheet-item { padding: 32rpx; text-align: center; border-top: 1rpx solid var(--line); }
-.sheet-item.active { color: var(--accent); }
+.table-option.active { border-color: var(--accent); color: var(--accent); }

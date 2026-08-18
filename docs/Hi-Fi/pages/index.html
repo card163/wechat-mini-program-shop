@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>首页 · 六六弗尔豪斯</title>
+<link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="screen-body">
+  <div class="screen-root">
+    <div class="statusbar"><span>9:41</span><span>●●● 5G 100%</span></div>
+
+    <div class="home-screen">
+      <div class="top-bar">
+        <a href="#" class="notice-btn" onclick="document.getElementById('notice').style.display='flex';return false;">本店须知</a>
+      </div>
+
+      <div class="brand">
+        <div class="brand-logo">六六弗尔豪斯休闲酒馆</div>
+        <div class="marquee">📢 绿色竞技，禁止赌博</div>
+      </div>
+
+      <img class="emblem-bg" src="../assets/home/bg-emblem.jpg" />
+
+      <div class="entry-panel">
+        <a class="entry-item" href="shop-index.html">
+          <img class="entry-icon" src="../assets/home/order.png" />
+          <div class="entry-label">点餐</div>
+        </a>
+        <a class="entry-item" href="recharge.html">
+          <img class="entry-icon" src="../assets/home/recharge.png" />
+          <div class="entry-label">充值/套餐</div>
+        </a>
+      </div>
+
+      <img class="lower-bg" src="../assets/home/bg-lower.jpg" />
+    </div>
+
+    <div class="tabbar">
+      <a class="active" href="index.html"><span class="icon">🏠</span>首页</a>
+      <a href="ranking.html"><span class="icon">🏆</span>排行榜</a>
+      <a href="me-index.html"><span class="icon">👤</span>我的</a>
+    </div>
+
+    <div class="modal-mask" id="notice" style="display:none;">
+      <div class="modal-box">
+        <a href="#" class="modal-close" onclick="document.getElementById('notice').style.display='none';return false;">✕</a>
+        <div class="modal-title">本店须知</div>
+        <div class="sub">尊敬的客户，您好：欢迎光临 六六弗尔豪斯休闲酒馆，请理性消费，绿色竞技，禁止赌博。</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

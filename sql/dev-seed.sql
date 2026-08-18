@@ -58,7 +58,7 @@ FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `nf_exchange_goods` WHERE `name` = '�
 
 -- 轮播图
 INSERT INTO `nf_banner` (`title`, `image`, `link`, `sort`, `status`)
-SELECT '新客首充有礼', 'https://placehold.co/750x360/1a1a1a/d4af37?text=Nice+Fold', '/pages/recharge/index', 1, 1
+SELECT '新客首充有礼', 'https://placehold.co/750x360/1a1a1a/d4af37?text=66', '/pages/recharge/index', 1, 1
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `nf_banner` WHERE `title` = '新客首充有礼');
 
 -- 测试会员（openid 为占位值，仅本地联调使用）

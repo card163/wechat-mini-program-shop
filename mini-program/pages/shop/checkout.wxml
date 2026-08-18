@@ -1,76 +1,60 @@
 <view class="container" wx:if="{{preview}}">
-  <view class="card">
-    <view class="row-between" bindtap="openTablePicker">
-      <view class="title">桌号</view>
-      <view class="{{tableName ? 'accent' : 'sub'}}">{{tableName || '请选择'}} ›</view>
-    </view>
+  <view class="section-label">下单桌号</view>
+  <view class="select-box" bindtap="openTablePicker">
+    <view class="{{tableName ? '' : 'sub'}}">{{tableName || '请选择'}}</view>
+    <view class="select-arrow">↓</view>
   </view>
 
-  <view class="card">
-    <view class="title">商品</view>
-    <view class="divider" />
-    <view wx:for="{{preview.items}}" wx:key="goods_id" class="row-between item">
+  <view class="section-label">支付方式</view>
+  <view class="pay-option {{payType === 1 ? 'active' : ''}}" data-type="1" bindtap="onPayTypeChange">
+    <view class="pay-name">微信支付</view>
+  </view>
+  <view class="pay-option balance-option {{payType === 2 ? 'active' : ''}}" data-type="2" bindtap="onPayTypeChange">
+    <view class="pay-name">余额支付</view>
+    <view class="sub">本金余额：¥{{preview.balanceText}}</view>
+    <view class="sub">赠金余额：¥{{preview.giftBalanceText}}</view>
+    <view class="sub accent" wx:if="{{payType === 2 && preview.plan.pay_gift > 0}}">
+      本单抵扣赠金 ¥{{preview.payGiftText}}，余额支付 ¥{{preview.payBalanceText}}
+    </view>
+    <view class="sub warn" wx:if="{{payType === 2 && !preview.balance_enough}}">余额不足，请先充值</view>
+  </view>
+
+  <view class="section-label">已选餐品</view>
+  <view class="item-box">
+    <view wx:for="{{preview.items}}" wx:key="goods_id" class="row item-row">
+      <image class="item-img" src="{{item.goods_cover}}" mode="aspectFill" />
       <view class="flex-1">
-        <view>{{item.goods_name}}</view>
-        <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持赠金支付</view>
+        <view class="title" style="font-size:28rpx;">{{item.goods_name}}</view>
+        <view class="price">¥{{item.priceText}}</view>
       </view>
-      <view class="sub">x{{item.quantity}}</view>
-      <view class="price item-price">¥{{item.subtotalText}}</view>
-    </view>
-    <view class="divider" />
-    <view class="row-between">
-      <view class="sub">合计</view>
-      <view class="price">¥{{preview.totalText}}</view>
+      <view class="sub">×{{item.quantity}}</view>
     </view>
   </view>
 
-  <view class="card">
-    <view class="title">支付方式</view>
-    <view class="divider" />
-
-    <view class="pay {{payType === 2 ? 'active' : ''}}" data-type="2" bindtap="onPayTypeChange">
-      <view class="flex-1">
-        <view>余额支付</view>
-        <view class="sub">余额 ¥{{preview.balanceText}} · 赠金 ¥{{preview.giftBalanceText}}</view>
-        <view class="sub" wx:if="{{preview.plan.pay_gift > 0}}">
-          本单抵扣赠金 ¥{{preview.payGiftText}}，余额支付 ¥{{preview.payBalanceText}}
-        </view>
-        <view class="sub warn" wx:if="{{!preview.balance_enough}}">余额不足，请先充值</view>
-      </view>
-      <view class="radio">{{payType === 2 ? '●' : '○'}}</view>
-    </view>
-
-    <view class="pay {{payType === 1 ? 'active' : ''}}" data-type="1" bindtap="onPayTypeChange">
-      <view class="flex-1">微信支付</view>
-      <view class="radio">{{payType === 1 ? '●' : '○'}}</view>
-    </view>
-  </view>
-
-  <view class="card">
-    <view class="title">备注</view>
-    <view class="divider" />
-    <input class="remark" placeholder="口味、加冰等要求" placeholder-class="sub" bindinput="onRemarkInput" maxlength="200" />
-  </view>
+  <view class="section-label">订单备注</view>
+  <textarea class="remark-box" placeholder="请填写你的其他要求" placeholder-class="sub" bindinput="onRemarkInput" maxlength="200" />
 
   <view class="footer">
     <view class="flex-1">
-      <text class="sub">应付 </text>
+      <text class="sub">合计: </text>
       <text class="price big">¥{{preview.totalText}}</text>
     </view>
-    <button class="btn-primary submit" bindtap="submit" disabled="{{submitting}}">提交订单</button>
+    <view class="btn-primary submit" bindtap="submit">支付</view>
   </view>
 </view>
 
-<view class="mask" wx:if="{{showTablePicker}}" bindtap="closeTablePicker">
-  <view class="sheet" catchtap="noop">
-    <view class="sheet-title">选择桌号</view>
+<view class="modal-mask" wx:if="{{showTablePicker}}" bindtap="closeTablePicker">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeTablePicker">✕</view>
+    <view class="modal-title">选择下单桌号</view>
     <view
       wx:for="{{tables}}"
       wx:key="id"
-      class="sheet-item {{tableId === item.id ? 'active' : ''}}"
+      class="table-option {{tableId === item.id ? 'active' : ''}}"
       data-id="{{item.id}}"
       data-name="{{item.name}}"
       bindtap="onTableSelect"
     >{{item.name}}</view>
   </view>
 </view>
+

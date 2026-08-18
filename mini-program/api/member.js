@@ -14,6 +14,7 @@ module.exports = {
 
   exchangeGoods: () => get('/api/exchange/goods'),
   exchange: (goodsId) => post('/api/exchange', { goods_id: goodsId }),
+  exchangeByPoint: (point) => post('/api/exchange/points', { point }),
   exchangeRecords: (params) => get('/api/exchange/records', params),
   exchangeCode: (id) => get(`/api/exchange/records/${id}/code`),
 

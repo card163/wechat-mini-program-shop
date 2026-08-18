@@ -1,10 +1,12 @@
 const shopApi = require('../../api/shop');
+const { shopInfo } = require('../../api/auth');
 const { fen2yuan } = require('../../utils/format');
 
 const CART_KEY = 'nf_cart';
 
 Page({
   data: {
+    shop: {},
     categories: [],
     currentCategory: 0,
     goods: [],
@@ -15,6 +17,7 @@ Page({
   },
 
   onLoad() {
+    shopInfo().then((shop) => this.setData({ shop }));
     this.loadCategories();
   },
 
@@ -26,8 +29,8 @@ Page({
     shopApi
       .categories()
       .then((list) => {
-        this.setData({ categories: [{ id: 0, name: '全部' }].concat(list) });
-        return this.loadGoods(0);
+        this.setData({ categories: list });
+        return this.loadGoods(list.length ? list[0].id : 0);
       })
       .catch(() => this.setData({ loading: false }));
   },

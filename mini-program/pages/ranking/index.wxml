@@ -1,28 +1,60 @@
-<view class="container">
-  <view class="head">
-    <view class="head-title accent">记分牌排行榜</view>
-    <view class="sub">按累计获得记分牌排名</view>
-  </view>
+<view class="rank-page">
+  <view class="banner-title">66大神排行榜</view>
 
-  <view class="card" wx:if="{{me}}">
-    <view class="row">
-      <view class="rank {{me.rank <= 3 && me.rank > 0 ? 'top' : ''}}">{{me.rank > 0 ? me.rank : '-'}}</view>
-      <image class="avatar" src="{{me.avatar}}" mode="aspectFill" />
-      <view class="flex-1">
-        <view>{{me.nickname}}（我）</view>
-        <view class="sub">{{me.rank > 0 ? '继续加油' : '暂未上榜'}}</view>
+  <view class="podium" wx:if="{{list.length}}">
+    <view class="podium-item second" wx:if="{{list[1]}}">
+      <view class="crown">👑</view>
+      <view class="medal silver">
+        <view class="medal-avatar">66</view>
       </view>
-      <view class="price">{{me.total_point}}</view>
+      <view class="pedestal silver-bg">2</view>
+      <view class="podium-card">
+        <view class="podium-name">{{list[1].nickname}}</view>
+        <view class="podium-score">🪙 {{list[1].total_point}}</view>
+      </view>
+    </view>
+
+    <view class="podium-item first" wx:if="{{list[0]}}">
+      <view class="crown">👑</view>
+      <view class="medal gold">
+        <view class="medal-avatar">66</view>
+      </view>
+      <view class="pedestal gold-bg">1</view>
+      <view class="podium-card">
+        <view class="podium-name">{{list[0].nickname}}</view>
+        <view class="podium-score">🪙 {{list[0].total_point}}</view>
+      </view>
+    </view>
+
+    <view class="podium-item third" wx:if="{{list[2]}}">
+      <view class="crown">👑</view>
+      <view class="medal bronze">
+        <view class="medal-avatar">66</view>
+      </view>
+      <view class="pedestal bronze-bg">3</view>
+      <view class="podium-card">
+        <view class="podium-name">{{list[2].nickname}}</view>
+        <view class="podium-score">🪙 {{list[2].total_point}}</view>
+      </view>
     </view>
   </view>
 
-  <view class="card">
-    <view wx:if="{{!loading && !list.length}}" class="empty">暂无排名数据</view>
-    <view wx:for="{{list}}" wx:key="member_id" class="row item">
-      <view class="rank {{item.rank <= 3 ? 'top' : ''}}">{{item.rank}}</view>
-      <image class="avatar" src="{{item.avatar}}" mode="aspectFill" />
-      <view class="flex-1">{{item.nickname}}</view>
-      <view class="price">{{item.total_point}}</view>
+  <view wx:if="{{!loading && !list.length}}" class="empty">暂无排名数据</view>
+
+  <view class="rank-list">
+    <view wx:for="{{list}}" wx:key="member_id" wx:if="{{index >= 3}}" class="rank-row">
+      <view class="rank-num">{{item.rank}}</view>
+      <view class="row-avatar">{{item.nickname[0]}}</view>
+      <view class="flex-1 rank-name">{{item.nickname}}</view>
+      <view class="rank-score">🪙 {{item.total_point}}</view>
     </view>
+  </view>
+
+  <view class="card me-card" wx:if="{{me}}">
+    <view class="rank-num {{me.rank > 0 && me.rank <= 3 ? 'top' : ''}}">{{me.rank > 0 ? me.rank : '-'}}</view>
+    <view class="row-avatar">我</view>
+    <view class="flex-1 rank-name">{{me.nickname}}（我）</view>
+    <view class="rank-score">🪙 {{me.total_point}}</view>
   </view>
 </view>
+

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>结算 · 六六弗尔豪斯</title>
+<link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="screen-body">
+  <div class="screen-root">
+    <div class="statusbar"><span>9:41</span><span>●●● 5G 100%</span></div>
+    <div class="navbar"><a class="back" href="shop-index.html">‹</a><span class="navbar-title">结算</span></div>
+
+    <div class="content">
+      <div class="section-label">下单桌号</div>
+      <a href="#" class="select-box" onclick="document.getElementById('tablePicker').style.display='flex';return false;">
+        <div>大桌</div>
+        <div class="select-arrow">↓</div>
+      </a>
+
+      <div class="section-label">支付方式</div>
+      <div class="pay-option active">
+        <div class="pay-name">微信支付</div>
+      </div>
+      <div class="pay-option">
+        <div class="pay-name">余额支付</div>
+        <div class="sub">本金余额：¥328.00</div>
+        <div class="sub">赠金余额：¥50.00</div>
+      </div>
+
+      <div class="section-label">已选餐品</div>
+      <div class="item-box">
+        <div class="row item-row">
+          <div class="thumb item-img">🥃</div>
+          <div class="flex-1"><div class="title" style="font-size:14px;">山崎12年</div><div class="price">¥128</div></div>
+          <div class="sub">×1</div>
+        </div>
+        <div class="row item-row">
+          <div class="thumb item-img">🍺</div>
+          <div class="flex-1"><div class="title" style="font-size:14px;">德式小麦</div><div class="price">¥38</div></div>
+          <div class="sub">×1</div>
+        </div>
+        <div class="row item-row">
+          <div class="thumb item-img">🍇</div>
+          <div class="flex-1"><div class="title" style="font-size:14px;">果盘拼盘</div><div class="price">¥88</div></div>
+          <div class="sub">×1</div>
+        </div>
+      </div>
+
+      <div class="section-label">订单备注</div>
+      <div class="remark-box">少冰，谢谢</div>
+    </div>
+
+    <div class="footer-bar">
+      <div class="flex-1"><span class="sub">合计: </span><span class="price big">¥256.00</span></div>
+      <span class="btn btn-primary" style="background:#d2574f;">支付</span>
+    </div>
+
+    <div class="modal-mask" id="tablePicker" style="display:none;">
+      <div class="modal-box">
+        <a href="#" class="modal-close" onclick="document.getElementById('tablePicker').style.display='none';return false;">✕</a>
+        <div class="modal-title">选择下单桌号</div>
+        <a href="#" class="table-option active" onclick="document.getElementById('tablePicker').style.display='none';return false;">大桌</a>
+        <a href="#" class="table-option" onclick="document.getElementById('tablePicker').style.display='none';return false;">小桌</a>
+        <a href="#" class="table-option" onclick="document.getElementById('tablePicker').style.display='none';return false;">一楼</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

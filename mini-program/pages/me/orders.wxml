@@ -1,13 +1,3 @@
-<view class="tabs">
-  <view
-    wx:for="{{tabs}}"
-    wx:key="label"
-    class="tab {{tabIndex === index ? 'active' : ''}}"
-    data-index="{{index}}"
-    bindtap="onTabTap"
-  >{{item.label}}</view>
-</view>
-
 <view class="container">
   <view wx:if="{{!loading && !list.length}}" class="empty">暂无订单</view>
 

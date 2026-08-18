@@ -14,7 +14,7 @@
   "msg": "ok",
   "data": {
     "shop": {
-      "name": "Nice Fold 德州酒馆",
+      "name": "六六弗尔豪斯休闲酒馆",
       "phone": "",
       "address": "",
       "notice": "",
@@ -48,7 +48,7 @@
   "code": 0,
   "msg": "ok",
   "data": {
-    "name": "Nice Fold 德州酒馆",
+    "name": "六六弗尔豪斯休闲酒馆",
     "phone": "",
     "address": "",
     "notice": "",

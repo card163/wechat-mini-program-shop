@@ -1,14 +1,71 @@
-.profile { display: flex; align-items: center; padding: 40rpx 8rpx; }
-.avatar-btn { padding: 0; background: transparent; line-height: normal; margin-right: 24rpx; }
-.avatar-btn::after { border: none; }
-.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; background: #2a2a2a; }
-.nickname { font-size: 34rpx; font-weight: 600; margin-bottom: 8rpx; }
-.phone-btn { width: 220rpx; height: 56rpx; line-height: 56rpx; margin: 8rpx 0 0; }
+.me-page { padding: 24rpx; }
 
-.asset { display: flex; }
+.profile-row { display: flex; align-items: center; padding: 16rpx 8rpx 32rpx; }
+.avatar-btn { padding: 0; background: transparent; line-height: normal; margin-right: 20rpx; }
+.avatar-btn::after { border: none; }
+.avatar { width: 128rpx; height: 128rpx; border-radius: 50%; background: linear-gradient(135deg,#caa24a,#5c3b1e); }
+.profile-info { min-width: 0; }
+.nickname { font-size: 36rpx; font-weight: 700; margin-bottom: 6rpx; }
+
+.wine-code-entry { text-align: center; flex: none; }
+.wine-code-icon { width: 48rpx; height: 48rpx; margin-bottom: 4rpx; }
+
+.asset-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 20rpx;
+  padding: 40rpx 20rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+.asset-badge {
+  position: absolute;
+  top: -20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #d9d9d9;
+  color: #1a1a1a;
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 6rpx 24rpx;
+  border-radius: 999rpx;
+}
+.asset-row { display: flex; align-items: center; }
 .asset-item { flex: 1; text-align: center; }
 .asset-num { font-size: 40rpx; font-weight: 700; margin-bottom: 8rpx; }
+.asset-sep { width: 1rpx; height: 64rpx; border-left: 1rpx dashed var(--line); }
 
-.cell { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 1rpx solid var(--line); }
-.cell:last-child { border-bottom: none; }
-.arrow { color: var(--text-sub); margin-left: 16rpx; }
+.section-title { font-size: 28rpx; font-weight: 700; margin-bottom: 20rpx; }
+.func-row { display: flex; }
+.func-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12rpx; }
+.func-icon {
+  width: 96rpx; height: 96rpx;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,.06);
+}
+.func-icon-img { width: 46rpx; height: 46rpx; }
+
+.shop-row { gap: 16rpx; }
+.shop-logo {
+  width: 64rpx; height: 64rpx; border-radius: 12rpx;
+  background: #222; color: var(--accent); font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-size: 22rpx;
+}
+.contact-btn {
+  background: rgba(255,255,255,.08);
+  color: var(--accent);
+  font-size: 24rpx;
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  border-radius: 999rpx;
+  margin: 0;
+}
+.contact-btn::after { border: none; }
+.service-text { margin-top: 20rpx; color: var(--text-sub); font-size: 24rpx; line-height: 40rpx; }
+
+.list-cell { display: flex; align-items: center; padding: 26rpx 0; border-bottom: 1rpx solid var(--line); }
+.list-cell:last-child { border-bottom: none; }
+.arrow { color: var(--text-sub); margin-left: 12rpx; }
+
+.exchange-tip { text-align: center; color: var(--accent); font-size: 26rpx; margin-bottom: 20rpx; }
+

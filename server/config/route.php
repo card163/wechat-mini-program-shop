@@ -42,6 +42,15 @@ use app\middleware\MemberAuth;
 use app\support\Result;
 use Webman\Route;
 
+// 后台标准资源路由，定义在本文件内避免依赖外部函数的加载时机
+$crud = static function (string $prefix, string $controller): void {
+    Route::get($prefix, [$controller, 'index']);
+    Route::get($prefix . '/{id:\d+}', [$controller, 'show']);
+    Route::post($prefix, [$controller, 'store']);
+    Route::put($prefix . '/{id:\d+}', [$controller, 'update']);
+    Route::delete($prefix . '/{id:\d+}', [$controller, 'destroy']);
+};
+
 // 健康检查（部署探活用，必须无鉴权且始终 200）
 Route::get('/health', [CommonController::class, 'health']);
 
@@ -86,6 +95,7 @@ Route::group('/api', function (): void {
     Route::get('/recharge/orders/{id:\d+}', [RechargeController::class, 'detail']);
 
     Route::post('/exchange', [ExchangeController::class, 'exchange']);
+    Route::post('/exchange/points', [ExchangeController::class, 'exchangeByPoint']);
     Route::get('/exchange/records', [ExchangeController::class, 'records']);
     Route::get('/exchange/records/{id:\d+}/code', [ExchangeController::class, 'code']);
 
@@ -121,7 +131,7 @@ Route::group('/admin', function (): void {
 })->middleware([AdminAuth::class]);
 
 // 仅超级管理员
-Route::group('/admin', function (): void {
+Route::group('/admin', function () use ($crud): void {
     Route::post('/orders/{id:\d+}/refund', [AdminOrderController::class, 'refund']);
 
     Route::get('/members', [AdminMemberController::class, 'index']);
@@ -133,13 +143,13 @@ Route::group('/admin', function (): void {
     Route::get('/members/{id:\d+}/balance-logs', [AdminMemberController::class, 'balanceLogs']);
     Route::get('/members/{id:\d+}/point-logs', [AdminMemberController::class, 'pointLogs']);
 
-    register_crud_routes('/goods-categories', GoodsCategoryController::class);
-    register_crud_routes('/goods', AdminGoodsController::class);
+    $crud('/goods-categories', GoodsCategoryController::class);
+    $crud('/goods', AdminGoodsController::class);
     Route::post('/goods/{id:\d+}/status', [AdminGoodsController::class, 'status']);
-    register_crud_routes('/tables', TableController::class);
-    register_crud_routes('/recharge-packages', RechargePackageController::class);
-    register_crud_routes('/exchange-goods', ExchangeGoodsController::class);
-    register_crud_routes('/banners', BannerController::class);
+    $crud('/tables', TableController::class);
+    $crud('/recharge-packages', RechargePackageController::class);
+    $crud('/exchange-goods', ExchangeGoodsController::class);
+    $crud('/banners', BannerController::class);
 
     Route::get('/settings/{group}', [SettingController::class, 'show']);
     Route::put('/settings/{group}', [SettingController::class, 'save']);

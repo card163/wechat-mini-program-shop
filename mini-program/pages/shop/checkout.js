@@ -10,7 +10,7 @@ Page({
     tableId: 0,
     tableName: '',
     showTablePicker: false,
-    payType: 2,
+    payType: 1,
     remark: '',
     preview: null,
     submitting: false,
@@ -51,7 +51,7 @@ Page({
             balanceText: fen2yuan(preview.balance),
             giftBalanceText: fen2yuan(preview.gift_balance),
             items: preview.items.map((item) =>
-              Object.assign({}, item, { subtotalText: fen2yuan(item.subtotal) })
+              Object.assign({}, item, { priceText: fen2yuan(item.price), subtotalText: fen2yuan(item.subtotal) })
             ),
           }),
         });

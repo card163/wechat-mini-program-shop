@@ -1,64 +1,79 @@
-<view class="tabs">
-  <view class="tab {{tabIndex === 0 ? 'active' : ''}}" data-index="0" bindtap="onTabTap">我的存酒</view>
-  <view class="tab {{tabIndex === 1 ? 'active' : ''}}" data-index="1" bindtap="onTabTap">取酒记录</view>
-</view>
-
-<view class="container">
-  <view class="card store-tip" bindtap="goStoreCode">
-    <view class="flex-1">
-      <view class="title">出示存酒码</view>
-      <view class="sub">店员扫码后为你登记存酒</view>
-    </view>
-    <view class="arrow">›</view>
+<view class="wine-page">
+  <view class="row-between wine-header">
+    <view class="page-title">我的存酒</view>
+    <view class="code-btn" bindtap="goStoreCode">存酒码</view>
   </view>
 
-  <block wx:if="{{tabIndex === 0}}">
-    <view wx:if="{{!loading && !storages.length}}" class="empty">暂无存酒</view>
+  <view class="card-gold">
+    <view class="usage-title">使用说明</view>
+    <view class="sub usage-line">存酒：点击右上角「存酒码」，工作人员扫码后登记酒名与数量。</view>
+    <view class="sub usage-line">取酒：在下方选择实物存酒，出示「取酒码」由店员核销。</view>
+    <view class="sub usage-line">套餐存酒：购买酒水套餐获得的额度，可在点单页抵扣酒水商品（1:1）。</view>
+  </view>
 
-    <view wx:for="{{storages}}" wx:key="id" class="card">
-      <view class="row-between">
-        <view class="title">{{item.wine_name}}</view>
-        <view class="tag">{{item.status_text}}</view>
-      </view>
-      <view class="divider" />
-      <view class="sub">规格：{{item.spec || '-'}}</view>
-      <view class="sub">存入 {{item.total_qty}} {{item.unit}} · 剩余 {{item.remain_qty}} {{item.unit}}</view>
-      <view class="sub">存入时间 {{item.stored_at}}</view>
-      <view class="sub">{{item.expired_at ? '到期时间 ' + item.expired_at : '不过期'}}</view>
-      <view class="sub" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
-
-      <view class="actions" wx:if="{{item.status === 1 && item.remain_qty > 0}}">
-        <button class="btn-primary act" data-id="{{item.id}}" bindtap="onTake">取酒</button>
-      </view>
+  <view class="row-between section-head">
+    <view class="section-title">在库酒品</view>
+    <view class="row" style="gap:16rpx;">
+      <view class="sub" bindtap="showTakes">取酒记录</view>
+      <view class="sub">{{storages.length}} 条</view>
     </view>
-  </block>
+  </view>
 
-  <block wx:else>
-    <view wx:if="{{!loading && !takes.length}}" class="empty">暂无取酒记录</view>
+  <view wx:if="{{!loading && !storages.length}}" class="empty-wine">
+    <view class="empty-emoji">🍾</view>
+    <view class="empty-title">暂无在库存酒</view>
+    <view class="sub">存酒后将显示在这里</view>
+  </view>
 
-    <view wx:for="{{takes}}" wx:key="id" class="card">
-      <view class="row-between">
-        <view class="title">{{item.wine_name}}</view>
-        <view class="tag">{{item.status_text}}</view>
-      </view>
-      <view class="divider" />
-      <view class="sub">数量 {{item.quantity}}</view>
-      <view class="sub">{{item.take_no}}</view>
-      <view class="sub">{{item.created_at}}</view>
-
-      <view class="actions" wx:if="{{item.status === 0}}">
-        <button class="btn-ghost act" data-id="{{item.id}}" bindtap="onCancelTake">取消</button>
-        <button class="btn-primary act" data-id="{{item.id}}" bindtap="showTakeCode">出示取酒码</button>
-      </view>
+  <view wx:for="{{storages}}" wx:key="id" class="card">
+    <view class="row-between"><view class="title" style="font-size:28rpx;">{{item.wine_name}}</view><view class="tag">{{item.status_text}}</view></view>
+    <view class="divider"></view>
+    <view class="sub">规格：{{item.spec || '-'}}</view>
+    <view class="sub">存入 {{item.total_qty}} {{item.unit}} · 剩余 {{item.remain_qty}} {{item.unit}}</view>
+    <view class="sub">{{item.expired_at ? '到期时间 ' + item.expired_at : '不过期'}}</view>
+    <view class="row" style="justify-content:flex-end;margin-top:16rpx;" wx:if="{{item.status === 1 && item.remain_qty > 0}}">
+      <button class="btn-primary act" data-id="{{item.id}}" bindtap="onTake">取酒</button>
     </view>
-  </block>
-</view>
-
-<view class="mask" wx:if="{{takeCode}}" bindtap="closeCode">
-  <view class="code-box" catchtap="noop">
-    <view class="title">{{takeCode.wine_name}} x{{takeCode.quantity}}</view>
-    <view class="sub">请出示给店员核销</view>
-    <view class="code">{{takeCode.take_no}}</view>
-    <view class="sub">取酒码有时效，过期请重新发起</view>
   </view>
 </view>
+
+<view class="modal-mask" wx:if="{{takesVisible}}" bindtap="hideTakes">
+  <view class="modal-box takes-box" catchtap="noop">
+    <view class="modal-close" bindtap="hideTakes">✕</view>
+    <view class="modal-title">取酒记录</view>
+    <view wx:if="{{!takes.length}}" class="empty">暂无取酒记录</view>
+    <scroll-view scroll-y class="takes-scroll">
+      <view wx:for="{{takes}}" wx:key="id" class="take-row">
+        <view class="row-between"><view class="title" style="font-size:26rpx;">{{item.wine_name}}</view><view class="tag">{{item.status_text}}</view></view>
+        <view class="sub">数量 {{item.quantity}} · {{item.take_no}}</view>
+        <view class="sub">{{item.created_at}}</view>
+        <view class="row" style="justify-content:flex-end;gap:12rpx;margin-top:8rpx;" wx:if="{{item.status === 0}}">
+          <view class="btn-ghost btn-mini" data-id="{{item.id}}" bindtap="onCancelTake">取消</view>
+          <view class="btn-gold btn-mini" data-id="{{item.id}}" bindtap="showTakeCode">出示取酒码</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<view class="modal-mask" wx:if="{{takeCode}}" bindtap="closeCode">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeCode">✕</view>
+    <view class="modal-title">{{takeCode.wine_name}} x{{takeCode.quantity}}</view>
+    <view class="qrcode-box">取酒码<br />{{takeCode.take_no}}</view>
+    <view class="sub" style="text-align:center;">请向工作人员出示此码，取酒码有时效，过期请重新发起</view>
+  </view>
+</view>
+
+<view class="modal-mask" wx:if="{{storeCodeVisible}}" bindtap="closeStoreCode">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeStoreCode">✕</view>
+    <view class="modal-title">存酒码</view>
+    <view class="sub" style="text-align:center;margin-bottom:20rpx;">请工作人员扫码登记存酒</view>
+    <image wx:if="{{storeQrcode}}" class="qrcode-img" src="{{storeQrcode}}" mode="aspectFit" />
+    <view wx:else class="qrcode-box">存酒码<br />二维码生成中</view>
+    <view class="store-caption">请向工作人员出示此码</view>
+    <view class="sub" style="text-align:center;">scene: {{storeScene}}</view>
+  </view>
+</view>
+

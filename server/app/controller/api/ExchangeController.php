@@ -18,6 +18,16 @@ class ExchangeController
         return Result::success(ExchangeService::goodsList(Auth::optionalMemberId($request)));
     }
 
+    public function exchangeByPoint(Request $request): Response
+    {
+        $point = (int)$request->post('point', 0);
+        v::intVal()->positive()->setTemplate('请输入取积分数量')->assert($point);
+
+        $result = ExchangeService::exchangeByPoint((int)$request->memberId, $point);
+
+        return Result::success($result, '取积分成功');
+    }
+
     public function exchange(Request $request): Response
     {
         $goodsId = (int)$request->post('goods_id', 0);

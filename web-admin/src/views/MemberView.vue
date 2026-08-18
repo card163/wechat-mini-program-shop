@@ -106,9 +106,9 @@ async function submitAdjust() {
       <el-button type="primary" @click="search">查询</el-button>
     </div>
 
-    <el-table :data="rows" v-loading="loading" border stripe>
+    <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
       <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column label="会员" width="200">
+      <el-table-column label="会员" min-width="200">
         <template #default="{ row }">
           <div class="member">
             <el-avatar :src="row.avatar" :size="32" />

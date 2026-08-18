@@ -1,9 +1,9 @@
-<view class="container" wx:if="{{member}}">
-  <view class="profile">
+<view class="me-page" wx:if="{{member}}">
+  <view class="profile-row">
     <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <image class="avatar" src="{{member.avatar}}" mode="aspectFill" />
     </button>
-    <view class="flex-1">
+    <view class="flex-1 profile-info">
       <input
         class="nickname"
         type="nickname"
@@ -12,59 +12,89 @@
         placeholder-class="sub"
         bindblur="onNicknameChange"
       />
-      <view class="sub" wx:if="{{member.phone}}">{{member.phone}}</view>
-      <button wx:else class="btn-ghost phone-btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone">绑定手机号</button>
+      <view class="sub">ID:{{member.id}}</view>
+    </view>
+    <view class="wine-code-entry" bindtap="goWineCode">
+      <image class="wine-code-icon" src="/assets/me/icon-qr.png" mode="aspectFit" />
+      <view class="sub">存酒码</view>
     </view>
   </view>
 
-  <view class="card asset">
-    <view class="asset-item" data-url="/pages/me/gift-logs" bindtap="go">
-      <view class="asset-num accent">{{balanceText}}</view>
-      <view class="sub">余额(元)</view>
-    </view>
-    <view class="asset-item" data-url="/pages/me/gift-logs" bindtap="go">
-      <view class="asset-num accent">{{giftText}}</view>
-      <view class="sub">赠金(元)</view>
-    </view>
-    <view class="asset-item" data-url="/pages/me/point-logs" bindtap="go">
-      <view class="asset-num accent">{{member.point}}</view>
-      <view class="sub">记分牌</view>
-    </view>
-  </view>
-
-  <view class="card">
-    <view class="cell" data-url="/pages/me/orders" bindtap="go">
-      <view class="flex-1">我的订单</view>
-      <view class="sub" wx:if="{{member.order_count.unpaid > 0}}">{{member.order_count.unpaid}} 笔待支付</view>
-      <view class="arrow">›</view>
-    </view>
-    <view class="cell" data-url="/pages/wine/index" bindtap="go">
-      <view class="flex-1">我的存酒</view>
-      <view class="sub" wx:if="{{member.wine_count > 0}}">{{member.wine_count}} 条存放中</view>
-      <view class="arrow">›</view>
-    </view>
-    <view class="cell" data-url="/pages/me/exchange" bindtap="go">
-      <view class="flex-1">记分牌兑换</view>
-      <view class="arrow">›</view>
-    </view>
-    <view class="cell" data-url="/pages/me/exchange-records" bindtap="go">
-      <view class="flex-1">兑换记录</view>
-      <view class="arrow">›</view>
+  <view class="asset-card" bindtap="goRecharge">
+    <view class="asset-badge">点击充值</view>
+    <view class="asset-row">
+      <view class="asset-item">
+        <view class="asset-num">¥{{balanceText}}</view>
+        <view class="sub">余额</view>
+      </view>
+      <view class="asset-sep"></view>
+      <view class="asset-item">
+        <view class="asset-num">{{member.point}}</view>
+        <view class="sub">积分</view>
+      </view>
+      <view class="asset-sep"></view>
+      <view class="asset-item">
+        <view class="asset-num">¥{{giftText}}</view>
+        <view class="sub">有效赠金</view>
+      </view>
     </view>
   </view>
 
   <view class="card">
-    <view class="cell" data-url="/pages/me/point-logs" bindtap="go">
-      <view class="flex-1">记分牌明细</view>
-      <view class="arrow">›</view>
+    <view class="section-title">常用功能</view>
+    <view class="func-row">
+      <view class="func-item" bindtap="goWine">
+        <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-wine.png" mode="aspectFit" /></view>
+        <view class="sub">我的存酒</view>
+      </view>
+      <view class="func-item" bindtap="openExchangeModal">
+        <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-coin.png" mode="aspectFit" /></view>
+        <view class="sub">取积分</view>
+      </view>
+      <view class="func-item" data-url="/pages/me/orders" bindtap="go">
+        <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-doc.png" mode="aspectFit" /></view>
+        <view class="sub">订单列表</view>
+      </view>
     </view>
-    <view class="cell" data-url="/pages/me/gift-logs" bindtap="go">
-      <view class="flex-1">赠金记录</view>
-      <view class="arrow">›</view>
+  </view>
+
+  <view class="card">
+    <view class="row-between">
+      <view class="row shop-row">
+        <view class="shop-logo">66</view>
+        <view class="title" style="font-size:30rpx;">六六弗尔豪斯休闲酒馆</view>
+      </view>
+      <button class="contact-btn" open-type="contact">📞 联系我们</button>
     </view>
-    <view class="cell" data-url="/pages/recharge/index" bindtap="go">
-      <view class="flex-1">充值</view>
-      <view class="arrow">›</view>
+    <view class="service-text">
+      尊敬的客户，您好：
+      有任何疑问可直接联系我们客服电话/微信咨询，也可直接咨询我们现场服务人员。
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="list-cell" data-url="/pages/me/point-logs" bindtap="go"><view class="flex-1">积分流水</view><view class="arrow">›</view></view>
+    <view class="list-cell" data-url="/pages/me/gift-logs" bindtap="go"><view class="flex-1">赠金记录</view><view class="arrow">›</view></view>
+  </view>
+</view>
+
+<view class="modal-mask" wx:if="{{exchangeVisible}}" bindtap="closeExchangeModal">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeExchangeModal">✕</view>
+    <view class="modal-title">取积分</view>
+    <view class="exchange-tip">当前可用积分：{{member.point}}</view>
+    <input
+      class="modal-input"
+      type="number"
+      placeholder="请输入取积分数量"
+      placeholder-class="sub"
+      value="{{exchangePoint}}"
+      bindinput="onExchangePointInput"
+    />
+    <view class="modal-actions">
+      <view class="btn-ghost" bindtap="closeExchangeModal">取消</view>
+      <view class="btn-gold" bindtap="confirmExchange">确认取积分</view>
     </view>
   </view>
 </view>
+

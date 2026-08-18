@@ -17,6 +17,54 @@ use Illuminate\Database\Capsule\Manager as Db;
 class ExchangeService
 {
     /**
+     * 按数量取积分：将任意数量积分按配置比例折算为赠金，多余不足一份的积分不扣除
+     *
+     * @return array<string, mixed>
+     */
+    public static function exchangeByPoint(int $memberId, int $point): array
+    {
+        if ($point <= 0) {
+            throw new BusinessException('请输入取积分数量');
+        }
+
+        $rate = max(1, SettingService::int('point', 'point_to_gift_rate', 300));
+
+        return Db::connection()->transaction(static function () use ($memberId, $point, $rate): array {
+            $member = AccountService::lockMember($memberId);
+
+            $consumePoint = intdiv($point, $rate) * $rate;
+            if ($consumePoint <= 0) {
+                throw new BusinessException("最少需要 {$rate} 积分才能兑换");
+            }
+            if ((int)$member->point < $consumePoint) {
+                throw new BusinessException('积分不足');
+            }
+
+            $giftAmount = intdiv($consumePoint, $rate) * 100;
+
+            AccountService::changePoint($member, -$consumePoint, MemberPointLog::BIZ_EXCHANGE_GIFT, 0, '取积分兑换赠金');
+
+            $batch = AccountService::grantGift(
+                $member,
+                $giftAmount,
+                MemberGiftBatch::SOURCE_EXCHANGE,
+                0,
+                SettingService::int('point', 'gift_default_days', 0),
+                '',
+                '取积分兑换赠金'
+            );
+
+            return [
+                'consume_point' => $consumePoint,
+                'gift_amount'   => $giftAmount,
+                'point_left'    => (int)$member->point,
+                'gift_balance'  => (int)$member->gift_balance,
+                'batch_id'      => (int)$batch->id,
+            ];
+        });
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function goodsList(int $memberId): array

@@ -1,11 +1,11 @@
 <view class="container">
   <view class="card summary">
-    <view class="sub">当前记分牌</view>
+    <view class="sub">当前积分</view>
     <view class="summary-num accent">{{point}}</view>
   </view>
 
   <view class="card">
-    <view wx:if="{{!loading && !list.length}}" class="empty">暂无记分牌记录</view>
+    <view wx:if="{{!loading && !list.length}}" class="empty">暂无积分变动记录</view>
     <view wx:for="{{list}}" wx:key="id" class="row-between log">
       <view class="flex-1">
         <view>{{item.biz_type_text}}</view>

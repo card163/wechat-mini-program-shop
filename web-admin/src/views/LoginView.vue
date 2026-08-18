@@ -31,8 +31,8 @@ async function submit() {
 <template>
   <div class="login">
     <el-card class="box">
-      <div class="brand">Nice Fold</div>
-      <div class="sub">德州酒馆管理后台</div>
+      <div class="brand">六六弗尔豪斯</div>
+      <div class="sub">休闲酒馆管理后台</div>
 
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item label="账号">

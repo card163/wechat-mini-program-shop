@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>六六弗尔豪斯 高保真原型</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body class="frame-body">
+  <div class="frame-shell">
+    <div class="side-panel">
+      <h3>六六弗尔豪斯休闲酒馆 · 高保真原型</h3>
+
+      <div class="group-title">首页 / 底部导航（3项）</div>
+      <a href="#" data-src="pages/index.html" class="current">首页</a>
+      <a href="#" data-src="pages/ranking.html">排行榜</a>
+      <a href="#" data-src="pages/me-index.html">我的</a>
+
+      <div class="group-title">点单结算</div>
+      <a href="#" data-src="pages/shop-index.html">点餐（首页入口进入）</a>
+      <a href="#" data-src="pages/shop-checkout.html">结算（含选桌号弹窗）</a>
+
+      <div class="group-title">充值</div>
+      <a href="#" data-src="pages/recharge.html">充值套餐</a>
+
+      <div class="group-title">个人中心</div>
+      <a href="#" data-src="pages/me-orders.html">我的订单</a>
+      <a href="#" data-src="pages/me-point-logs.html">积分流水</a>
+      <a href="#" data-src="pages/me-gift-logs.html">赠金记录</a>
+
+      <div class="group-title">存酒取酒</div>
+      <a href="#" data-src="pages/me-wine.html">我的存酒（含存酒码/取酒码弹窗）</a>
+
+      <div class="group-title">补充功能（未在主导航暴露）</div>
+      <a href="#" data-src="pages/me-exchange.html">兑换商品目录</a>
+      <a href="#" data-src="pages/me-exchange-records.html">兑换记录</a>
+
+      <div class="hint">
+        对应 docs/design 下的 13 张设计稿截图。点击左侧列表切换手机预览，页面内部的按钮/卡片也可直接点击跳转（在预览框内导航）。<br /><br />
+        "取积分"（我的页常用功能）与"存酒码/取酒码"（我的存酒页）在真实小程序里都是叠加弹窗，已在对应预览页内联实现，无需单独打开新页面。<br /><br />
+        也可以直接打开 pages/ 目录下的单个 html 文件在浏览器中独立浏览。
+      </div>
+    </div>
+
+    <div class="phone">
+      <iframe id="screen" src="pages/index.html"></iframe>
+    </div>
+  </div>
+
+  <script>
+    var links = document.querySelectorAll('.side-panel a[data-src]');
+    var frame = document.getElementById('screen');
+
+    links.forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        links.forEach(function (l) { l.classList.remove('current'); });
+        link.classList.add('current');
+        frame.src = link.getAttribute('data-src');
+      });
+    });
+
+    // 手机预览内部跳转时，同步高亮左侧对应菜单
+    frame.addEventListener('load', function () {
+      try {
+        var path = frame.contentWindow.location.pathname.split('/').pop();
+        links.forEach(function (l) {
+          var target = l.getAttribute('data-src').split('/').pop();
+          l.classList.toggle('current', target === path);
+        });
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>

@@ -11,13 +11,12 @@
     "pages/me/gift-logs",
     "pages/me/exchange",
     "pages/me/exchange-records",
-    "pages/wine/index",
-    "pages/wine/code"
+    "pages/wine/index"
   ],
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#121212",
-    "navigationBarTitleText": "Nice Fold 德州酒馆",
+    "navigationBarTitleText": "六六弗尔豪斯休闲酒馆",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#121212"
   },
@@ -27,10 +26,24 @@
     "backgroundColor": "#1a1a1a",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/index/index", "text": "首页" },
-      { "pagePath": "pages/shop/index", "text": "点单" },
-      { "pagePath": "pages/ranking/index", "text": "排行榜" },
-      { "pagePath": "pages/me/index", "text": "我的" }
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/tabbar/home.png",
+        "selectedIconPath": "assets/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/ranking/index",
+        "text": "排行榜",
+        "iconPath": "assets/tabbar/ranking.png",
+        "selectedIconPath": "assets/tabbar/ranking-active.png"
+      },
+      {
+        "pagePath": "pages/me/index",
+        "text": "我的",
+        "iconPath": "assets/tabbar/me.png",
+        "selectedIconPath": "assets/tabbar/me-active.png"
+      }
     ]
   },
   "style": "v2",

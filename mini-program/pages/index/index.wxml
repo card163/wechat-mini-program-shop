@@ -1,59 +1,33 @@
-<view class="container">
-  <view class="hero">
-    <view class="hero-name">{{shop.name}}</view>
-    <view class="sub" wx:if="{{shop.business_hours}}">营业时间 {{shop.business_hours}}</view>
-    <view class="sub" wx:if="{{shop.address}}" bindtap="callShop">{{shop.address}}</view>
+<view class="home">
+  <view class="top-bar">
+    <view class="notice-btn" bindtap="showNotice">本店须知</view>
   </view>
 
-  <swiper wx:if="{{banners.length}}" class="banner" autoplay circular indicator-dots indicator-active-color="#d4af37">
-    <swiper-item wx:for="{{banners}}" wx:key="id" data-link="{{item.link}}" bindtap="onBannerTap">
-      <image class="banner-img" src="{{item.image}}" mode="aspectFill" />
-    </swiper-item>
-  </swiper>
+  <view class="brand">
+    <view class="brand-logo">六六弗尔豪斯休闲酒馆</view>
+    <view class="marquee">📢 绿色竞技，禁止赌博</view>
+  </view>
 
-  <view class="card asset" wx:if="{{member}}">
-    <view class="asset-item">
-      <view class="asset-num accent">{{balanceText}}</view>
-      <view class="sub">余额(元)</view>
+  <image class="emblem-bg" src="/assets/home/bg-emblem.jpg" mode="widthFix" />
+
+  <view class="entry-panel">
+    <view class="entry-item" bindtap="goShop">
+      <image class="entry-icon" src="/assets/home/order.png" mode="aspectFit" />
+      <view class="entry-label">点餐</view>
     </view>
-    <view class="asset-item">
-      <view class="asset-num accent">{{giftText}}</view>
-      <view class="sub">赠金(元)</view>
-    </view>
-    <view class="asset-item">
-      <view class="asset-num accent">{{member.point}}</view>
-      <view class="sub">记分牌</view>
+    <view class="entry-item" bindtap="goRecharge">
+      <image class="entry-icon" src="/assets/home/recharge.png" mode="aspectFit" />
+      <view class="entry-label">充值/套餐</view>
     </view>
   </view>
 
-  <view class="card">
-    <view class="grid">
-      <view class="grid-item" bindtap="goShop">
-        <view class="grid-icon">酒</view>
-        <view>点单</view>
-      </view>
-      <view class="grid-item" bindtap="goRecharge">
-        <view class="grid-icon">充</view>
-        <view>充值</view>
-      </view>
-      <view class="grid-item" bindtap="goWine">
-        <view class="grid-icon">存</view>
-        <view>我的存酒</view>
-      </view>
-      <view class="grid-item" bindtap="goExchange">
-        <view class="grid-icon">兑</view>
-        <view>记分牌兑换</view>
-      </view>
-      <view class="grid-item" bindtap="goRanking">
-        <view class="grid-icon">榜</view>
-        <view>排行榜</view>
-      </view>
-    </view>
-  </view>
+  <image class="lower-bg" src="/assets/home/bg-lower.jpg" mode="widthFix" />
+</view>
 
-  <view class="card" wx:if="{{shop.notice}}">
-    <view class="title">门店公告</view>
-    <view class="divider" />
-    <view class="sub">{{shop.notice}}</view>
+<view class="modal-mask" wx:if="{{noticeVisible}}" bindtap="hideNotice">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="hideNotice">✕</view>
+    <view class="modal-title">本店须知</view>
+    <view class="sub notice-body">{{shop.notice || '尊敬的客户，您好：欢迎光临 六六弗尔豪斯休闲酒馆，请理性消费，绿色竞技，禁止赌博。'}}</view>
   </view>
 </view>

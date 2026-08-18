@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的存酒 · 六六弗尔豪斯</title>
+<link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="screen-body">
+  <div class="screen-root">
+    <div class="statusbar"><span>9:41</span><span>●●● 5G 100%</span></div>
+    <div class="navbar"><a class="back" href="me-index.html">‹</a><span class="navbar-title">我的存酒</span></div>
+
+    <div class="content" style="padding-top:12px;">
+      <div class="row-between wine-header">
+        <div class="page-title">我的存酒</div>
+        <a href="#" class="code-btn" onclick="document.getElementById('storeCode').style.display='flex';return false;">存酒码</a>
+      </div>
+
+      <div class="card-gold">
+        <div class="usage-title">使用说明</div>
+        <div class="sub usage-line">存酒：点击右上角「存酒码」，工作人员扫码后登记酒名与数量。</div>
+        <div class="sub usage-line">取酒：在下方选择实物存酒，出示「取酒码」由店员核销。</div>
+        <div class="sub usage-line">套餐存酒：购买酒水套餐获得的额度，可在点单页抵扣酒水商品（1:1）。</div>
+      </div>
+
+      <div class="row-between section-head">
+        <div class="section-title">在库酒品</div>
+        <div class="row" style="gap:10px;">
+          <a href="#" class="sub" onclick="document.getElementById('takes').style.display='flex';return false;">取酒记录</a>
+          <div class="sub">2 条</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between"><div class="title" style="font-size:14px;">麦卡伦12年</div><div class="tag">存放中</div></div>
+        <div class="divider"></div>
+        <div class="sub">规格：700ml</div>
+        <div class="sub">存入 2 瓶 · 剩余 1 瓶</div>
+        <div class="sub">到期时间 2026-09-29 21:30</div>
+        <div class="row" style="justify-content:flex-end;margin-top:12px;">
+          <a href="#" class="btn btn-primary btn-sm" onclick="document.getElementById('takeCode').style.display='flex';return false;">取酒</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between"><div class="title" style="font-size:14px;">山崎12年</div><div class="tag gray">已取完</div></div>
+        <div class="divider"></div>
+        <div class="sub">规格：700ml</div>
+        <div class="sub">存入 1 瓶 · 剩余 0 瓶</div>
+      </div>
+    </div>
+
+    <div class="modal-mask" id="storeCode" style="display:none;">
+      <div class="modal-box">
+        <a href="#" class="modal-close" onclick="document.getElementById('storeCode').style.display='none';return false;">✕</a>
+        <div class="modal-title">存酒码</div>
+        <div class="sub" style="text-align:center;margin-bottom:8px;">请工作人员扫码登记存酒</div>
+        <div class="qrcode-box">存酒码<br />二维码占位</div>
+        <div class="store-caption">请向工作人员出示此码</div>
+        <div class="sub" style="text-align:center;">scene: s81</div>
+      </div>
+    </div>
+
+    <div class="modal-mask" id="takeCode" style="display:none;">
+      <div class="modal-box">
+        <a href="#" class="modal-close" onclick="document.getElementById('takeCode').style.display='none';return false;">✕</a>
+        <div class="modal-title">麦卡伦12年 x1</div>
+        <div class="qrcode-box">取酒码<br />WT20260817162151551507</div>
+        <div class="sub" style="text-align:center;">请向工作人员出示此码，取酒码有时效，过期请重新发起</div>
+      </div>
+    </div>
+
+    <div class="modal-mask" id="takes" style="display:none;">
+      <div class="modal-box">
+        <a href="#" class="modal-close" onclick="document.getElementById('takes').style.display='none';return false;">✕</a>
+        <div class="modal-title">取酒记录</div>
+        <div style="max-height:280px;overflow-y:auto;">
+          <div style="padding:10px 0;border-bottom:1px solid var(--line);">
+            <div class="row-between"><div class="title" style="font-size:13px;">麦卡伦12年</div><div class="tag">已核销</div></div>
+            <div class="sub">数量 1 · WT20260817162151551507</div>
+          </div>
+          <div style="padding:10px 0;">
+            <div class="row-between"><div class="title" style="font-size:13px;">山崎12年</div><div class="tag">已核销</div></div>
+            <div class="sub">数量 1 · WT20260815193200223344</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

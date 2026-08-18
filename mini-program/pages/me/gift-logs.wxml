@@ -1,31 +1,33 @@
 <view class="container">
-  <view class="card summary" wx:if="{{summary}}">
-    <view class="sub">可用赠金(元)</view>
-    <view class="summary-num accent">{{summary.giftBalanceText}}</view>
+  <view class="card-gold" wx:if="{{summary}}">
+    <view class="sub">当前有效赠金（未过期批次合计）</view>
+    <view class="summary-num accent">¥{{summary.giftBalanceText}}</view>
     <view class="sub" wx:if="{{summary.hasExpiring}}">
       ¥{{summary.expiringText}} 将于 {{summary.expiringAt}} 过期
     </view>
   </view>
 
-  <view class="card">
-    <view wx:if="{{!loading && !list.length}}" class="empty">暂无赠金记录</view>
-    <view wx:for="{{list}}" wx:key="id" class="batch">
-      <view class="row-between">
-        <view class="flex-1">{{item.source_type_text}}</view>
-        <view class="tag">{{item.status_text}}</view>
-      </view>
-      <view class="row-between batch-body">
-        <view class="sub">发放 ¥{{item.amountText}} · 剩余 ¥{{item.remainText}}</view>
-        <view class="sub">{{item.expired_at ? item.expired_at + ' 到期' : '永久有效'}}</view>
-      </view>
-      <view class="sub">{{item.created_at}}</view>
-    </view>
+  <view class="card-gold">
+    <view class="title" style="font-size:28rpx;margin-bottom:12rpx;">赠金说明：</view>
+    <view class="sub rule-line">a.存记分牌的同时获得赠金</view>
+    <view class="sub rule-line">b.记分牌:赠金=300:1</view>
+    <view class="sub rule-line">c.赠金仅限兑换店内酒水、小吃等</view>
+    <view class="sub rule-line">d.赠金仅限店内使用，不可转增、不可交易、不可折现</view>
   </view>
 
-  <view class="card rule">
-    <view class="title">赠金规则</view>
-    <view class="divider" />
-    <view class="sub">赠金仅限兑换店内酒水小吃，不可转赠、不可交易、不可提现。</view>
-    <view class="sub">消费时优先扣除最近到期的赠金批次。</view>
+  <view class="section-title">赠金明细：</view>
+
+  <view wx:if="{{!loading && !list.length}}" class="empty">暂无赠金相关记录</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card batch">
+    <view class="row-between">
+      <view class="flex-1">{{item.source_type_text}}</view>
+      <view class="tag">{{item.status_text}}</view>
+    </view>
+    <view class="row-between batch-body">
+      <view class="sub">发放 ¥{{item.amountText}} · 剩余 ¥{{item.remainText}}</view>
+      <view class="sub">{{item.expired_at ? item.expired_at + ' 到期' : '永久有效'}}</view>
+    </view>
+    <view class="sub">{{item.created_at}}</view>
   </view>
 </view>

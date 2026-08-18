@@ -2,7 +2,41 @@
 
 对应设计稿 `me-exchage-sorce.png`。
 
-## 1. 兑换商品列表
+## 1. 取积分（弹窗，按数量折算赠金）
+
+`POST /api/exchange/points` · 需要会员 token
+
+对应"我的"页「取积分」弹窗：会员输入任意积分数量，按比例折算为赠金，多余不足一份比例的积分不扣除。
+
+**请求**
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `point` | int | 是 | 取积分数量，需 ≥ `rate`（当前 300） |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "取积分成功",
+  "data": {
+    "consume_point": 300,
+    "gift_amount": 100,
+    "point_left": 900,
+    "gift_balance": 100,
+    "batch_id": 12
+  }
+}
+```
+
+| 失败场景 | code | msg |
+|---|---|---|
+| 数量为空/非正整数 | 1 | 请输入取积分数量 |
+| 不足最小兑换比例 | 1 | 最少需要 300 积分才能兑换 |
+| 积分不足 | 1 | 积分不足 |
+
+## 2. 兑换商品列表（备用：物品兑换目录）
 
 `GET /api/exchange/goods` · 无需鉴权（带 token 时返回 `point` 便于置灰按钮）
 
@@ -48,7 +82,7 @@
 | `rate` | 记分牌兑换赠金比例，固定 300（记分牌 : 赠金 = 300 : 1） |
 | `stock` | `-1` 表示不限量 |
 
-## 2. 提交兑换
+## 3. 提交兑换（物品兑换目录）
 
 `POST /api/exchange` · 需要会员 token
 
@@ -107,7 +141,7 @@
 3. `type=1`：`nf_exchange_record.status=0` 待核销，`stock` 递减、`exchanged` 递增。
 4. 记分牌与赠金换算严格按 `rate`，禁止前端传入金额。
 
-## 3. 兑换记录
+## 4. 兑换记录
 
 `GET /api/exchange/records` · 需要会员 token
 
@@ -146,7 +180,7 @@
 }
 ```
 
-## 4. 兑换码
+## 5. 兑换码
 
 `GET /api/exchange/records/{id}/code` · 需要会员 token
 

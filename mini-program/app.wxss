@@ -69,3 +69,88 @@ view, text, input, button, scroll-view { box-sizing: border-box; }
   background: rgba(212, 175, 55, .16);
   color: var(--accent);
 }
+
+/* 金色描边卡片，用于赠金说明等强调区块 */
+.card-gold {
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid rgba(212, 175, 55, .45);
+  background: linear-gradient(160deg, rgba(212,175,55,.12), rgba(28,28,30,.6));
+}
+
+/* 通用居中弹窗遮罩 */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-box {
+  width: 620rpx;
+  background: var(--bg-card-2);
+  border-radius: 20rpx;
+  padding: 36rpx 32rpx;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  right: 20rpx;
+  top: 16rpx;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-size: 28rpx;
+}
+.modal-title {
+  text-align: center;
+  color: var(--accent);
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 20rpx;
+}
+.modal-input {
+  width: 100%;
+  height: 76rpx;
+  border: 1rpx solid var(--accent);
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  color: var(--text);
+  font-size: 28rpx;
+}
+.modal-actions { display: flex; gap: 16rpx; margin-top: 24rpx; }
+.modal-actions .btn-ghost,
+.modal-actions .btn-gold { flex: 1; height: 76rpx; line-height: 76rpx; text-align: center; border-radius: 12rpx; font-size: 28rpx; }
+.btn-gold { background: var(--accent); color: #201a06; font-weight: 600; }
+
+.qrcode-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 24rpx;
+  text-align: center;
+  margin: 12rpx 0;
+}
+.qrcode-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12rpx; margin: 12rpx 0; background: #fff; }
+.store-caption { text-align: center; color: var(--accent); font-size: 28rpx; font-weight: 600; margin-top: 16rpx; }
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  background: rgba(212, 175, 55, .16);
+  color: var(--accent);
+}
