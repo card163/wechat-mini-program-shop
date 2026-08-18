@@ -27,10 +27,28 @@ Page({
     updateProfile({ avatar: e.detail.avatarUrl }).then((member) => this.setData({ member }));
   },
 
+  // 使用微信昵称快捷填入时，input 会先触发 bindinput，随后才 blur，
+  // 部分机型 blur 事件的 e.detail.value 存在滞后，故以 input 记录的最新值为准
+  onNicknameInput(e) {
+    this.nicknameDraft = e.detail.value;
+  },
+
+  onNicknameReview(e) {
+    if (e.detail.pass === false) {
+      wx.showToast({ title: '昵称包含违规内容，请修改', icon: 'none' });
+    }
+  },
+
   onNicknameChange(e) {
-    const nickname = e.detail.value;
-    if (!nickname) return;
-    updateProfile({ nickname }).then((member) => this.setData({ member }));
+    const nickname = this.nicknameDraft !== undefined ? this.nicknameDraft : e.detail.value;
+    this.nicknameDraft = undefined;
+    if (!nickname || nickname === this.data.member.nickname) return;
+    updateProfile({ nickname })
+      .then((member) => {
+        this.setData({ member });
+        wx.showToast({ title: '昵称已保存' });
+      })
+      .catch(() => {});
   },
 
   goRecharge() {

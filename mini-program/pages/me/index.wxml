@@ -10,6 +10,8 @@
         value="{{member.nickname}}"
         placeholder="点击设置昵称"
         placeholder-class="sub"
+        bindinput="onNicknameInput"
+        bindnicknamereview="onNicknameReview"
         bindblur="onNicknameChange"
       />
       <view class="sub">ID:{{member.id}}</view>
