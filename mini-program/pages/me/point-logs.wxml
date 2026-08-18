@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="card summary">
+    <view class="sub">当前记分牌</view>
+    <view class="summary-num accent">{{point}}</view>
+  </view>
+
+  <view class="card">
+    <view wx:if="{{!loading && !list.length}}" class="empty">暂无记分牌记录</view>
+    <view wx:for="{{list}}" wx:key="id" class="row-between log">
+      <view class="flex-1">
+        <view>{{item.biz_type_text}}</view>
+        <view class="sub">{{item.remark || '-'}}</view>
+        <view class="sub">{{item.created_at}}</view>
+      </view>
+      <view class="log-right">
+        <view class="{{item.point > 0 ? 'accent' : 'minus'}} log-num">{{item.point > 0 ? '+' : ''}}{{item.point}}</view>
+        <view class="sub">余 {{item.after_point}}</view>
+      </view>
+    </view>
+  </view>
+</view>

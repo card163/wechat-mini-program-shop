@@ -1,0 +1,41 @@
+<view class="tabs">
+  <view
+    wx:for="{{tabs}}"
+    wx:key="label"
+    class="tab {{tabIndex === index ? 'active' : ''}}"
+    data-index="{{index}}"
+    bindtap="onTabTap"
+  >{{item.label}}</view>
+</view>
+
+<view class="container">
+  <view wx:if="{{!loading && !list.length}}" class="empty">暂无订单</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card">
+    <view class="row-between">
+      <view class="sub">{{item.order_no}}</view>
+      <view class="tag">{{item.order_status_text}}</view>
+    </view>
+    <view class="divider" />
+
+    <view wx:for="{{item.items}}" wx:for-item="goods" wx:key="goods_id" class="row-between goods">
+      <view class="flex-1">{{goods.goods_name}}</view>
+      <view class="sub">x{{goods.quantity}}</view>
+      <view class="price goods-price">¥{{goods.subtotalText}}</view>
+    </view>
+
+    <view class="divider" />
+    <view class="row-between">
+      <view class="sub">{{item.table_name}} · {{item.created_at}}</view>
+      <view class="price">¥{{item.payAmountText}}</view>
+    </view>
+    <view class="sub" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+
+    <view class="actions" wx:if="{{item.order_status === 0}}">
+      <button class="btn-ghost act" data-id="{{item.id}}" bindtap="onCancel">取消订单</button>
+      <button class="btn-primary act" data-id="{{item.id}}" bindtap="onPay">去支付</button>
+    </view>
+  </view>
+
+  <view wx:if="{{!hasMore && list.length}}" class="sub more">没有更多了</view>
+</view>

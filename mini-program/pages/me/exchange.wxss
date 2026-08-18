@@ -1,0 +1,7 @@
+.summary-num { font-size: 56rpx; font-weight: 700; margin: 8rpx 0; }
+.record-btn { padding: 0 28rpx; height: 60rpx; line-height: 60rpx; }
+
+.goods { display: flex; }
+.goods-img { width: 150rpx; height: 150rpx; border-radius: 16rpx; margin-right: 20rpx; background: #2a2a2a; }
+.goods-bottom { margin-top: 20rpx; }
+.ex-btn { width: 200rpx; height: 64rpx; line-height: 64rpx; font-size: 26rpx; }

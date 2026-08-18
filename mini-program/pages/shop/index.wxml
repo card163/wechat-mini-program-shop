@@ -1,0 +1,42 @@
+<view class="shop">
+  <scroll-view class="side" scroll-y>
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="side-item {{currentCategory === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryTap"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <scroll-view class="list" scroll-y>
+    <view wx:if="{{!loading && !goods.length}}" class="empty">暂无商品</view>
+
+    <view wx:for="{{goods}}" wx:key="id" class="goods">
+      <image class="goods-img" src="{{item.cover}}" mode="aspectFill" />
+      <view class="goods-info">
+        <view class="goods-name">{{item.name}}</view>
+        <view class="sub">{{item.subtitle}}</view>
+        <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持赠金支付</view>
+        <view class="row-between goods-bottom">
+          <view class="price">¥{{item.priceText}}</view>
+          <view class="stepper">
+            <view wx:if="{{item.quantity > 0}}" class="step-btn" data-id="{{item.id}}" bindtap="onMinus">-</view>
+            <view wx:if="{{item.quantity > 0}}" class="step-num">{{item.quantity}}</view>
+            <view class="step-btn add" data-id="{{item.id}}" bindtap="onAdd">+</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="list-bottom" />
+  </scroll-view>
+</view>
+
+<view class="cart-bar">
+  <view class="cart-info">
+    <view class="cart-count">已选 {{cartCount}} 件</view>
+    <view class="price">合计 ¥{{cartAmountText}}</view>
+  </view>
+  <view class="cart-clear" bindtap="clearCart" wx:if="{{cartCount > 0}}">清空</view>
+  <view class="cart-btn {{cartCount ? '' : 'disabled'}}" bindtap="goCheckout">去结算</view>
+</view>

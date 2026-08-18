@@ -1,0 +1,14 @@
+.balance { text-align: center; padding: 48rpx 0; }
+.balance-num { font-size: 64rpx; font-weight: 700; margin: 12rpx 0; }
+
+.pkg-list { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.pkg {
+  width: 48%; padding: 28rpx 20rpx; margin-bottom: 20rpx;
+  border-radius: 16rpx; background: var(--bg-card-2);
+  border: 1rpx solid transparent; text-align: center;
+}
+.pkg.active { border-color: var(--accent); background: rgba(212, 175, 55, .08); }
+.pkg-amount { font-size: 38rpx; font-weight: 700; color: var(--accent); margin-bottom: 8rpx; }
+
+.rule .sub { line-height: 44rpx; }
+.submit { height: 88rpx; line-height: 88rpx; margin-top: 24rpx; }

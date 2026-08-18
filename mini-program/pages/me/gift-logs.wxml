@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="card summary" wx:if="{{summary}}">
+    <view class="sub">可用赠金(元)</view>
+    <view class="summary-num accent">{{summary.giftBalanceText}}</view>
+    <view class="sub" wx:if="{{summary.hasExpiring}}">
+      ¥{{summary.expiringText}} 将于 {{summary.expiringAt}} 过期
+    </view>
+  </view>
+
+  <view class="card">
+    <view wx:if="{{!loading && !list.length}}" class="empty">暂无赠金记录</view>
+    <view wx:for="{{list}}" wx:key="id" class="batch">
+      <view class="row-between">
+        <view class="flex-1">{{item.source_type_text}}</view>
+        <view class="tag">{{item.status_text}}</view>
+      </view>
+      <view class="row-between batch-body">
+        <view class="sub">发放 ¥{{item.amountText}} · 剩余 ¥{{item.remainText}}</view>
+        <view class="sub">{{item.expired_at ? item.expired_at + ' 到期' : '永久有效'}}</view>
+      </view>
+      <view class="sub">{{item.created_at}}</view>
+    </view>
+  </view>
+
+  <view class="card rule">
+    <view class="title">赠金规则</view>
+    <view class="divider" />
+    <view class="sub">赠金仅限兑换店内酒水小吃，不可转赠、不可交易、不可提现。</view>
+    <view class="sub">消费时优先扣除最近到期的赠金批次。</view>
+  </view>
+</view>

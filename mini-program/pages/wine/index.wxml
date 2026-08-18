@@ -1,0 +1,64 @@
+<view class="tabs">
+  <view class="tab {{tabIndex === 0 ? 'active' : ''}}" data-index="0" bindtap="onTabTap">我的存酒</view>
+  <view class="tab {{tabIndex === 1 ? 'active' : ''}}" data-index="1" bindtap="onTabTap">取酒记录</view>
+</view>
+
+<view class="container">
+  <view class="card store-tip" bindtap="goStoreCode">
+    <view class="flex-1">
+      <view class="title">出示存酒码</view>
+      <view class="sub">店员扫码后为你登记存酒</view>
+    </view>
+    <view class="arrow">›</view>
+  </view>
+
+  <block wx:if="{{tabIndex === 0}}">
+    <view wx:if="{{!loading && !storages.length}}" class="empty">暂无存酒</view>
+
+    <view wx:for="{{storages}}" wx:key="id" class="card">
+      <view class="row-between">
+        <view class="title">{{item.wine_name}}</view>
+        <view class="tag">{{item.status_text}}</view>
+      </view>
+      <view class="divider" />
+      <view class="sub">规格：{{item.spec || '-'}}</view>
+      <view class="sub">存入 {{item.total_qty}} {{item.unit}} · 剩余 {{item.remain_qty}} {{item.unit}}</view>
+      <view class="sub">存入时间 {{item.stored_at}}</view>
+      <view class="sub">{{item.expired_at ? '到期时间 ' + item.expired_at : '不过期'}}</view>
+      <view class="sub" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+
+      <view class="actions" wx:if="{{item.status === 1 && item.remain_qty > 0}}">
+        <button class="btn-primary act" data-id="{{item.id}}" bindtap="onTake">取酒</button>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view wx:if="{{!loading && !takes.length}}" class="empty">暂无取酒记录</view>
+
+    <view wx:for="{{takes}}" wx:key="id" class="card">
+      <view class="row-between">
+        <view class="title">{{item.wine_name}}</view>
+        <view class="tag">{{item.status_text}}</view>
+      </view>
+      <view class="divider" />
+      <view class="sub">数量 {{item.quantity}}</view>
+      <view class="sub">{{item.take_no}}</view>
+      <view class="sub">{{item.created_at}}</view>
+
+      <view class="actions" wx:if="{{item.status === 0}}">
+        <button class="btn-ghost act" data-id="{{item.id}}" bindtap="onCancelTake">取消</button>
+        <button class="btn-primary act" data-id="{{item.id}}" bindtap="showTakeCode">出示取酒码</button>
+      </view>
+    </view>
+  </block>
+</view>
+
+<view class="mask" wx:if="{{takeCode}}" bindtap="closeCode">
+  <view class="code-box" catchtap="noop">
+    <view class="title">{{takeCode.wine_name}} x{{takeCode.quantity}}</view>
+    <view class="sub">请出示给店员核销</view>
+    <view class="code">{{takeCode.take_no}}</view>
+    <view class="sub">取酒码有时效，过期请重新发起</view>
+  </view>
+</view>

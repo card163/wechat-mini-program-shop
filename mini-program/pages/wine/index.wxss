@@ -1,0 +1,23 @@
+.tabs { display: flex; background: #1a1a1a; border-bottom: 1rpx solid var(--line); }
+.tab { flex: 1; text-align: center; padding: 26rpx 0; font-size: 28rpx; color: var(--text-sub); }
+.tab.active { color: var(--accent); border-bottom: 4rpx solid var(--accent); }
+
+.store-tip { display: flex; align-items: center; }
+.arrow { color: var(--text-sub); font-size: 36rpx; }
+
+.actions { display: flex; justify-content: flex-end; margin-top: 20rpx; }
+.act { width: 200rpx; height: 64rpx; line-height: 64rpx; font-size: 26rpx; margin-left: 20rpx; }
+
+.mask {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, .75);
+  display: flex; align-items: center; justify-content: center;
+}
+.code-box {
+  width: 600rpx; padding: 48rpx 32rpx; text-align: center;
+  background: var(--bg-card); border-radius: 24rpx;
+}
+.code {
+  margin: 32rpx 0; padding: 28rpx 12rpx;
+  background: #fff; color: #111; border-radius: 16rpx;
+  font-size: 30rpx; letter-spacing: 2rpx; word-break: break-all;
+}

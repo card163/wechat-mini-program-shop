@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="card code-card">
+    <view class="title">存酒码</view>
+    <view class="sub">请出示给店员扫码，登记你的存酒</view>
+
+    <image wx:if="{{qrcode}}" class="qrcode" src="{{qrcode}}" mode="aspectFit" />
+    <view wx:else class="code-text">{{scene}}</view>
+
+    <view class="sub" wx:if="{{countdown > 0}}">{{countdown}} 秒后失效</view>
+    <view class="sub warn" wx:else>已失效，请刷新</view>
+
+    <button class="btn-primary refresh" bindtap="refresh" disabled="{{loading}}">刷新存酒码</button>
+  </view>
+
+  <view class="card">
+    <view class="title">存酒说明</view>
+    <view class="divider" />
+    <view class="sub">1. 存酒由店员现场登记，登记后可在「我的存酒」查看。</view>
+    <view class="sub">2. 取酒需在小程序发起并由店员扫码核销。</view>
+    <view class="sub">3. 存酒有保存期限，过期将自动失效，请及时取用。</view>
+  </view>
+</view>

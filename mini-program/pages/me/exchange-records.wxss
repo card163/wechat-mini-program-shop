@@ -1,0 +1,16 @@
+.actions { display: flex; justify-content: flex-end; margin-top: 20rpx; }
+.act { width: 220rpx; height: 64rpx; line-height: 64rpx; font-size: 26rpx; }
+
+.mask {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, .75);
+  display: flex; align-items: center; justify-content: center;
+}
+.code-box {
+  width: 600rpx; padding: 48rpx 32rpx; text-align: center;
+  background: var(--bg-card); border-radius: 24rpx;
+}
+.code {
+  margin: 32rpx 0; padding: 28rpx 12rpx;
+  background: #fff; color: #111; border-radius: 16rpx;
+  font-size: 30rpx; letter-spacing: 2rpx; word-break: break-all;
+}

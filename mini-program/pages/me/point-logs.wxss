@@ -1,0 +1,8 @@
+.summary { text-align: center; padding: 40rpx 0; }
+.summary-num { font-size: 64rpx; font-weight: 700; margin-top: 12rpx; }
+
+.log { padding: 24rpx 0; border-bottom: 1rpx solid var(--line); }
+.log:last-child { border-bottom: none; }
+.log-right { text-align: right; }
+.log-num { font-size: 32rpx; font-weight: 600; }
+.minus { color: #e05b5b; }

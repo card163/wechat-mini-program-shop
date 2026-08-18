@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="card summary">
+    <view class="row-between">
+      <view>
+        <view class="sub">我的记分牌</view>
+        <view class="summary-num accent">{{point}}</view>
+      </view>
+      <view class="btn-ghost record-btn" bindtap="goRecords">兑换记录</view>
+    </view>
+    <view class="sub">记分牌 : 赠金 = {{rate}} : 1</view>
+  </view>
+
+  <view wx:if="{{!loading && !list.length}}" class="empty">暂无可兑换商品</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card goods">
+    <image class="goods-img" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}" />
+    <view class="flex-1">
+      <view class="row-between">
+        <view class="title">{{item.name}}</view>
+        <view class="tag">{{item.type === 2 ? '赠金' : '实物'}}</view>
+      </view>
+      <view class="sub">{{item.description}}</view>
+      <view class="sub" wx:if="{{item.type === 2}}">到账赠金 ¥{{item.giftText}}</view>
+      <view class="sub" wx:if="{{item.stock >= 0}}">剩余 {{item.stock}} 份</view>
+      <view class="row-between goods-bottom">
+        <view class="price">{{item.point}} 记分牌</view>
+        <button
+          class="btn-primary ex-btn"
+          data-id="{{item.id}}"
+          bindtap="onExchange"
+          disabled="{{!item.enough || item.soldOut}}"
+        >{{item.soldOut ? '已兑完' : (item.enough ? '立即兑换' : '记分牌不足')}}</button>
+      </view>
+    </view>
+  </view>
+</view>

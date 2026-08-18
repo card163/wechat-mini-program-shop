@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/shop/index",
+    "pages/shop/checkout",
+    "pages/recharge/index",
+    "pages/ranking/index",
+    "pages/me/index",
+    "pages/me/orders",
+    "pages/me/point-logs",
+    "pages/me/gift-logs",
+    "pages/me/exchange",
+    "pages/me/exchange-records",
+    "pages/wine/index",
+    "pages/wine/code"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#121212",
+    "navigationBarTitleText": "Nice Fold 德州酒馆",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#121212"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#d4af37",
+    "backgroundColor": "#1a1a1a",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/shop/index", "text": "点单" },
+      { "pagePath": "pages/ranking/index", "text": "排行榜" },
+      { "pagePath": "pages/me/index", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

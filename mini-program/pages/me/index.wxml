@@ -1,0 +1,70 @@
+<view class="container" wx:if="{{member}}">
+  <view class="profile">
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar" src="{{member.avatar}}" mode="aspectFill" />
+    </button>
+    <view class="flex-1">
+      <input
+        class="nickname"
+        type="nickname"
+        value="{{member.nickname}}"
+        placeholder="点击设置昵称"
+        placeholder-class="sub"
+        bindblur="onNicknameChange"
+      />
+      <view class="sub" wx:if="{{member.phone}}">{{member.phone}}</view>
+      <button wx:else class="btn-ghost phone-btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone">绑定手机号</button>
+    </view>
+  </view>
+
+  <view class="card asset">
+    <view class="asset-item" data-url="/pages/me/gift-logs" bindtap="go">
+      <view class="asset-num accent">{{balanceText}}</view>
+      <view class="sub">余额(元)</view>
+    </view>
+    <view class="asset-item" data-url="/pages/me/gift-logs" bindtap="go">
+      <view class="asset-num accent">{{giftText}}</view>
+      <view class="sub">赠金(元)</view>
+    </view>
+    <view class="asset-item" data-url="/pages/me/point-logs" bindtap="go">
+      <view class="asset-num accent">{{member.point}}</view>
+      <view class="sub">记分牌</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="cell" data-url="/pages/me/orders" bindtap="go">
+      <view class="flex-1">我的订单</view>
+      <view class="sub" wx:if="{{member.order_count.unpaid > 0}}">{{member.order_count.unpaid}} 笔待支付</view>
+      <view class="arrow">›</view>
+    </view>
+    <view class="cell" data-url="/pages/wine/index" bindtap="go">
+      <view class="flex-1">我的存酒</view>
+      <view class="sub" wx:if="{{member.wine_count > 0}}">{{member.wine_count}} 条存放中</view>
+      <view class="arrow">›</view>
+    </view>
+    <view class="cell" data-url="/pages/me/exchange" bindtap="go">
+      <view class="flex-1">记分牌兑换</view>
+      <view class="arrow">›</view>
+    </view>
+    <view class="cell" data-url="/pages/me/exchange-records" bindtap="go">
+      <view class="flex-1">兑换记录</view>
+      <view class="arrow">›</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="cell" data-url="/pages/me/point-logs" bindtap="go">
+      <view class="flex-1">记分牌明细</view>
+      <view class="arrow">›</view>
+    </view>
+    <view class="cell" data-url="/pages/me/gift-logs" bindtap="go">
+      <view class="flex-1">赠金记录</view>
+      <view class="arrow">›</view>
+    </view>
+    <view class="cell" data-url="/pages/recharge/index" bindtap="go">
+      <view class="flex-1">充值</view>
+      <view class="arrow">›</view>
+    </view>
+  </view>
+</view>

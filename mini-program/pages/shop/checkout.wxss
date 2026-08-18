@@ -1,0 +1,33 @@
+.container { padding-bottom: 160rpx; }
+
+.item { padding: 12rpx 0; }
+.item-price { margin-left: 20rpx; }
+
+.pay {
+  display: flex; align-items: center;
+  padding: 24rpx; margin-bottom: 16rpx;
+  border-radius: 16rpx; background: var(--bg-card-2);
+  border: 1rpx solid transparent;
+}
+.pay.active { border-color: var(--accent); }
+.radio { color: var(--accent); font-size: 32rpx; margin-left: 20rpx; }
+.warn { color: #e05b5b; }
+
+.remark { height: 72rpx; font-size: 28rpx; }
+
+.footer {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: 120rpx; display: flex; align-items: center;
+  padding: 0 24rpx; background: #1a1a1a; border-top: 1rpx solid var(--line);
+}
+.price.big { font-size: 38rpx; }
+.submit { width: 260rpx; height: 80rpx; line-height: 80rpx; }
+
+.mask {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, .6);
+  display: flex; align-items: flex-end;
+}
+.sheet { width: 100%; background: var(--bg-card); border-radius: 24rpx 24rpx 0 0; padding: 32rpx 0 48rpx; }
+.sheet-title { text-align: center; font-size: 30rpx; margin-bottom: 16rpx; }
+.sheet-item { padding: 32rpx; text-align: center; border-top: 1rpx solid var(--line); }
+.sheet-item.active { color: var(--accent); }

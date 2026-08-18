@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="card balance">
+    <view class="sub">当前余额(元)</view>
+    <view class="balance-num accent">{{balanceText}}</view>
+    <view class="sub">赠金 ¥{{giftBalanceText}}</view>
+  </view>
+
+  <view class="card">
+    <view class="title">选择充值金额</view>
+    <view class="divider" />
+    <view class="pkg-list">
+      <view
+        wx:for="{{packages}}"
+        wx:key="id"
+        class="pkg {{selectedId === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelect"
+      >
+        <view class="pkg-amount">¥{{item.amountText}}</view>
+        <view class="sub" wx:if="{{item.gift_amount > 0}}">送赠金 ¥{{item.giftText}}</view>
+        <view class="sub" wx:if="{{item.gift_point > 0}}">送 {{item.gift_point}} 记分牌</view>
+        <view class="sub" wx:if="{{item.gift_expire_days > 0}}">赠金 {{item.gift_expire_days}} 天有效</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card rule">
+    <view class="title">充值说明</view>
+    <view class="divider" />
+    <view class="sub">1. 充值金额计入余额本金，可用于全部商品。</view>
+    <view class="sub">2. 赠送金额计入赠金账户，仅限兑换店内酒水小吃，不可转赠、不可交易、不可提现。</view>
+    <view class="sub">3. 赠金按批次记录并可能设置有效期，过期后自动失效。</view>
+  </view>
+
+  <button class="btn-primary submit" bindtap="submit" disabled="{{submitting}}">立即充值</button>
+</view>

@@ -1,0 +1,16 @@
+.head { padding: 32rpx 8rpx; }
+.head-title { font-size: 40rpx; font-weight: 700; }
+
+.item { padding: 20rpx 0; border-bottom: 1rpx solid var(--line); }
+.item:last-child { border-bottom: none; }
+
+.rank {
+  width: 56rpx; text-align: center; font-size: 30rpx;
+  color: var(--text-sub); font-weight: 600;
+}
+.rank.top { color: var(--accent); }
+
+.avatar {
+  width: 72rpx; height: 72rpx; border-radius: 50%;
+  margin: 0 20rpx; background: #2a2a2a;
+}

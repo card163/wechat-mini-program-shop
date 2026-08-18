@@ -1,0 +1,14 @@
+.profile { display: flex; align-items: center; padding: 40rpx 8rpx; }
+.avatar-btn { padding: 0; background: transparent; line-height: normal; margin-right: 24rpx; }
+.avatar-btn::after { border: none; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; background: #2a2a2a; }
+.nickname { font-size: 34rpx; font-weight: 600; margin-bottom: 8rpx; }
+.phone-btn { width: 220rpx; height: 56rpx; line-height: 56rpx; margin: 8rpx 0 0; }
+
+.asset { display: flex; }
+.asset-item { flex: 1; text-align: center; }
+.asset-num { font-size: 40rpx; font-weight: 700; margin-bottom: 8rpx; }
+
+.cell { display: flex; align-items: center; padding: 28rpx 0; border-bottom: 1rpx solid var(--line); }
+.cell:last-child { border-bottom: none; }
+.arrow { color: var(--text-sub); margin-left: 16rpx; }

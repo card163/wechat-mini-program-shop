@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="hero">
+    <view class="hero-name">{{shop.name}}</view>
+    <view class="sub" wx:if="{{shop.business_hours}}">营业时间 {{shop.business_hours}}</view>
+    <view class="sub" wx:if="{{shop.address}}" bindtap="callShop">{{shop.address}}</view>
+  </view>
+
+  <swiper wx:if="{{banners.length}}" class="banner" autoplay circular indicator-dots indicator-active-color="#d4af37">
+    <swiper-item wx:for="{{banners}}" wx:key="id" data-link="{{item.link}}" bindtap="onBannerTap">
+      <image class="banner-img" src="{{item.image}}" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <view class="card asset" wx:if="{{member}}">
+    <view class="asset-item">
+      <view class="asset-num accent">{{balanceText}}</view>
+      <view class="sub">余额(元)</view>
+    </view>
+    <view class="asset-item">
+      <view class="asset-num accent">{{giftText}}</view>
+      <view class="sub">赠金(元)</view>
+    </view>
+    <view class="asset-item">
+      <view class="asset-num accent">{{member.point}}</view>
+      <view class="sub">记分牌</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="grid">
+      <view class="grid-item" bindtap="goShop">
+        <view class="grid-icon">酒</view>
+        <view>点单</view>
+      </view>
+      <view class="grid-item" bindtap="goRecharge">
+        <view class="grid-icon">充</view>
+        <view>充值</view>
+      </view>
+      <view class="grid-item" bindtap="goWine">
+        <view class="grid-icon">存</view>
+        <view>我的存酒</view>
+      </view>
+      <view class="grid-item" bindtap="goExchange">
+        <view class="grid-icon">兑</view>
+        <view>记分牌兑换</view>
+      </view>
+      <view class="grid-item" bindtap="goRanking">
+        <view class="grid-icon">榜</view>
+        <view>排行榜</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{shop.notice}}">
+    <view class="title">门店公告</view>
+    <view class="divider" />
+    <view class="sub">{{shop.notice}}</view>
+  </view>
+</view>
