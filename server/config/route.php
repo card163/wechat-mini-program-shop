@@ -171,6 +171,11 @@ Route::group('/admin', function () use ($crud): void {
     Route::get('/stat/trend', [StatController::class, 'trend']);
 })->middleware([AdminAuth::class, AdminRole::class]);
 
+// 跨域预检请求（OPTIONS）没有对应的业务路由，必须在 fallback 之前单独匹配，
+// 否则会落入 Route::fallback() 直接返回，绕过 Cors 中间件导致响应缺少 CORS 头，
+// 浏览器把预检当成失败，最终表现为前端提示“网络异常”
+Route::options('/{path:.+}', static fn(): support\Response => response(''));
+
 // 关闭控制器默认路由，所有接口必须显式注册
 Route::disableDefaultRoute();
 

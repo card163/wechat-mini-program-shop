@@ -4,8 +4,15 @@ services:
     build: .
     container_name: docker-webman
     restart: unless-stopped
+    # baota_net 由宝塔/aapanel Docker 管理器创建；本地脱离宝塔环境跑 docker compose 时
+    # 需先执行 `docker network create baota_net`，或删掉本段改回默认 bridge 网络。
+    networks:
+      - baota_net
     volumes:
       - "./:/app"
     ports:
       - "8787:8787"
-    command: ["php", "start.php", "start" ]
+    command: ["php", "start.php", "start"]
+networks:
+  baota_net:
+    external: true
