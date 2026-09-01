@@ -1,3 +1,3 @@
-const BASE_URL = 'http://127.0.0.1:8787';
+const BASE_URL = 'https://api-nf.dwj.la';
 
 module.exports = { BASE_URL };

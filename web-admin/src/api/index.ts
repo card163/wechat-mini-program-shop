@@ -95,4 +95,6 @@ export const printLogApi = {
   list: (params: Record<string, any>) => get<PageResult<any>>('/admin/print-logs', params),
 }
 
-export const uploadUrl = '/admin/upload/image'
+// el-upload 的 action 不走 axios 实例，不会自动带上 baseURL，需手动拼接 API 域名，
+// 否则在管理后台前端与后端分域名部署时会把请求发到前端自己的静态站点导致 404。
+export const uploadUrl = `${import.meta.env.VITE_API_BASE || ''}/admin/upload/image`

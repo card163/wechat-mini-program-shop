@@ -96,7 +96,7 @@ class MemberAuthService
 
     public static function displayName(string $nickname): string
     {
-        return $nickname === '' ? '牌友' : $nickname;
+        return $nickname === '' ? '网友' : $nickname;
     }
 
     public static function maskPhone(string $phone): string
