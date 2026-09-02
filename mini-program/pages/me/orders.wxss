@@ -10,6 +10,9 @@
 .goods-price { margin-left: 20rpx; }
 
 .actions { display: flex; justify-content: flex-end; margin-top: 20rpx; }
-.act { width: 180rpx; height: 64rpx; line-height: 64rpx; font-size: 26rpx; margin-left: 20rpx; }
+.act {
+  width: 180rpx; height: 64rpx; font-size: 26rpx; margin-left: 20rpx;
+  padding: 0; display: flex; align-items: center; justify-content: center;
+}
 
 .more { text-align: center; padding: 24rpx 0; }

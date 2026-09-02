@@ -4,13 +4,8 @@
     "pages/shop/index",
     "pages/shop/checkout",
     "pages/recharge/index",
-    "pages/ranking/index",
     "pages/me/index",
     "pages/me/orders",
-    "pages/me/point-logs",
-    "pages/me/gift-logs",
-    "pages/me/exchange",
-    "pages/me/exchange-records",
     "pages/wine/index"
   ],
   "window": {
@@ -33,10 +28,10 @@
         "selectedIconPath": "assets/tabbar/home-active.png"
       },
       {
-        "pagePath": "pages/ranking/index",
-        "text": "排行榜",
-        "iconPath": "assets/tabbar/ranking.png",
-        "selectedIconPath": "assets/tabbar/ranking-active.png"
+        "pagePath": "pages/me/orders",
+        "text": "订单",
+        "iconPath": "assets/tabbar/order.png",
+        "selectedIconPath": "assets/tabbar/order-active.png"
       },
       {
         "pagePath": "pages/me/index",

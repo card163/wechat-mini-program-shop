@@ -1,7 +1,0 @@
-.summary-num { font-size: 48rpx; font-weight: 700; margin: 8rpx 0; }
-
-.rule-line { line-height: 44rpx; }
-
-.section-title { font-size: 28rpx; font-weight: 700; margin: 8rpx 0 16rpx; }
-
-.batch { margin-bottom: 16rpx; }

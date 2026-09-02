@@ -5,8 +5,6 @@ const { fen2yuan } = require('../../utils/format');
 Page({
   data: {
     member: null,
-    exchangeVisible: false,
-    exchangePoint: '',
   },
 
   onShow() {
@@ -61,31 +59,9 @@ Page({
     wx.navigateTo({ url: '/pages/wine/index?autoCode=1' });
   },
 
-  openExchangeModal() {
-    this.setData({ exchangeVisible: true, exchangePoint: '' });
-  },
-  closeExchangeModal() {
-    this.setData({ exchangeVisible: false });
-  },
-  onExchangePointInput(e) {
-    this.setData({ exchangePoint: e.detail.value });
-  },
-  confirmExchange() {
-    const point = Number(this.data.exchangePoint);
-    if (!point || point <= 0) {
-      wx.showToast({ title: '请输入取积分数量', icon: 'none' });
-      return;
-    }
-
-    memberApi.exchangeByPoint(point).then(() => {
-      wx.showToast({ title: '取积分成功' });
-      this.setData({ exchangeVisible: false });
-      this.onShow();
-    });
-  },
-
   go(e) {
-    wx.navigateTo({ url: e.currentTarget.dataset.url });
+    // pages/me/orders 是 tabBar 页面，navigateTo 无法跳转（会静默失败），需用 switchTab
+    wx.switchTab({ url: e.currentTarget.dataset.url });
   },
   noop() {},
 });

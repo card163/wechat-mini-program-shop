@@ -113,7 +113,8 @@ Page({
           fail: () => {
             wx.showToast({ title: '支付已取消，可在订单中继续支付', icon: 'none' });
             wx.removeStorageSync(CART_KEY);
-            setTimeout(() => wx.redirectTo({ url: '/pages/me/orders' }), 1200);
+            // pages/me/orders 是 tabBar 页面，需用 switchTab 而非 redirectTo
+            setTimeout(() => wx.switchTab({ url: '/pages/me/orders' }), 1200);
             resolve();
           },
         })
@@ -124,6 +125,6 @@ Page({
   onPaid() {
     wx.removeStorageSync(CART_KEY);
     wx.showToast({ title: '下单成功' });
-    setTimeout(() => wx.redirectTo({ url: '/pages/me/orders' }), 1000);
+    setTimeout(() => wx.switchTab({ url: '/pages/me/orders' }), 1000);
   },
 });

@@ -11,7 +11,6 @@
       >
         <view class="pkg-amount">¥{{item.amountText}}</view>
         <view class="pkg-reward" wx:if="{{item.gift_amount > 0}}">赠 ¥{{item.giftText}} 赠金</view>
-        <view class="pkg-reward" wx:if="{{item.gift_point > 0}}">赠 {{item.gift_point}} 积分</view>
       </view>
     </view>
   </view>

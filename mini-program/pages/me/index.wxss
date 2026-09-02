@@ -67,5 +67,3 @@
 .list-cell:last-child { border-bottom: none; }
 .arrow { color: var(--text-sub); margin-left: 12rpx; }
 
-.exchange-tip { text-align: center; color: var(--accent); font-size: 26rpx; margin-bottom: 20rpx; }
-

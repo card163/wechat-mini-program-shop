@@ -14,7 +14,7 @@
 .shop-name { font-size: 30rpx; font-weight: 700; }
 .shop-hours { font-size: 22rpx; color: var(--text-sub); flex: none; }
 
-.shop { display: flex; height: calc(100vh - 96rpx - 110rpx); }
+.shop { display: flex; height: calc(100vh - 96rpx - 110rpx - env(safe-area-inset-bottom)); }
 
 .side { width: 176rpx; background: #171717; flex: none; }
 .side-item {
@@ -50,8 +50,8 @@
 
 .cart-bar {
   position: fixed; left: 0; right: 0; bottom: 0;
-  height: 110rpx; display: flex; align-items: center;
-  padding: 0 24rpx; background: #1a1a1a; border-top: 1rpx solid var(--line);
+  min-height: 110rpx; display: flex; align-items: center;
+  padding: 0 24rpx env(safe-area-inset-bottom); background: #1a1a1a; border-top: 1rpx solid var(--line);
 }
 .cart-info { flex: 1; }
 .cart-btn {

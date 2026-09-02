@@ -7,5 +7,4 @@ module.exports = {
   logout: () => post('/api/auth/logout'),
   home: () => get('/api/home'),
   shopInfo: () => get('/api/shop/info'),
-  ranking: (limit = 50) => get('/api/ranking', { limit }),
 };

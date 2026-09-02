@@ -31,11 +31,6 @@
       </view>
       <view class="asset-sep"></view>
       <view class="asset-item">
-        <view class="asset-num">{{member.point}}</view>
-        <view class="sub">积分</view>
-      </view>
-      <view class="asset-sep"></view>
-      <view class="asset-item">
         <view class="asset-num">¥{{giftText}}</view>
         <view class="sub">有效赠金</view>
       </view>
@@ -48,10 +43,6 @@
       <view class="func-item" bindtap="goWine">
         <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-wine.png" mode="aspectFit" /></view>
         <view class="sub">我的存酒</view>
-      </view>
-      <view class="func-item" bindtap="openExchangeModal">
-        <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-coin.png" mode="aspectFit" /></view>
-        <view class="sub">取积分</view>
       </view>
       <view class="func-item" data-url="/pages/me/orders" bindtap="go">
         <view class="func-icon"><image class="func-icon-img" src="/assets/me/icon-doc.png" mode="aspectFit" /></view>
@@ -74,29 +65,5 @@
     </view>
   </view>
 
-  <view class="card">
-    <view class="list-cell" data-url="/pages/me/point-logs" bindtap="go"><view class="flex-1">积分流水</view><view class="arrow">›</view></view>
-    <view class="list-cell" data-url="/pages/me/gift-logs" bindtap="go"><view class="flex-1">赠金记录</view><view class="arrow">›</view></view>
-  </view>
-</view>
-
-<view class="modal-mask" wx:if="{{exchangeVisible}}" bindtap="closeExchangeModal">
-  <view class="modal-box" catchtap="noop">
-    <view class="modal-close" bindtap="closeExchangeModal">✕</view>
-    <view class="modal-title">取积分</view>
-    <view class="exchange-tip">当前可用积分：{{member.point}}</view>
-    <input
-      class="modal-input"
-      type="number"
-      placeholder="请输入取积分数量"
-      placeholder-class="sub"
-      value="{{exchangePoint}}"
-      bindinput="onExchangePointInput"
-    />
-    <view class="modal-actions">
-      <view class="btn-ghost" bindtap="closeExchangeModal">取消</view>
-      <view class="btn-gold" bindtap="confirmExchange">确认取积分</view>
-    </view>
-  </view>
 </view>
 
