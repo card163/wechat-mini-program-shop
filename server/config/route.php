@@ -36,6 +36,7 @@ use app\controller\api\MemberController;
 use app\controller\api\NotifyController;
 use app\controller\api\OrderController;
 use app\controller\api\RechargeController;
+use app\controller\api\UploadController as ApiUploadController;
 use app\controller\api\WineController;
 use app\controller\CommonController;
 use app\middleware\AdminAuth;
@@ -78,6 +79,8 @@ Route::group('/api', function (): void {
     Route::post('/auth/profile', [ApiAuthController::class, 'profile']);
     Route::post('/auth/phone', [ApiAuthController::class, 'phone']);
     Route::post('/auth/logout', [ApiAuthController::class, 'logout']);
+
+    Route::post('/upload/image', [ApiUploadController::class, 'image']);
 
     Route::get('/member/info', [MemberController::class, 'info']);
     Route::get('/member/balance-logs', [MemberController::class, 'balanceLogs']);

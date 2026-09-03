@@ -1,5 +1,5 @@
 const memberApi = require('../../api/member');
-const { updateProfile } = require('../../api/auth');
+const { updateProfile, uploadImage } = require('../../api/auth');
 const { fen2yuan } = require('../../utils/format');
 
 Page({
@@ -22,7 +22,12 @@ Page({
   },
 
   onChooseAvatar(e) {
-    updateProfile({ avatar: e.detail.avatarUrl }).then((member) => this.setData({ member }));
+    // wx.chooseAvatar 拿到的是 wxfile:// 本地临时路径，需先上传到服务器换取可访问 URL
+    wx.showLoading({ title: '上传中', mask: true });
+    uploadImage(e.detail.avatarUrl)
+      .then(({ url }) => updateProfile({ avatar: url }))
+      .then((member) => this.setData({ member }))
+      .finally(() => wx.hideLoading());
   },
 
   // 使用微信昵称快捷填入时，input 会先触发 bindinput，随后才 blur，

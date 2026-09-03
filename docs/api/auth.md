@@ -68,6 +68,31 @@
 |---|---|---|---|
 | `code` | string | 是 | 新版 `getPhoneNumber` 返回的 `code` |
 
+## 4. 上传图片（头像）
+
+`POST /api/upload/image` · 需要会员 token · `multipart/form-data`
+
+`wx.chooseAvatar` 拿到的 `avatarUrl` 是 `wxfile://` 本地临时路径，仅在小程序本地可用，必须先调用本接口上传换成服务器可访问的 URL，再传给「更新会员资料」接口的 `avatar` 参数。
+
+**请求**
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `file` | file | 是 | 图片文件，≤5MB，仅支持 jpg/jpeg/png/gif/webp |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "url": "https://api-nf.dwj.la/uploads/202609/xxxx.jpg",
+    "path": "/uploads/202609/xxxx.jpg"
+  }
+}
+```
+
 **响应**
 
 ```json

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\controller\admin;
+namespace app\controller\api;
 
 use app\service\UploadService;
 use app\support\Result;

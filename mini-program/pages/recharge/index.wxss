@@ -1,8 +1,7 @@
 .container { padding-bottom: 180rpx; }
 
-.pkg-grid { display: flex; flex-wrap: wrap; gap: 20rpx; }
+.pkg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
 .pkg {
-  width: calc(50% - 10rpx);
   box-sizing: border-box;
   border: 1rpx solid rgba(212,175,55,.3);
   border-radius: 16rpx;
