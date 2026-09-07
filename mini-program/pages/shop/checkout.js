@@ -6,9 +6,11 @@ const CART_KEY = 'nf_cart';
 Page({
   data: {
     items: [],
-    tables: [],
+    zones: [],
     tableId: 0,
     tableName: '',
+    tempTableId: 0,
+    tempTableName: '',
     showTablePicker: false,
     payType: 1,
     remark: '',
@@ -38,7 +40,7 @@ Page({
   },
 
   loadTables() {
-    shopApi.tables().then((tables) => this.setData({ tables }));
+    shopApi.tables().then((zones) => this.setData({ zones }));
   },
 
   loadPreview() {
@@ -64,14 +66,30 @@ Page({
   },
 
   openTablePicker() {
-    this.setData({ showTablePicker: true });
+    this.setData({
+      tempTableId: this.data.tableId,
+      tempTableName: this.data.tableName,
+      showTablePicker: true,
+    });
   },
   closeTablePicker() {
     this.setData({ showTablePicker: false });
   },
   onTableSelect(e) {
-    const { id, name } = e.currentTarget.dataset;
-    this.setData({ tableId: Number(id), tableName: name, showTablePicker: false });
+    const { zoneName, id, name } = e.currentTarget.dataset;
+    const tableName = zoneName ? `${zoneName} ${name}` : name;
+    this.setData({ tempTableId: Number(id), tempTableName: tableName });
+  },
+  confirmTablePicker() {
+    if (!this.data.tempTableId) {
+      wx.showToast({ title: '请选择桌号', icon: 'none' });
+      return;
+    }
+    this.setData({
+      tableId: this.data.tempTableId,
+      tableName: this.data.tempTableName,
+      showTablePicker: false,
+    });
   },
   noop() {},
   onPayTypeChange(e) {

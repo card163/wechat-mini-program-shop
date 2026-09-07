@@ -13,23 +13,25 @@ use app\model\Printer;
  */
 final class FeieAdapter extends AbstractTagAdapter
 {
-    private const string API_URL = 'https://api.feieyun.cn/Api/Open/';
+    private const string API_URL_CN  = 'https://api.feieyun.cn/Api/Open/';
+    private const string API_URL_SEA = 'https://api.jp.feieyun.com/Api/Open/';
 
     public function print(Printer $printer, array $lines): array
     {
         $stime  = (string)time();
         $times  = max(1, (int)$printer->voice_times ?: (int)$printer->copies ?: 1);
         $params = [
-            'user'      => (string)$printer->account,
-            'stime'     => $stime,
-            'sig'       => sha1($printer->account . $printer->secret_key . $stime),
-            'apiname'   => 'Open_printMsg',
-            'device_id' => (string)$printer->sn,
-            'content'   => $this->render($lines),
-            'times'     => $times,
+            'user'    => (string)$printer->account,
+            'stime'   => $stime,
+            'sig'     => sha1($printer->account . $printer->secret_key . $stime),
+            'apiname' => 'Open_printMsg',
+            'sn'      => (string)$printer->sn,
+            'content' => $this->render($lines),
+            'times'   => $times,
         ];
 
-        $response = $this->httpPost(self::API_URL, $params);
+        $url      = (int)$printer->area === Printer::AREA_SEA ? self::API_URL_SEA : self::API_URL_CN;
+        $response = $this->httpPost($url, $params);
 
         return [
             'success'  => (int)($response['ret'] ?? -1) === 0,

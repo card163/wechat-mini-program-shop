@@ -62,6 +62,7 @@ export const goodsApi = {
   changeStatus: (id: number, status: number) => post(`/admin/goods/${id}/status`, { status }),
 }
 export const categoryApi = crudApi('/admin/goods-categories')
+export const tableZoneApi = crudApi('/admin/table-zones')
 export const tableApi = crudApi('/admin/tables')
 export const rechargePackageApi = crudApi('/admin/recharge-packages')
 export const exchangeGoodsApi = crudApi('/admin/exchange-goods')

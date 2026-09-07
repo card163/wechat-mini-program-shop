@@ -17,6 +17,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'members', name: 'members', component: () => import('@/views/MemberView.vue'), meta: { title: '会员管理', super: true } },
       { path: 'goods', name: 'goods', component: () => import('@/views/GoodsView.vue'), meta: { title: '商品管理', super: true } },
       { path: 'categories', name: 'categories', component: () => import('@/views/CategoryView.vue'), meta: { title: '商品分类', super: true } },
+      { path: 'table-zones', name: 'table-zones', component: () => import('@/views/TableZoneView.vue'), meta: { title: '桌号分区', super: true } },
       { path: 'tables', name: 'tables', component: () => import('@/views/TableView.vue'), meta: { title: '桌号管理', super: true } },
       { path: 'recharge-packages', name: 'recharge-packages', component: () => import('@/views/RechargePackageView.vue'), meta: { title: '充值套餐', super: true } },
       { path: 'exchange-goods', name: 'exchange-goods', component: () => import('@/views/ExchangeGoodsView.vue'), meta: { title: '兑换商品', super: true } },

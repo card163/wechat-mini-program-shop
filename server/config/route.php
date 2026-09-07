@@ -26,6 +26,7 @@ use app\controller\admin\RechargePackageController;
 use app\controller\admin\SettingController;
 use app\controller\admin\StatController;
 use app\controller\admin\TableController;
+use app\controller\admin\TableZoneController;
 use app\controller\admin\UploadController;
 use app\controller\admin\VerifyController;
 use app\controller\api\AuthController as ApiAuthController;
@@ -155,6 +156,7 @@ Route::group('/admin', function () use ($crud): void {
     $crud('/goods-categories', GoodsCategoryController::class);
     $crud('/goods', AdminGoodsController::class);
     Route::post('/goods/{id:\d+}/status', [AdminGoodsController::class, 'status']);
+    $crud('/table-zones', TableZoneController::class);
     $crud('/tables', TableController::class);
     $crud('/recharge-packages', RechargePackageController::class);
     $crud('/exchange-goods', ExchangeGoodsController::class);

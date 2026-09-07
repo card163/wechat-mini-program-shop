@@ -45,17 +45,27 @@
 </view>
 
 <view class="modal-mask" wx:if="{{showTablePicker}}" bindtap="closeTablePicker">
-  <view class="modal-box" catchtap="noop">
+  <view class="modal-box table-picker-box" catchtap="noop">
     <view class="modal-close" bindtap="closeTablePicker">✕</view>
-    <view class="modal-title">选择下单桌号</view>
-    <view
-      wx:for="{{tables}}"
-      wx:key="id"
-      class="table-option {{tableId === item.id ? 'active' : ''}}"
-      data-id="{{item.id}}"
-      data-name="{{item.name}}"
-      bindtap="onTableSelect"
-    >{{item.name}}</view>
+    <view class="modal-title">选择桌位号</view>
+    <scroll-view scroll-y class="table-picker-scroll">
+      <block wx:for="{{zones}}" wx:key="zone_id" wx:for-item="zone">
+        <view class="section-label zone-label">{{zone.zone_name}}</view>
+        <view class="table-grid">
+          <view
+            wx:for="{{zone.tables}}"
+            wx:key="id"
+            wx:for-item="table"
+            class="table-cell {{tempTableId === table.id ? 'active' : ''}}"
+            data-zone-name="{{zone.zone_name}}"
+            data-id="{{table.id}}"
+            data-name="{{table.name}}"
+            bindtap="onTableSelect"
+          >{{table.name}}</view>
+        </view>
+      </block>
+    </scroll-view>
+    <view class="btn-gold table-picker-confirm" bindtap="confirmTablePicker">确定</view>
   </view>
 </view>
 

@@ -33,6 +33,7 @@ const menus = [
   { path: '/members', title: '会员管理', icon: User, super: true },
   { path: '/goods', title: '商品管理', icon: Goods, super: true },
   { path: '/categories', title: '商品分类', icon: MenuIcon, super: true },
+  { path: '/table-zones', title: '桌号分区', icon: Grid, super: true },
   { path: '/tables', title: '桌号管理', icon: Grid, super: true },
   { path: '/recharge-packages', title: '充值套餐', icon: Wallet, super: true },
   { path: '/exchange-goods', title: '兑换商品', icon: Present, super: true },

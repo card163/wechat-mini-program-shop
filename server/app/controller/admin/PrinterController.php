@@ -73,6 +73,8 @@ class PrinterController
         $account   = trim((string)$request->post('account', ''));
         $secretKey = (string)$request->post('secret_key', '');
 
+        $area = (int)$request->post('area', Printer::AREA_CN);
+
         v::stringType()->length(1, 50)->setTemplate('请输入打印机名称')->assert($name);
         v::in(Printer::vendors())->setTemplate('厂商类型不正确')->assert($vendor);
         v::stringType()->length(1, 64)->setTemplate('请输入打印机终端编号(SN)')->assert($sn);
@@ -80,9 +82,11 @@ class PrinterController
         if ($isCreate) {
             v::stringType()->length(1, 128)->setTemplate('请输入密钥')->assert($secretKey);
         }
+        v::in(Printer::areas())->setTemplate('区域不正确')->assert($area);
 
         $printer->name    = $name;
         $printer->vendor  = $vendor;
+        $printer->area    = $area;
         $printer->sn      = $sn;
         $printer->account = $account;
         if ($secretKey !== '') {
@@ -116,6 +120,7 @@ class PrinterController
             'id'          => (int)$printer->id,
             'name'        => (string)$printer->name,
             'vendor'      => (int)$printer->vendor,
+            'area'        => (int)$printer->area,
             'sn'          => (string)$printer->sn,
             'account'     => (string)$printer->account,
             'secret_key'  => self::maskSecret((string)$printer->secret_key),

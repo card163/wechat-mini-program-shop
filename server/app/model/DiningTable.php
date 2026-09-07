@@ -15,9 +15,22 @@ class DiningTable extends BaseModel
     protected $table = 'nf_table';
 
     protected $casts = [
+        'zone_id'    => 'integer',
         'sort'       => 'integer',
         'status'     => 'integer',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
+
+    protected $appends = ['zone_name'];
+
+    public function zone(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(TableZone::class, 'zone_id');
+    }
+
+    public function getZoneNameAttribute(): string
+    {
+        return (string)($this->zone?->name ?? '');
+    }
 }

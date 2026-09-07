@@ -28,6 +28,7 @@ class Order extends BaseModel
     protected $casts = [
         'member_id'    => 'integer',
         'table_id'     => 'integer',
+        'daily_no'     => 'integer',
         'total_amount' => 'integer',
         'pay_amount'   => 'integer',
         'pay_type'     => 'integer',

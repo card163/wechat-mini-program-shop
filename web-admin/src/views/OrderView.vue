@@ -100,6 +100,7 @@ async function reprint(row: any) {
     </div>
 
     <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
+      <el-table-column prop="daily_no" label="出单序号" width="90" />
       <el-table-column prop="order_no" label="订单号" min-width="180" />
       <el-table-column prop="table_name" label="桌号" width="90" />
       <el-table-column prop="member_id" label="会员ID" width="90" />
@@ -140,6 +141,7 @@ async function reprint(row: any) {
     <el-drawer v-model="detailVisible" title="订单详情" size="520px">
       <template v-if="detail">
         <el-descriptions :column="1" border>
+          <el-descriptions-item label="出单序号">{{ detail.daily_no }}</el-descriptions-item>
           <el-descriptions-item label="订单号">{{ detail.order_no }}</el-descriptions-item>
           <el-descriptions-item label="桌号">{{ detail.table_name }}</el-descriptions-item>
           <el-descriptions-item label="会员ID">{{ detail.member_id }}</el-descriptions-item>

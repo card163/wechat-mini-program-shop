@@ -150,7 +150,9 @@
 | GET/POST | `/admin/goods` | 商品列表 / 新增 |
 | PUT/DELETE | `/admin/goods/{id}` | 编辑 / 删除 |
 | POST | `/admin/goods/{id}/status` | 上下架 |
-| GET/POST | `/admin/tables` | 桌号列表 / 新增 |
+| GET/POST | `/admin/table-zones` | 桌号分区列表 / 新增（先划区，如“一号台”“二号台”） |
+| PUT/DELETE | `/admin/table-zones/{id}` | 编辑 / 删除（分区下还有桌号时禁止删除） |
+| GET/POST | `/admin/tables` | 桌号列表 / 新增，需指定所属分区 `zone_id` |
 | PUT/DELETE | `/admin/tables/{id}` | 编辑 / 删除 |
 
 ### 订单

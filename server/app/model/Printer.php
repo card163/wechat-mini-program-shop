@@ -13,6 +13,9 @@ class Printer extends BaseModel
     public const int VENDOR_XPYUN = 2;
     public const int VENDOR_SUNMI = 3;
 
+    public const int AREA_CN  = 1;
+    public const int AREA_SEA = 2;
+
     public const int STATUS_ON  = 1;
     public const int STATUS_OFF = 0;
 
@@ -20,6 +23,7 @@ class Printer extends BaseModel
 
     protected $casts = [
         'vendor'      => 'integer',
+        'area'        => 'integer',
         'copies'      => 'integer',
         'voice_times' => 'integer',
         'status'      => 'integer',
@@ -32,5 +36,11 @@ class Printer extends BaseModel
     public static function vendors(): array
     {
         return [self::VENDOR_FEIE, self::VENDOR_XPYUN, self::VENDOR_SUNMI];
+    }
+
+    /** @return array<int, string> */
+    public static function areas(): array
+    {
+        return [self::AREA_CN, self::AREA_SEA];
     }
 }

@@ -3,7 +3,7 @@
 
   <view wx:for="{{list}}" wx:key="id" class="card">
     <view class="row-between">
-      <view class="sub">{{item.order_no}}</view>
+      <view class="sub">出单号 No.{{item.daily_no}} · {{item.order_no}}</view>
       <view class="tag">{{item.order_status_text}}</view>
     </view>
     <view class="divider" />

@@ -102,7 +102,7 @@
 
 `GET /api/tables` · 无需鉴权
 
-对应设计稿 `shoping-checkout-select-table.png`。
+对应设计稿 `shoping-checkout-select-table.png`。桌号分「分区」两级管理（先划区、再在区内加具体桌号），返回按分区分组的结构，仅包含启用分区下至少有一个启用桌号的分区；每个分区内的桌号按 `sort` 升序、`id` 升序。
 
 **响应**
 
@@ -111,9 +111,23 @@
   "code": 0,
   "msg": "ok",
   "data": [
-    { "id": 1, "name": "大桌" },
-    { "id": 2, "name": "小桌" },
-    { "id": 3, "name": "一楼" }
+    {
+      "zone_id": 1,
+      "zone_name": "一号台",
+      "tables": [
+        { "id": 1, "name": "A01" },
+        { "id": 2, "name": "A02" }
+      ]
+    },
+    {
+      "zone_id": 2,
+      "zone_name": "二号台",
+      "tables": [
+        { "id": 10, "name": "B01" }
+      ]
+    }
   ]
 }
 ```
+
+下单时提交的仍是具体桌号的 `table_id`；订单快照的 `table_name` 由服务端拼接为「分区名 桌号名」（如「一号台 A01」）。

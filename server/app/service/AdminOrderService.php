@@ -199,6 +199,7 @@ class AdminOrderService
         return [
             'id'           => (int)$order->id,
             'order_no'     => (string)$order->order_no,
+            'daily_no'     => (int)$order->daily_no,
             'member_id'    => (int)$order->member_id,
             'table_name'   => (string)$order->table_name,
             'total_amount' => (int)$order->total_amount,

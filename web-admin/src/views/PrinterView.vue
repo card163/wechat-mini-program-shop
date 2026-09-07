@@ -40,13 +40,13 @@ async function load() {
 
 function openCreate() {
   editingId.value = 0
-  form.value = { name: '', vendor: 1, sn: '', account: '', secret_key: '', copies: 1, voice_times: 0, status: 1, sort: 0, remark: '' }
+  form.value = { name: '', vendor: 1, area: 1, sn: '', account: '', secret_key: '', copies: 1, voice_times: 0, status: 1, sort: 0, remark: '' }
   dialogVisible.value = true
 }
 
 function openEdit(row: any) {
   editingId.value = row.id
-  form.value = { ...row, secret_key: '' }
+  form.value = { area: 1, ...row, secret_key: '' }
   dialogVisible.value = true
 }
 
@@ -130,6 +130,9 @@ function onTabChange(name: string | number) {
           <el-table-column label="厂商" width="120">
             <template #default="{ row }">{{ vendorLabel(row.vendor) }}</template>
           </el-table-column>
+          <el-table-column label="区域" width="80">
+            <template #default="{ row }">{{ row.vendor === 1 ? (row.area === 2 ? '东南亚' : '国内') : '-' }}</template>
+          </el-table-column>
           <el-table-column prop="sn" label="终端编号(SN)" width="140" />
           <el-table-column prop="account" label="账号" width="140" />
           <el-table-column prop="secret_key" label="密钥" width="110" />
@@ -199,6 +202,12 @@ function onTabChange(name: string | number) {
         <el-form-item label="厂商">
           <el-select v-model="form.vendor" style="width: 100%">
             <el-option v-for="item in VENDORS" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="form.vendor === 1" label="区域">
+          <el-select v-model="form.area" style="width: 100%">
+            <el-option label="国内" :value="1" />
+            <el-option label="东南亚" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item label="打印机终端编号(SN)"><el-input v-model="form.sn" /></el-form-item>

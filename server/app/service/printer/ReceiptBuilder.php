@@ -23,6 +23,7 @@ final class ReceiptBuilder
             $lines[] = ['text' => $shopName, 'align' => 'center', 'bold' => true];
         }
         $lines[] = ['text' => '来单提醒', 'align' => 'center', 'bold' => true];
+        $lines[] = ['text' => '出单序号：' . (string)$order->daily_no, 'align' => 'center', 'bold' => true];
         $lines[] = ['divider' => true];
         $lines[] = ['text' => '订单号：' . $order->order_no];
         $lines[] = ['text' => '桌　号：' . self::clean((string)$order->table_name)];

@@ -8,6 +8,7 @@ use app\exception\BusinessException;
 use app\model\DiningTable;
 use app\model\Goods;
 use app\model\GoodsCategory;
+use app\model\TableZone;
 use app\support\Result;
 
 class CatalogService
@@ -72,20 +73,46 @@ class CatalogService
     }
 
     /**
+     * 先划区、再选桌号：按分区分组返回，仅包含启用分区下至少有一个启用桌号的分区
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function tables(): array
     {
-        return DiningTable::query()
+        $tables = DiningTable::query()
             ->where('status', DiningTable::STATUS_ON)
             ->orderBy('sort')
             ->orderBy('id')
-            ->get(['id', 'name'])
-            ->map(static fn(DiningTable $table): array => [
-                'id'   => (int)$table->id,
-                'name' => (string)$table->name,
-            ])
-            ->all();
+            ->get(['id', 'zone_id', 'name']);
+
+        $zones = TableZone::query()
+            ->where('status', TableZone::STATUS_ON)
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        $result = [];
+        foreach ($zones as $zone) {
+            $zoneTables = $tables->where('zone_id', $zone->id)
+                ->map(static fn(DiningTable $table): array => [
+                    'id'   => (int)$table->id,
+                    'name' => (string)$table->name,
+                ])
+                ->values()
+                ->all();
+
+            if ($zoneTables === []) {
+                continue;
+            }
+
+            $result[] = [
+                'zone_id'   => (int)$zone->id,
+                'zone_name' => (string)$zone->name,
+                'tables'    => $zoneTables,
+            ];
+        }
+
+        return $result;
     }
 
     /**

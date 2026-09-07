@@ -36,7 +36,9 @@ class OrderService
             (int)$member->drink_card_balance,
             $checked['total_amount'],
             $checked['gift_payable_amount'],
-            $checked['drink_card_payable_amount']
+            $checked['gift_cash_cap'],
+            $checked['drink_card_payable_amount'],
+            $checked['drink_card_cash_cap']
         );
 
         return [
@@ -80,9 +82,10 @@ class OrderService
 
             $order = new Order();
             $order->order_no     = Sn::make(Sn::ORDER);
+            $order->daily_no     = self::nextDailyNo();
             $order->member_id    = $memberId;
             $order->table_id     = (int)$table->id;
-            $order->table_name   = (string)$table->name;
+            $order->table_name   = trim(($table->zone_name !== '' ? $table->zone_name . ' ' : '') . (string)$table->name);
             $order->total_amount = $checked['total_amount'];
             $order->pay_amount   = $checked['total_amount'];
             $order->pay_type     = $payType;
@@ -108,7 +111,14 @@ class OrderService
             self::reduceStock($checked['items']);
 
             if ($payType === Order::PAY_TYPE_BALANCE) {
-                self::payByBalance($member, $order, $checked['gift_payable_amount'], $checked['drink_card_payable_amount']);
+                self::payByBalance(
+                    $member,
+                    $order,
+                    $checked['gift_payable_amount'],
+                    $checked['gift_cash_cap'],
+                    $checked['drink_card_payable_amount'],
+                    $checked['drink_card_cash_cap']
+                );
             }
 
             return (int)$order->id;
@@ -143,7 +153,9 @@ class OrderService
             $order->save();
 
             if ($payType === Order::PAY_TYPE_BALANCE) {
-                self::payByBalance($member, $order, self::giftPayableAmountOfOrder($order), self::drinkCardPayableAmountOfOrder($order));
+                [$giftUnits, $giftCashCap]           = self::giftPayableAmountOfOrder($order);
+                [$drinkCardUnits, $drinkCardCashCap]  = self::drinkCardPayableAmountOfOrder($order);
+                self::payByBalance($member, $order, $giftUnits, $giftCashCap, $drinkCardUnits, $drinkCardCashCap);
             }
         });
 
@@ -287,15 +299,23 @@ class OrderService
     /**
      * 余额支付：优先扣赠金，其次扣饮品卡，不足部分扣本金
      */
-    private static function payByBalance(Member $member, Order $order, int $giftPayableAmount, int $drinkCardPayableAmount): void
-    {
+    private static function payByBalance(
+        Member $member,
+        Order $order,
+        int $giftPayableAmount,
+        int $giftCashCap,
+        int $drinkCardPayableAmount,
+        int $drinkCardCashCap
+    ): void {
         $plan = self::planPayment(
             (int)$member->balance,
             (int)$member->gift_balance,
             (int)$member->drink_card_balance,
             (int)$order->pay_amount,
             $giftPayableAmount,
-            $drinkCardPayableAmount
+            $giftCashCap,
+            $drinkCardPayableAmount,
+            $drinkCardCashCap
         );
         if (!$plan['enough']) {
             throw new BusinessException('余额不足，请先充值');
@@ -359,7 +379,10 @@ class OrderService
     }
 
     /**
-     * 计算支付方案：赠金/饮品卡只能分别覆盖允许其支付的商品金额，优先扣赠金、其次扣饮品卡，剩余由本金覆盖
+     * 计算支付方案：赠金/饮品卡只能分别覆盖允许其支付的商品金额，优先扣赠金、其次扣饮品卡，剩余由本金覆盖。
+     * $giftPayableAmount/$drinkCardPayableAmount 是需要消耗的凭证数量（与余额同单位，可能是“张”这种与分不同的记账单位）；
+     * $giftCashCap/$drinkCardCashCap 是这些凭证足额消耗后能够抵扣的现金金额（分），两者单位不同，不能直接相减，
+     * 按“实际可用凭证数 / 所需凭证数”的比例折算实际抵扣的现金金额，避免“张”模式下把凭证数当成分来减导致抵扣金额畸小。
      *
      * @return array{pay_gift: int, pay_drink_card: int, pay_balance: int, enough: bool}
      */
@@ -369,18 +392,35 @@ class OrderService
         int $drinkCardBalance,
         int $payAmount,
         int $giftPayableAmount,
-        int $drinkCardPayableAmount
+        int $giftCashCap,
+        int $drinkCardPayableAmount,
+        int $drinkCardCashCap
     ): array {
         $giftEnabled = SettingService::int('order', 'gift_pay_enabled', 1) === 1;
-        $payGift     = $giftEnabled ? min($giftBalance, $giftPayableAmount, $payAmount) : 0;
 
-        $remainAfterGift = $payAmount - $payGift;
-        $payDrinkCard    = min($drinkCardBalance, $drinkCardPayableAmount, $remainAfterGift);
-        $payBalance      = $remainAfterGift - $payDrinkCard;
+        $payGiftUnits = 0;
+        $payGiftCash  = 0;
+        if ($giftEnabled && $giftPayableAmount > 0) {
+            $payGiftUnits = min($giftBalance, $giftPayableAmount);
+            $payGiftCash  = intdiv($giftCashCap * $payGiftUnits, $giftPayableAmount);
+        }
+        $payGiftCash = min($payGiftCash, $payAmount);
+
+        $remainAfterGift = $payAmount - $payGiftCash;
+
+        $payDrinkCardUnits = 0;
+        $payDrinkCardCash  = 0;
+        if ($drinkCardPayableAmount > 0) {
+            $payDrinkCardUnits = min($drinkCardBalance, $drinkCardPayableAmount);
+            $payDrinkCardCash  = intdiv($drinkCardCashCap * $payDrinkCardUnits, $drinkCardPayableAmount);
+        }
+        $payDrinkCardCash = min($payDrinkCardCash, $remainAfterGift);
+
+        $payBalance = $remainAfterGift - $payDrinkCardCash;
 
         return [
-            'pay_gift'       => $payGift,
-            'pay_drink_card' => $payDrinkCard,
+            'pay_gift'       => $payGiftUnits,
+            'pay_drink_card' => $payDrinkCardUnits,
             'pay_balance'    => $payBalance,
             'enough'         => $balance >= $payBalance,
         ];
@@ -390,7 +430,7 @@ class OrderService
      * 校验商品并计算金额，$lock 为 true 时对商品行加锁
      *
      * @param array<int, array{goods_id: int|string, quantity: int|string}> $items
-     * @return array{items: array<int, array<string, mixed>>, total_amount: int, gift_payable_amount: int, drink_card_payable_amount: int}
+     * @return array{items: array<int, array<string, mixed>>, total_amount: int, gift_payable_amount: int, gift_cash_cap: int, drink_card_payable_amount: int, drink_card_cash_cap: int}
      */
     private static function resolveItems(array $items, bool $lock = false): array
     {
@@ -414,10 +454,14 @@ class OrderService
         }
         $goodsList = $query->get()->keyBy('id');
 
+        $giftUnit               = SettingService::giftUnit();
+        $drinkCardUnit          = SettingService::drinkCardUnit();
         $resolved               = [];
         $totalAmount            = 0;
         $giftPayableAmount      = 0;
+        $giftCashCap            = 0;
         $drinkCardPayableAmount = 0;
+        $drinkCardCashCap       = 0;
 
         foreach ($quantities as $goodsId => $quantity) {
             /** @var Goods|null $goods */
@@ -434,10 +478,13 @@ class OrderService
             if ((int)$goods->gift_payable === 1) {
                 // 赠金消耗量由商品自行配置(固定值)，与现金售价无关
                 $giftPayableAmount += (int)$goods->gift_amount * $quantity;
+                // “元”单位下赠金与现金同一记账单位(分)可直接抵扣；“张”单位下赠金是与现金无关的兑换凭证，抵满数量即视为该商品现金全额被兑换
+                $giftCashCap += $giftUnit === '张' ? $subtotal : (int)$goods->gift_amount * $quantity;
             }
             if ((int)$goods->drink_card_payable === 1) {
                 // 饮品卡消耗量同样由商品自行配置(固定值)，与赠金额度相互独立
                 $drinkCardPayableAmount += (int)$goods->drink_card_amount * $quantity;
+                $drinkCardCashCap += $drinkCardUnit === '张' ? $subtotal : (int)$goods->drink_card_amount * $quantity;
             }
 
             $resolved[] = [
@@ -462,13 +509,33 @@ class OrderService
             'items'                     => $resolved,
             'total_amount'              => $totalAmount,
             'gift_payable_amount'       => $giftPayableAmount,
+            'gift_cash_cap'             => $giftCashCap,
             'drink_card_payable_amount' => $drinkCardPayableAmount,
+            'drink_card_cash_cap'       => $drinkCardCashCap,
         ];
     }
 
     /**
      * @param array<int, array<string, mixed>> $items
      */
+    /**
+     * 生成当日出单序号，每天从1开始递增，用于叫号/小票打印
+     */
+    private static function nextDailyNo(): int
+    {
+        $today = date('Y-m-d');
+
+        // 原子 upsert：借助 LAST_INSERT_ID(expr) 让本次自增结果可被读取，避免额外加锁
+        // 注意：该表以 biz_date 作主键、不含 AUTO_INCREMENT 列，否则 MySQL 会用自增列的值覆盖 LAST_INSERT_ID(expr) 的显式赋值
+        Db::connection()->statement(
+            'INSERT INTO nf_order_daily_sequence (biz_date, seq, created_at, updated_at) VALUES (?, LAST_INSERT_ID(1), NOW(), NOW())
+             ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1), updated_at = NOW()',
+            [$today]
+        );
+
+        return (int)Db::connection()->getPdo()->lastInsertId();
+    }
+
     private static function reduceStock(array $items): void
     {
         foreach ($items as $item) {
@@ -517,30 +584,42 @@ class OrderService
         }
     }
 
-    private static function giftPayableAmountOfOrder(Order $order): int
+    /**
+     * @return array{0: int, 1: int} [需消耗的赠金凭证数量, 对应可抵扣的现金上限(分)]
+     */
+    private static function giftPayableAmountOfOrder(Order $order): array
     {
-        $amount = 0;
+        $giftUnit = SettingService::giftUnit();
+        $amount   = 0;
+        $cashCap  = 0;
         foreach ($order->items as $item) {
             $goods = Goods::query()->find((int)$item->goods_id);
             if ($goods !== null && (int)$goods->gift_payable === 1) {
-                $amount += (int)$goods->gift_amount * (int)$item->quantity;
+                $amount   += (int)$goods->gift_amount * (int)$item->quantity;
+                $cashCap  += $giftUnit === '张' ? (int)$item->subtotal : (int)$goods->gift_amount * (int)$item->quantity;
             }
         }
 
-        return $amount;
+        return [$amount, $cashCap];
     }
 
-    private static function drinkCardPayableAmountOfOrder(Order $order): int
+    /**
+     * @return array{0: int, 1: int} [需消耗的饮品卡凭证数量, 对应可抵扣的现金上限(分)]
+     */
+    private static function drinkCardPayableAmountOfOrder(Order $order): array
     {
-        $amount = 0;
+        $drinkCardUnit = SettingService::drinkCardUnit();
+        $amount        = 0;
+        $cashCap       = 0;
         foreach ($order->items as $item) {
             $goods = Goods::query()->find((int)$item->goods_id);
             if ($goods !== null && (int)$goods->drink_card_payable === 1) {
-                $amount += (int)$goods->drink_card_amount * (int)$item->quantity;
+                $amount  += (int)$goods->drink_card_amount * (int)$item->quantity;
+                $cashCap += $drinkCardUnit === '张' ? (int)$item->subtotal : (int)$goods->drink_card_amount * (int)$item->quantity;
             }
         }
 
-        return $amount;
+        return [$amount, $cashCap];
     }
 
     /**
@@ -580,6 +659,7 @@ class OrderService
         return [
             'id'                => (int)$order->id,
             'order_no'          => (string)$order->order_no,
+            'daily_no'          => (int)$order->daily_no,
             'table_name'        => (string)$order->table_name,
             'total_amount'      => (int)$order->total_amount,
             'pay_amount'        => (int)$order->pay_amount,

@@ -39,8 +39,14 @@
 .price.big { font-size: 38rpx; }
 .submit { width: 220rpx; height: 80rpx; line-height: 80rpx; text-align: center; background: #d2574f; }
 
-.table-option {
-  padding: 26rpx; margin-top: 20rpx; text-align: center;
-  border: 1rpx solid var(--line); border-radius: 12rpx; color: var(--text); font-size: 28rpx;
+.table-picker-box { width: 680rpx; max-height: 80vh; display: flex; flex-direction: column; }
+.table-picker-scroll { flex: 1; max-height: 800rpx; }
+.table-grid { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.table-cell {
+  width: calc((100% - 32rpx) / 3);
+  padding: 22rpx 0; text-align: center;
+  background: var(--bg-card); border: 1rpx solid var(--line); border-radius: 12rpx;
+  color: var(--text-sub); font-size: 28rpx;
 }
-.table-option.active { border-color: var(--accent); color: var(--accent); }
+.table-cell.active { border-color: var(--accent); color: var(--accent); background: rgba(212, 175, 55, .12); }
+.table-picker-confirm { margin-top: 28rpx; height: 76rpx; line-height: 76rpx; text-align: center; border-radius: 12rpx; font-size: 28rpx; }
