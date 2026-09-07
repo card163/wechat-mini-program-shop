@@ -85,6 +85,7 @@ Route::group('/api', function (): void {
     Route::get('/member/info', [MemberController::class, 'info']);
     Route::get('/member/balance-logs', [MemberController::class, 'balanceLogs']);
     Route::get('/member/gift-logs', [MemberController::class, 'giftLogs']);
+    Route::get('/member/drink-card-logs', [MemberController::class, 'drinkCardLogs']);
     Route::get('/member/point-logs', [MemberController::class, 'pointLogs']);
     Route::get('/member/gift-batches', [MemberController::class, 'giftBatches']);
 
@@ -146,6 +147,7 @@ Route::group('/admin', function () use ($crud): void {
     Route::post('/members/{id:\d+}/phone', [AdminMemberController::class, 'updatePhone']);
     Route::post('/members/{id:\d+}/balance/adjust', [AdminMemberController::class, 'adjustBalance']);
     Route::post('/members/{id:\d+}/gift/grant', [AdminMemberController::class, 'grantGift']);
+    Route::post('/members/{id:\d+}/drink-card/grant', [AdminMemberController::class, 'grantDrinkCard']);
     Route::post('/members/{id:\d+}/point/adjust', [AdminMemberController::class, 'adjustPoint']);
     Route::get('/members/{id:\d+}/balance-logs', [AdminMemberController::class, 'balanceLogs']);
     Route::get('/members/{id:\d+}/point-logs', [AdminMemberController::class, 'pointLogs']);

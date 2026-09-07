@@ -7,6 +7,7 @@ namespace app\service;
 use app\exception\BusinessException;
 use app\model\Goods;
 use app\model\MemberBalanceLog;
+use app\model\MemberDrinkCardBatch;
 use app\model\MemberGiftBatch;
 use app\model\MemberPointLog;
 use app\model\Order;
@@ -135,6 +136,19 @@ class AdminOrderService
                 );
             }
 
+            if ((int)$order->pay_drink_card > 0) {
+                AccountService::grantDrinkCard(
+                    $member,
+                    (int)$order->pay_drink_card,
+                    MemberDrinkCardBatch::SOURCE_REFUND,
+                    (int)$order->id,
+                    0,
+                    (string)$order->order_no,
+                    '订单退款退回饮品卡',
+                    $operatorId
+                );
+            }
+
             if ((int)$order->gain_point > 0) {
                 AccountService::changePoint(
                     $member,
@@ -192,6 +206,7 @@ class AdminOrderService
             'pay_type'     => (int)$order->pay_type,
             'pay_balance'  => (int)$order->pay_balance,
             'pay_gift'     => (int)$order->pay_gift,
+            'pay_drink_card' => (int)$order->pay_drink_card,
             'pay_wechat'   => (int)$order->pay_wechat,
             'pay_status'   => (int)$order->pay_status,
             'order_status' => (int)$order->order_status,

@@ -7,6 +7,7 @@ namespace app\service;
 use app\exception\BusinessException;
 use app\model\Member;
 use app\model\MemberBalanceLog;
+use app\model\MemberDrinkCardBatch;
 use app\model\MemberGiftBatch;
 use app\model\MemberPointLog;
 use Illuminate\Database\Capsule\Manager as Db;
@@ -23,14 +24,14 @@ class AdminMemberService
         if ($keyword !== '') {
             $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $keyword);
             $query->where(static function ($builder) use ($escaped): void {
-                $builder->where('nickname', 'like', "%$escaped%")->orWhere('phone', 'like', "%$escaped%");
+                $builder->where('nickname', 'like', "%$escaped%")->orWhere('phone', 'like', "%$escaped%")->orWhere('id',intval($escaped));
             });
         }
         if ($status !== null) {
             $query->where('status', $status);
         }
 
-        $sortField = in_array($orderBy, ['balance', 'gift_balance', 'point', 'total_point', 'total_recharge', 'total_consume'], true)
+        $sortField = in_array($orderBy, ['balance', 'gift_balance', 'drink_card_balance', 'point', 'total_point', 'total_recharge', 'total_consume'], true)
             ? $orderBy
             : 'id';
 
@@ -66,7 +67,22 @@ class AdminMemberService
             ])
             ->all();
 
-        return self::format($member) + ['gift_batches' => $batches];
+        $drinkCardBatches = MemberDrinkCardBatch::query()
+            ->where('member_id', $memberId)
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get()
+            ->map(static fn(MemberDrinkCardBatch $batch): array => [
+                'id'            => (int)$batch->id,
+                'amount'        => (int)$batch->amount,
+                'remain_amount' => (int)$batch->remain_amount,
+                'status'        => (int)$batch->status,
+                'status_text'   => MemberService::drinkCardStatusText((int)$batch->status),
+                'expired_at'    => $batch->expired_at === null ? null : (string)$batch->expired_at,
+            ])
+            ->all();
+
+        return self::format($member) + ['gift_batches' => $batches, 'drink_card_batches' => $drinkCardBatches];
     }
 
     public static function changeStatus(int $memberId, int $status): void
@@ -129,6 +145,18 @@ class AdminMemberService
         });
     }
 
+    public static function grantDrinkCard(int $memberId, int $amount, int $expireDays, string $remark, int $operatorId): void
+    {
+        if ($amount <= 0) {
+            throw new BusinessException('发放数量必须大于0');
+        }
+
+        Db::connection()->transaction(static function () use ($memberId, $amount, $expireDays, $remark, $operatorId): void {
+            $member = AccountService::lockMember($memberId);
+            AccountService::grantDrinkCard($member, $amount, MemberDrinkCardBatch::SOURCE_ADMIN, 0, $expireDays, '', $remark, $operatorId);
+        });
+    }
+
     public static function adjustPoint(int $memberId, int $point, string $remark, int $operatorId): void
     {
         if ($point === 0) {
@@ -163,6 +191,7 @@ class AdminMemberService
             'phone'          => (string)$member->phone,
             'balance'        => (int)$member->balance,
             'gift_balance'   => (int)$member->gift_balance,
+            'drink_card_balance' => (int)$member->drink_card_balance,
             'point'          => (int)$member->point,
             'total_point'    => (int)$member->total_point,
             'total_recharge' => (int)$member->total_recharge,

@@ -23,7 +23,8 @@
       <view class="goods-info">
         <view class="goods-name">{{item.name}}</view>
         <view class="sub goods-desc">{{item.subtitle}}</view>
-        <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持赠金支付</view>
+        <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持{{giftLabel}}支付</view>
+        <view class="sub" wx:if="{{item.drink_card_payable === 1}}">支持{{drinkCardLabel}}支付</view>
         <view class="row-between goods-bottom">
           <view class="price">¥{{item.priceText}}</view>
           <view class="stepper">
@@ -45,4 +46,6 @@
   </view>
   <view class="cart-btn {{cartCount ? '' : 'disabled'}}" bindtap="goCheckout">去结算</view>
 </view>
+
+<phone-login-modal wx:if="{{showPhoneModal}}" bind:login="onPhoneBound" />
 

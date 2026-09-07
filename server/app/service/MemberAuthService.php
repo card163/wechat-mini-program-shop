@@ -89,6 +89,7 @@ class MemberAuthService
             'phone'        => self::maskPhone((string)$member->phone),
             'balance'      => (int)$member->balance,
             'gift_balance' => (int)$member->gift_balance,
+            'drink_card_balance' => (int)$member->drink_card_balance,
             'point'        => (int)$member->point,
             'total_point'  => (int)$member->total_point,
         ];

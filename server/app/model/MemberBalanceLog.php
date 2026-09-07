@@ -9,8 +9,9 @@ namespace app\model;
  */
 class MemberBalanceLog extends BaseModel
 {
-    public const int ACCOUNT_PRINCIPAL = 1;
-    public const int ACCOUNT_GIFT      = 2;
+    public const int ACCOUNT_PRINCIPAL  = 1;
+    public const int ACCOUNT_GIFT       = 2;
+    public const int ACCOUNT_DRINK_CARD = 3;
 
     public const int BIZ_RECHARGE      = 1;
     public const int BIZ_RECHARGE_GIFT = 2;
@@ -19,13 +20,16 @@ class MemberBalanceLog extends BaseModel
     public const int BIZ_POINT_EXCHANGE = 5;
     public const int BIZ_GIFT_EXPIRED  = 6;
     public const int BIZ_ADMIN_ADJUST  = 7;
+    public const int BIZ_DRINK_CARD_EXPIRED = 8;
+    public const int BIZ_ORDER_GIFT_DRINK_CARD = 9;
 
     protected $table = 'nf_member_balance_log';
 
     protected $casts = [
-        'member_id'      => 'integer',
-        'account_type'   => 'integer',
-        'gift_batch_id'  => 'integer',
+        'member_id'          => 'integer',
+        'account_type'       => 'integer',
+        'gift_batch_id'      => 'integer',
+        'drink_card_batch_id' => 'integer',
         'amount'         => 'integer',
         'before_balance' => 'integer',
         'after_balance'  => 'integer',

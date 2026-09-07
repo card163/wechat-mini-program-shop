@@ -12,9 +12,10 @@
   <view class="pay-option balance-option {{payType === 2 ? 'active' : ''}}" data-type="2" bindtap="onPayTypeChange">
     <view class="pay-name">余额支付</view>
     <view class="sub">本金余额：¥{{preview.balanceText}}</view>
-    <view class="sub">赠金余额：¥{{preview.giftBalanceText}}</view>
-    <view class="sub accent" wx:if="{{payType === 2 && preview.plan.pay_gift > 0}}">
-      本单抵扣赠金 ¥{{preview.payGiftText}}，余额支付 ¥{{preview.payBalanceText}}
+    <view class="sub">{{giftLabel}}余额：{{preview.giftBalanceText}}</view>
+    <view class="sub">{{drinkCardLabel}}余额：{{preview.drinkCardBalanceText}}</view>
+    <view class="sub accent" wx:if="{{payType === 2 && (preview.plan.pay_gift > 0 || preview.plan.pay_drink_card > 0)}}">
+      本单抵扣{{giftLabel}} {{preview.payGiftText}}，{{drinkCardLabel}} {{preview.payDrinkCardText}}，余额支付 ¥{{preview.payBalanceText}}
     </view>
     <view class="sub warn" wx:if="{{payType === 2 && !preview.balance_enough}}">余额不足，请先充值</view>
   </view>

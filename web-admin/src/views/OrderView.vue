@@ -4,6 +4,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { orderApi } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import { fen2yuan } from '@/utils/money'
+import { giftConfig, giftText, loadGiftConfig } from '@/utils/gift'
+import { drinkCardConfig, drinkCardText, loadDrinkCardConfig } from '@/utils/drinkCard'
 
 const auth = useAuthStore()
 
@@ -23,6 +25,8 @@ const detail = ref<any>(null)
 const detailVisible = ref(false)
 
 onMounted(load)
+onMounted(loadGiftConfig)
+onMounted(loadDrinkCardConfig)
 
 async function load() {
   loading.value = true
@@ -61,7 +65,7 @@ function finish(row: any) {
 
 function refund(row: any) {
   ElMessageBox.prompt(
-    `退款金额 ¥${fen2yuan(row.pay_amount)}，赠金与余额将原路退回，请填写退款原因`,
+    `退款金额 ¥${fen2yuan(row.pay_amount)}，${giftConfig.displayName}/${drinkCardConfig.displayName}与余额将原路退回，请填写退款原因`,
     '订单退款',
     { inputPlaceholder: '退款原因', inputValidator: (v) => (v ? true : '请填写退款原因') },
   )
@@ -102,9 +106,9 @@ async function reprint(row: any) {
       <el-table-column label="金额" width="110">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.pay_amount) }}</span></template>
       </el-table-column>
-      <el-table-column label="支付构成" min-width="260">
+      <el-table-column label="支付构成" min-width="320">
         <template #default="{ row }">
-          <span>微信 ¥{{ fen2yuan(row.pay_wechat) }} / 余额 ¥{{ fen2yuan(row.pay_balance) }} / 赠金 ¥{{ fen2yuan(row.pay_gift) }}</span>
+          <span>微信 ¥{{ fen2yuan(row.pay_wechat) }} / 余额 ¥{{ fen2yuan(row.pay_balance) }} / {{ giftConfig.displayName }} {{ giftText(row.pay_gift) }} / {{ drinkCardConfig.displayName }} {{ drinkCardText(row.pay_drink_card) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="100">
@@ -142,8 +146,7 @@ async function reprint(row: any) {
           <el-descriptions-item label="应付">¥{{ fen2yuan(detail.pay_amount) }}</el-descriptions-item>
           <el-descriptions-item label="微信支付">¥{{ fen2yuan(detail.pay_wechat) }}</el-descriptions-item>
           <el-descriptions-item label="余额支付">¥{{ fen2yuan(detail.pay_balance) }}</el-descriptions-item>
-          <el-descriptions-item label="赠金抵扣">¥{{ fen2yuan(detail.pay_gift) }}</el-descriptions-item>
-          <el-descriptions-item label="获得记分牌">{{ detail.gain_point }}</el-descriptions-item>
+          <el-descriptions-item :label="`${giftConfig.displayName}抵扣`">{{ giftText(detail.pay_gift) }}</el-descriptions-item>          <el-descriptions-item :label="`${drinkCardConfig.displayName}扣扣`">{{ drinkCardText(detail.pay_drink_card) }}</el-descriptions-item>          <el-descriptions-item label="获得记分牌">{{ detail.gain_point }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.remark || '-' }}</el-descriptions-item>
           <el-descriptions-item label="下单时间">{{ detail.created_at }}</el-descriptions-item>
           <el-descriptions-item label="支付时间">{{ detail.paid_at || '-' }}</el-descriptions-item>

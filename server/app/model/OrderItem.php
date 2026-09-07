@@ -17,6 +17,8 @@ class OrderItem extends BaseModel
         'price'      => 'integer',
         'quantity'   => 'integer',
         'subtotal'   => 'integer',
+        'drink_card_gift_amount'      => 'integer',
+        'drink_card_gift_expire_days' => 'integer',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];

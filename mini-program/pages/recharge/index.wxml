@@ -10,7 +10,7 @@
         bindtap="onSelect"
       >
         <view class="pkg-amount">¥{{item.amountText}}</view>
-        <view class="pkg-reward" wx:if="{{item.gift_amount > 0}}">赠 ¥{{item.giftText}} 赠金</view>
+        <view class="pkg-reward" wx:if="{{item.gift_amount > 0}}">赠 {{item.giftText}} {{giftLabel}}</view>
       </view>
     </view>
   </view>
@@ -20,4 +20,6 @@
   <view class="sub footer-tip">支付后到账，余额充值可至「我的」查看</view>
   <view class="btn-primary submit" bindtap="submit">微信支付</view>
 </view>
+
+<phone-login-modal wx:if="{{showPhoneModal}}" bind:login="onPhoneBound" />
 

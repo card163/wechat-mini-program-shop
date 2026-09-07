@@ -4,23 +4,27 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getToken, type PageResult } from '@/api/request'
 import { uploadUrl } from '@/api'
 import { fen2yuan, yuan2fen } from '@/utils/money'
+import { giftConfig, giftFromStorage, giftText, giftToStorage, loadGiftConfig } from '@/utils/gift'
+import { drinkCardConfig, drinkCardFromStorage, drinkCardText, drinkCardToStorage, loadDrinkCardConfig } from '@/utils/drinkCard'
 
 export interface CrudColumn {
   prop: string
   label: string
   width?: number | string
-  type?: 'text' | 'money' | 'image' | 'status' | 'datetime'
+  type?: 'text' | 'money' | 'giftAmount' | 'drinkCardAmount' | 'image' | 'status' | 'datetime'
 }
 
 export interface CrudField {
   prop: string
   label: string
-  type?: 'text' | 'textarea' | 'number' | 'money' | 'switch' | 'select' | 'image'
+  type?: 'text' | 'textarea' | 'number' | 'money' | 'giftAmount' | 'drinkCardAmount' | 'switch' | 'select' | 'image'
   options?: { label: string; value: any }[]
   placeholder?: string
   required?: boolean
   default?: any
   tip?: string
+  /** 仅当该函数返回 true 时才展示此字段（例如仅在“可用赠金支付”开启时才需要填写），隐藏时也不强制必填 */
+  visibleIf?: (form: Record<string, any>) => boolean
 }
 
 interface CrudApi {
@@ -51,6 +55,8 @@ const form = ref<Record<string, any>>({})
 const uploadHeaders = { Authorization: `Bearer ${getToken()}` }
 
 onMounted(load)
+onMounted(loadGiftConfig)
+onMounted(loadDrinkCardConfig)
 
 async function load() {
   loading.value = true
@@ -82,7 +88,15 @@ function openEdit(row: any) {
   editingId.value = row.id
   const data: Record<string, any> = {}
   props.fields.forEach((field) => {
-    data[field.prop] = field.type === 'money' ? fen2yuan(row[field.prop]) : row[field.prop]
+    if (field.type === 'money') {
+      data[field.prop] = fen2yuan(row[field.prop])
+    } else if (field.type === 'giftAmount') {
+      data[field.prop] = giftFromStorage(row[field.prop])
+    } else if (field.type === 'drinkCardAmount') {
+      data[field.prop] = drinkCardFromStorage(row[field.prop])
+    } else {
+      data[field.prop] = row[field.prop]
+    }
   })
   form.value = data
   dialogVisible.value = true
@@ -91,12 +105,21 @@ function openEdit(row: any) {
 async function submit() {
   const payload: Record<string, any> = {}
   for (const field of props.fields) {
+    const visible = !field.visibleIf || field.visibleIf(form.value)
     const value = form.value[field.prop]
-    if (field.required && (value === '' || value === null || value === undefined)) {
+    if (visible && field.required && (value === '' || value === null || value === undefined)) {
       ElMessage.warning(`请填写${field.label}`)
       return
     }
-    payload[field.prop] = field.type === 'money' ? yuan2fen(value) : value
+    if (field.type === 'money') {
+      payload[field.prop] = yuan2fen(value)
+    } else if (field.type === 'giftAmount') {
+      payload[field.prop] = giftToStorage(value)
+    } else if (field.type === 'drinkCardAmount') {
+      payload[field.prop] = drinkCardToStorage(value)
+    } else {
+      payload[field.prop] = value
+    }
   }
 
   if (editingId.value) {
@@ -143,6 +166,8 @@ function onUploaded(response: any, field: CrudField) {
         <template #default="{ row }">
           <el-image v-if="col.type === 'image'" :src="row[col.prop]" style="width: 56px; height: 56px" fit="cover" />
           <span v-else-if="col.type === 'money'" class="money">¥{{ fen2yuan(row[col.prop]) }}</span>
+          <span v-else-if="col.type === 'giftAmount'" class="money">{{ giftText(row[col.prop]) }}</span>
+          <span v-else-if="col.type === 'drinkCardAmount'" class="money">{{ drinkCardText(row[col.prop]) }}</span>
           <el-tag v-else-if="col.type === 'status'" :type="row[col.prop] === 1 ? 'success' : 'info'">
             {{ row[col.prop] === 1 ? '启用' : '停用' }}
           </el-tag>
@@ -171,31 +196,39 @@ function onUploaded(response: any, field: CrudField) {
 
     <el-dialog v-model="dialogVisible" :title="(editingId ? '编辑' : '新增') + title" width="560px">
       <el-form label-width="110px">
-        <el-form-item v-for="field in fields" :key="field.prop" :label="field.label">
-          <el-switch v-if="field.type === 'switch'" v-model="form[field.prop]" :active-value="1" :inactive-value="0" />
-          <el-select v-else-if="field.type === 'select'" v-model="form[field.prop]" style="width: 100%">
-            <el-option v-for="opt in field.options" :key="opt.value" :label="opt.label" :value="opt.value" />
-          </el-select>
-          <el-input v-else-if="field.type === 'textarea'" v-model="form[field.prop]" type="textarea" :rows="3" />
-          <el-input-number v-else-if="field.type === 'number'" v-model="form[field.prop]" :min="-1" controls-position="right" />
-          <el-input v-else-if="field.type === 'money'" v-model="form[field.prop]" placeholder="单位：元">
-            <template #append>元</template>
-          </el-input>
-          <template v-else-if="field.type === 'image'">
-            <el-upload
-              :action="uploadUrl"
-              :headers="uploadHeaders"
-              name="file"
-              :show-file-list="false"
-              :on-success="(res: any) => onUploaded(res, field)"
-            >
-              <el-image v-if="form[field.prop]" :src="form[field.prop]" style="width: 90px; height: 90px" fit="cover" />
-              <el-button v-else>上传图片</el-button>
-            </el-upload>
-          </template>
-          <el-input v-else v-model="form[field.prop]" :placeholder="field.placeholder" />
-          <div v-if="field.tip" class="tip">{{ field.tip }}</div>
-        </el-form-item>
+        <template v-for="field in fields" :key="field.prop">
+          <el-form-item v-if="!field.visibleIf || field.visibleIf(form)" :label="field.label">
+            <el-switch v-if="field.type === 'switch'" v-model="form[field.prop]" :active-value="1" :inactive-value="0" />
+            <el-select v-else-if="field.type === 'select'" v-model="form[field.prop]" style="width: 100%">
+              <el-option v-for="opt in field.options" :key="opt.value" :label="opt.label" :value="opt.value" />
+            </el-select>
+            <el-input v-else-if="field.type === 'textarea'" v-model="form[field.prop]" type="textarea" :rows="3" />
+            <el-input-number v-else-if="field.type === 'number'" v-model="form[field.prop]" :min="-1" controls-position="right" />
+            <el-input v-else-if="field.type === 'money'" v-model="form[field.prop]" placeholder="单位：元">
+              <template #append>元</template>
+            </el-input>
+            <el-input v-else-if="field.type === 'giftAmount'" v-model="form[field.prop]" :placeholder="giftConfig.unit === '张' ? '整数张数' : '单位：元'">
+              <template #append>{{ giftConfig.unit }}</template>
+            </el-input>
+            <el-input v-else-if="field.type === 'drinkCardAmount'" v-model="form[field.prop]" :placeholder="drinkCardConfig.unit === '张' ? '整数张数' : '单位：元'">
+              <template #append>{{ drinkCardConfig.unit }}</template>
+            </el-input>
+            <template v-else-if="field.type === 'image'">
+              <el-upload
+                :action="uploadUrl"
+                :headers="uploadHeaders"
+                name="file"
+                :show-file-list="false"
+                :on-success="(res: any) => onUploaded(res, field)"
+              >
+                <el-image v-if="form[field.prop]" :src="form[field.prop]" style="width: 90px; height: 90px" fit="cover" />
+                <el-button v-else>上传图片</el-button>
+              </el-upload>
+            </template>
+            <el-input v-else v-model="form[field.prop]" :placeholder="field.placeholder" />
+            <div v-if="field.tip" class="tip">{{ field.tip }}</div>
+          </el-form-item>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>

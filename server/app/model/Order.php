@@ -33,6 +33,7 @@ class Order extends BaseModel
         'pay_type'     => 'integer',
         'pay_balance'  => 'integer',
         'pay_gift'     => 'integer',
+        'pay_drink_card' => 'integer',
         'pay_wechat'   => 'integer',
         'pay_status'   => 'integer',
         'order_status' => 'integer',

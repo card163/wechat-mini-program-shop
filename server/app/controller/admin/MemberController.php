@@ -74,6 +74,19 @@ class MemberController
         return Result::success(null, '发放成功');
     }
 
+    public function grantDrinkCard(Request $request, int $id): Response
+    {
+        AdminMemberService::grantDrinkCard(
+            $id,
+            (int)$request->post('amount', 0),
+            (int)$request->post('expire_days', 0),
+            (string)$request->post('remark', '管理员发放'),
+            (int)$request->adminId
+        );
+
+        return Result::success(null, '发放成功');
+    }
+
     public function adjustPoint(Request $request, int $id): Response
     {
         AdminMemberService::adjustPoint(

@@ -4,8 +4,8 @@
   </view>
 
   <view class="brand">
-    <view class="brand-logo">六六弗尔豪斯休闲酒馆</view>
-    <view class="marquee">📢 本店提供小零食等商品及存酒服务。</view>
+    <view class="brand-logo">66·Fullhouse 休闲酒馆</view>
+    <view class="marquee">📢 本店提供鸡尾酒、威士忌、啤酒、小吃等服务。</view>
   </view>
 
   <image class="emblem-bg" src="/assets/home/bg-emblem.jpg" mode="widthFix" />
@@ -28,6 +28,6 @@
   <view class="modal-box" catchtap="noop">
     <view class="modal-close" bindtap="hideNotice">✕</view>
     <view class="modal-title">本店须知</view>
-    <view class="sub notice-body">{{shop.notice || '尊敬的客户，您好：欢迎光临 六六弗尔豪斯休闲酒馆，请理性消费，本店提供小零食等商品及存酒服务。'}}</view>
+    <view class="sub notice-body">{{shop.notice || '尊敬的客户，您好：欢迎光临 六六弗尔豪斯休闲酒馆，请理性消费，本店提供鸡尾酒、威士忌、啤酒、小吃等服务。'}}</view>
   </view>
 </view>

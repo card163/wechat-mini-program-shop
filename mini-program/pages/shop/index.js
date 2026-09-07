@@ -1,6 +1,7 @@
 const shopApi = require('../../api/shop');
+const memberApi = require('../../api/member');
 const { shopInfo } = require('../../api/auth');
-const { fen2yuan } = require('../../utils/format');
+const { fen2yuan, giftLabel, drinkCardLabel } = require('../../utils/format');
 
 const CART_KEY = 'nf_cart';
 
@@ -14,9 +15,13 @@ Page({
     cartCount: 0,
     cartAmountText: '0.00',
     loading: true,
+    showPhoneModal: false,
+    giftLabel: '赠金',
+    drinkCardLabel: '饮品卡',
   },
 
   onLoad() {
+    this.setData({ giftLabel: giftLabel(), drinkCardLabel: drinkCardLabel() });
     shopInfo().then((shop) => this.setData({ shop }));
     this.loadCategories();
   },
@@ -111,6 +116,22 @@ Page({
       wx.showToast({ title: '请先选择商品', icon: 'none' });
       return;
     }
+    getApp()
+      .ensureLogin()
+      .then(() => memberApi.info())
+      .then((member) => {
+        if (!member.phone) {
+          this.setData({ showPhoneModal: true });
+          return;
+        }
+        wx.navigateTo({ url: '/pages/shop/checkout' });
+      })
+      .catch(() => {});
+  },
+
+  // 手机号登录成功后自动继续跳转结算，无需用户再点一次
+  onPhoneBound() {
+    this.setData({ showPhoneModal: false });
     wx.navigateTo({ url: '/pages/shop/checkout' });
   },
 });

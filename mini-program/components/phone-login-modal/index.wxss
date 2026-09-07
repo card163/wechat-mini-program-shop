@@ -1,0 +1,45 @@
+.phone-modal-mask {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-modal-card {
+  box-sizing: border-box;
+  width: 560rpx;
+  background: #1c1c1e;
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx;
+  text-align: center;
+  border: 1rpx solid rgba(212, 175, 55, .3);
+}
+
+.phone-modal-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #f5f5f5;
+  margin-bottom: 16rpx;
+}
+
+.phone-modal-desc {
+  font-size: 24rpx;
+  color: #9a9a9a;
+  line-height: 1.6;
+  margin-bottom: 40rpx;
+}
+
+.phone-modal-btn {
+  background: linear-gradient(90deg, #8b1a1a, #b32626);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  border: none;
+}
+.phone-modal-btn[disabled] { opacity: .5; }

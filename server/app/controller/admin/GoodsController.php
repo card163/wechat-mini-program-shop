@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace app\controller\admin;
 
+use app\exception\BusinessException;
 use app\model\Goods;
+use app\service\SettingService;
 use app\support\Result;
 use support\Request;
 use support\Response;
@@ -20,13 +22,25 @@ class GoodsController extends CrudController
     {
         return [
             'category_id', 'name', 'subtitle', 'cover', 'images', 'price', 'origin_price',
-            'unit', 'stock', 'gift_payable', 'sort', 'status', 'description',
+            'unit', 'stock', 'gift_payable', 'gift_amount', 'drink_card_payable', 'drink_card_amount',
+            'drink_card_gift_amount', 'drink_card_gift_expire_days',
+            'sort', 'status', 'description',
         ];
     }
 
     protected function searchable(): array
     {
         return ['name', 'subtitle'];
+    }
+
+    protected function validateInput(array $data): void
+    {
+        if (isset($data['gift_payable']) && (int)$data['gift_payable'] === 1 && (int)($data['gift_amount'] ?? 0) <= 0) {
+            throw new BusinessException('请填写使用多少' . SettingService::giftDisplayName());
+        }
+        if (isset($data['drink_card_payable']) && (int)$data['drink_card_payable'] === 1 && (int)($data['drink_card_amount'] ?? 0) <= 0) {
+            throw new BusinessException('请填写使用多少' . SettingService::drinkCardDisplayName());
+        }
     }
 
     public function index(Request $request): Response

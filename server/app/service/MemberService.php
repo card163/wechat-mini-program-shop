@@ -6,6 +6,7 @@ namespace app\service;
 
 use app\model\Member;
 use app\model\MemberBalanceLog;
+use app\model\MemberDrinkCardBatch;
 use app\model\MemberGiftBatch;
 use app\model\MemberPointLog;
 use app\model\Order;
@@ -52,6 +53,7 @@ class MemberService
                 'biz_type_text' => self::balanceBizText((int)$log->biz_type),
                 'biz_no'        => (string)$log->biz_no,
                 'gift_batch_id' => (int)$log->gift_batch_id,
+                'drink_card_batch_id' => (int)$log->drink_card_batch_id,
                 'remark'        => (string)$log->remark,
                 'created_at'    => (string)$log->created_at,
             ])
@@ -134,6 +136,55 @@ class MemberService
         ];
     }
 
+    /**
+     * @return array{summary: array<string, mixed>, list: array<int, array<string, mixed>>, total: int}
+     */
+    public static function drinkCardBatches(int $memberId, ?int $status, int $page, int $pageSize): array
+    {
+        $member = Member::query()->findOrFail($memberId);
+
+        $query = MemberDrinkCardBatch::query()->where('member_id', $memberId);
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+
+        $total = (int)$query->count();
+        $list  = $query->orderByDesc('id')
+            ->forPage($page, $pageSize)
+            ->get()
+            ->map(static fn(MemberDrinkCardBatch $batch): array => [
+                'id'               => (int)$batch->id,
+                'amount'           => (int)$batch->amount,
+                'used_amount'      => (int)$batch->used_amount,
+                'remain_amount'    => (int)$batch->remain_amount,
+                'source_type'      => (int)$batch->source_type,
+                'source_type_text' => self::drinkCardSourceText((int)$batch->source_type),
+                'status'           => (int)$batch->status,
+                'status_text'      => self::drinkCardStatusText((int)$batch->status),
+                'expired_at'       => $batch->expired_at === null ? null : (string)$batch->expired_at,
+                'created_at'       => (string)$batch->created_at,
+            ])
+            ->all();
+
+        $expiring = MemberDrinkCardBatch::query()
+            ->where('member_id', $memberId)
+            ->where('status', MemberDrinkCardBatch::STATUS_VALID)
+            ->where('remain_amount', '>', 0)
+            ->whereNotNull('expired_at')
+            ->orderBy('expired_at')
+            ->first();
+
+        return [
+            'summary' => [
+                'drink_card_balance' => (int)$member->drink_card_balance,
+                'expiring_amount'    => $expiring === null ? 0 : (int)$expiring->remain_amount,
+                'expiring_at'        => $expiring === null ? null : (string)$expiring->expired_at,
+            ],
+            'list'  => $list,
+            'total' => $total,
+        ];
+    }
+
     public static function balanceBizText(int $bizType): string
     {
         return match ($bizType) {
@@ -144,6 +195,8 @@ class MemberService
             MemberBalanceLog::BIZ_POINT_EXCHANGE => '记分牌兑换',
             MemberBalanceLog::BIZ_GIFT_EXPIRED   => '赠金过期',
             MemberBalanceLog::BIZ_ADMIN_ADJUST   => '管理员调整',
+            MemberBalanceLog::BIZ_DRINK_CARD_EXPIRED => '饮品卡过期',
+            MemberBalanceLog::BIZ_ORDER_GIFT_DRINK_CARD => '购买商品赠送',
             default                              => '其他',
         };
     }
@@ -179,6 +232,26 @@ class MemberService
             MemberGiftBatch::STATUS_USED_UP => '已用完',
             MemberGiftBatch::STATUS_EXPIRED => '已过期',
             default                         => '未知',
+        };
+    }
+
+    public static function drinkCardSourceText(int $sourceType): string
+    {
+        return match ($sourceType) {
+            MemberDrinkCardBatch::SOURCE_ADMIN      => '管理员发放',
+            MemberDrinkCardBatch::SOURCE_REFUND     => '订单退回',
+            MemberDrinkCardBatch::SOURCE_ORDER_GIFT => '购买商品赠送',
+            default                             => '其他',
+        };
+    }
+
+    public static function drinkCardStatusText(int $status): string
+    {
+        return match ($status) {
+            MemberDrinkCardBatch::STATUS_VALID   => '有效',
+            MemberDrinkCardBatch::STATUS_USED_UP => '已用完',
+            MemberDrinkCardBatch::STATUS_EXPIRED => '已过期',
+            default                              => '未知',
         };
     }
 }

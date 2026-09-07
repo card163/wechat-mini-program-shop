@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "充值套餐"
+  "navigationBarTitleText": "充值套餐",
+  "usingComponents": {
+    "phone-login-modal": "/components/phone-login-modal/index"
+  }
 }

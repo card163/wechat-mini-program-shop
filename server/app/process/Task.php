@@ -28,6 +28,11 @@ class Task
             self::run('expireGiftBatches', static fn(): int => AccountService::expireGiftBatches());
         });
 
+        // 回收到期饮品卡
+        Timer::add(300, static function (): void {
+            self::run('expireDrinkCardBatches', static fn(): int => AccountService::expireDrinkCardBatches());
+        });
+
         // 标记过期存酒
         Timer::add(3600, static function (): void {
             self::run('expireWineStorages', static fn(): int => WineService::expireStorages());

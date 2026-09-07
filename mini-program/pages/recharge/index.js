@@ -1,5 +1,5 @@
 const memberApi = require('../../api/member');
-const { fen2yuan, money } = require('../../utils/format');
+const { fen2yuan, money, giftLabel, giftAmountText } = require('../../utils/format');
 
 Page({
   data: {
@@ -7,6 +7,8 @@ Page({
     member: null,
     selectedId: 0,
     submitting: false,
+    showPhoneModal: false,
+    giftLabel: '赠金',
   },
 
   onShow() {
@@ -18,16 +20,29 @@ Page({
           packages: packages.map((item) =>
             Object.assign({}, item, {
               amountText: money(item.amount),
-              giftText: money(item.gift_amount),
+              giftText: giftAmountText(item.gift_amount),
             })
           ),
           member,
+          showPhoneModal: !member.phone,
           balanceText: fen2yuan(member.balance),
-          giftBalanceText: fen2yuan(member.gift_balance),
+          giftBalanceText: giftAmountText(member.gift_balance),
+          giftLabel: giftLabel(),
           selectedId: this.data.selectedId || (packages[0] ? packages[0].id : 0),
         });
       })
       .catch(() => {});
+  },
+
+  onPhoneBound() {
+    memberApi.info().then((member) => {
+      this.setData({
+        member,
+        showPhoneModal: false,
+        balanceText: fen2yuan(member.balance),
+        giftBalanceText: giftAmountText(member.gift_balance),
+      });
+    });
   },
 
   onSelect(e) {

@@ -3,6 +3,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { memberApi } from '@/api'
 import { fen2yuan, yuan2fen } from '@/utils/money'
+import { giftConfig, giftText, giftToStorage, loadGiftConfig } from '@/utils/gift'
+import { drinkCardConfig, drinkCardText, drinkCardToStorage, loadDrinkCardConfig } from '@/utils/drinkCard'
 
 const loading = ref(false)
 const rows = ref<any[]>([])
@@ -15,7 +17,7 @@ const balanceLogs = ref<any[]>([])
 const pointLogs = ref<any[]>([])
 
 const adjustVisible = ref(false)
-const adjustType = ref<'balance' | 'gift' | 'point'>('balance')
+const adjustType = ref<'balance' | 'gift' | 'drinkCard' | 'point'>('balance')
 const adjustForm = reactive({ amount: '', point: 0, expire_days: 0, remark: '' })
 
 const phoneVisible = ref(false)
@@ -23,6 +25,8 @@ const phoneRow = ref<any>(null)
 const phoneForm = reactive({ phone: '' })
 
 onMounted(load)
+onMounted(loadGiftConfig)
+onMounted(loadDrinkCardConfig)
 
 async function load() {
   loading.value = true
@@ -80,7 +84,7 @@ async function submitPhone() {
   load()
 }
 
-function openAdjust(row: any, type: 'balance' | 'gift' | 'point') {
+function openAdjust(row: any, type: 'balance' | 'gift' | 'drinkCard' | 'point') {
   detail.value = row
   adjustType.value = type
   adjustForm.amount = ''
@@ -100,7 +104,9 @@ async function submitAdjust() {
   if (adjustType.value === 'balance') {
     await memberApi.adjustBalance(id, yuan2fen(adjustForm.amount), adjustForm.remark)
   } else if (adjustType.value === 'gift') {
-    await memberApi.grantGift(id, yuan2fen(adjustForm.amount), adjustForm.expire_days, adjustForm.remark)
+    await memberApi.grantGift(id, giftToStorage(adjustForm.amount), adjustForm.expire_days, adjustForm.remark)
+  } else if (adjustType.value === 'drinkCard') {
+    await memberApi.grantDrinkCard(id, drinkCardToStorage(adjustForm.amount), adjustForm.expire_days, adjustForm.remark)
   } else {
     await memberApi.adjustPoint(id, adjustForm.point, adjustForm.remark)
   }
@@ -114,7 +120,7 @@ async function submitAdjust() {
 <template>
   <div class="page">
     <div class="toolbar">
-      <el-input v-model="query.keyword" placeholder="昵称 / 手机号" clearable style="width: 220px" @keyup.enter="search" />
+      <el-input v-model="query.keyword" placeholder="昵称 / 手机号 / ID" clearable style="width: 220px" @keyup.enter="search" />
       <el-select v-model="query.status" placeholder="状态" clearable style="width: 130px">
         <el-option label="正常" :value="1" />
         <el-option label="禁用" :value="0" />
@@ -146,8 +152,11 @@ async function submitAdjust() {
       <el-table-column label="余额" width="110">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.balance) }}</span></template>
       </el-table-column>
-      <el-table-column label="赠金" width="110">
-        <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.gift_balance) }}</span></template>
+      <el-table-column :label="giftConfig.displayName" width="110">
+        <template #default="{ row }"><span class="money">{{ giftText(row.gift_balance) }}</span></template>
+      </el-table-column>
+      <el-table-column :label="drinkCardConfig.displayName" width="110">
+        <template #default="{ row }"><span class="money">{{ drinkCardText(row.drink_card_balance) }}</span></template>
       </el-table-column>
       <el-table-column prop="point" label="记分牌" width="100" />
       <el-table-column prop="total_point" label="累计记分牌" width="120" />
@@ -156,11 +165,12 @@ async function submitAdjust() {
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '正常' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="330" fixed="right">
+      <el-table-column label="操作" width="420" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="showDetail(row)">详情</el-button>
           <el-button link type="primary" @click="openAdjust(row, 'balance')">调余额</el-button>
-          <el-button link type="primary" @click="openAdjust(row, 'gift')">发赠金</el-button>
+          <el-button link type="primary" @click="openAdjust(row, 'gift')">发{{ giftConfig.displayName }}</el-button>
+          <el-button link type="primary" @click="openAdjust(row, 'drinkCard')">发{{ drinkCardConfig.displayName }}</el-button>
           <el-button link type="primary" @click="openAdjust(row, 'point')">调记分牌</el-button>
           <el-button link :type="row.status === 1 ? 'danger' : 'success'" @click="toggleStatus(row)">
             {{ row.status === 1 ? '禁用' : '启用' }}
@@ -187,7 +197,8 @@ async function submitAdjust() {
           <el-descriptions-item label="手机号">{{ detail.phone || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">{{ detail.status === 1 ? '正常' : '禁用' }}</el-descriptions-item>
           <el-descriptions-item label="余额">¥{{ fen2yuan(detail.balance) }}</el-descriptions-item>
-          <el-descriptions-item label="赠金">¥{{ fen2yuan(detail.gift_balance) }}</el-descriptions-item>
+          <el-descriptions-item :label="giftConfig.displayName">{{ giftText(detail.gift_balance) }}</el-descriptions-item>
+          <el-descriptions-item :label="drinkCardConfig.displayName">{{ drinkCardText(detail.drink_card_balance) }}</el-descriptions-item>
           <el-descriptions-item label="记分牌">{{ detail.point }}</el-descriptions-item>
           <el-descriptions-item label="累计记分牌">{{ detail.total_point }}</el-descriptions-item>
           <el-descriptions-item label="累计充值">¥{{ fen2yuan(detail.total_recharge) }}</el-descriptions-item>
@@ -195,13 +206,26 @@ async function submitAdjust() {
         </el-descriptions>
 
         <el-tabs style="margin-top: 16px">
-          <el-tab-pane label="赠金批次">
+          <el-tab-pane :label="`${giftConfig.displayName}批次`">
             <el-table :data="detail.gift_batches" border>
               <el-table-column label="发放" width="110">
-                <template #default="{ row }">¥{{ fen2yuan(row.amount) }}</template>
+                <template #default="{ row }">{{ giftText(row.amount) }}</template>
               </el-table-column>
               <el-table-column label="剩余" width="110">
-                <template #default="{ row }">¥{{ fen2yuan(row.remain_amount) }}</template>
+                <template #default="{ row }">{{ giftText(row.remain_amount) }}</template>
+              </el-table-column>
+              <el-table-column prop="status_text" label="状态" width="100" />
+              <el-table-column prop="expired_at" label="到期时间" />
+            </el-table>
+          </el-tab-pane>
+
+          <el-tab-pane :label="`${drinkCardConfig.displayName}批次`">
+            <el-table :data="detail.drink_card_batches" border>
+              <el-table-column label="发放" width="110">
+                <template #default="{ row }">{{ drinkCardText(row.amount) }}</template>
+              </el-table-column>
+              <el-table-column label="剩余" width="110">
+                <template #default="{ row }">{{ drinkCardText(row.remain_amount) }}</template>
               </el-table-column>
               <el-table-column prop="status_text" label="状态" width="100" />
               <el-table-column prop="expired_at" label="到期时间" />
@@ -246,14 +270,18 @@ async function submitAdjust() {
       </template>
     </el-dialog>
 
-    <el-dialog v-model="adjustVisible" :title="adjustType === 'balance' ? '调整余额' : adjustType === 'gift' ? '发放赠金' : '调整记分牌'" width="460px">
+    <el-dialog
+      v-model="adjustVisible"
+      :title="adjustType === 'balance' ? '调整余额' : adjustType === 'gift' ? `发放${giftConfig.displayName}` : adjustType === 'drinkCard' ? `发放${drinkCardConfig.displayName}` : '调整记分牌'"
+      width="460px"
+    >
       <el-form label-width="100px">
         <el-form-item v-if="adjustType !== 'point'" label="金额">
           <el-input v-model="adjustForm.amount" :placeholder="adjustType === 'balance' ? '正数增加，负数扣减' : '发放金额'">
-            <template #append>元</template>
+            <template #append>{{ adjustType === 'gift' ? giftConfig.unit : adjustType === 'drinkCard' ? drinkCardConfig.unit : '元' }}</template>
           </el-input>
         </el-form-item>
-        <el-form-item v-if="adjustType === 'gift'" label="有效天数">
+        <el-form-item v-if="adjustType === 'gift' || adjustType === 'drinkCard'" label="有效天数">
           <el-input-number v-model="adjustForm.expire_days" :min="0" />
           <div class="tip">0 表示永久有效</div>
         </el-form-item>

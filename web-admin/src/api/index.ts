@@ -30,6 +30,8 @@ export const memberApi = {
     post(`/admin/members/${id}/balance/adjust`, { amount, remark }),
   grantGift: (id: number, amount: number, expireDays: number, remark: string) =>
     post(`/admin/members/${id}/gift/grant`, { amount, expire_days: expireDays, remark }),
+  grantDrinkCard: (id: number, amount: number, expireDays: number, remark: string) =>
+    post(`/admin/members/${id}/drink-card/grant`, { amount, expire_days: expireDays, remark }),
   adjustPoint: (id: number, point: number, remark: string) =>
     post(`/admin/members/${id}/point/adjust`, { point, remark }),
   balanceLogs: (id: number, params: Record<string, any>) =>

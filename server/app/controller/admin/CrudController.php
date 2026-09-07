@@ -40,6 +40,15 @@ abstract class CrudController
     {
     }
 
+    /**
+     * 保存(新增/编辑)前的业务校验，子类按需覆写
+     *
+     * @param array<string, mixed> $data
+     */
+    protected function validateInput(array $data): void
+    {
+    }
+
     public function index(Request $request): Response
     {
         $page     = max(1, (int)$request->get('page', 1));
@@ -82,7 +91,9 @@ abstract class CrudController
     {
         $model = $this->model();
         $item  = new $model();
-        $item->fill($this->input($request));
+        $data  = $this->input($request);
+        $this->validateInput($data);
+        $item->fill($data);
         $item->save();
 
         return Result::success($item, '创建成功');
@@ -91,7 +102,9 @@ abstract class CrudController
     public function update(Request $request, int $id): Response
     {
         $item = $this->find($id);
-        $item->fill($this->input($request));
+        $data = $this->input($request);
+        $this->validateInput($data);
+        $item->fill($data);
         $item->save();
 
         return Result::success($item, '保存成功');

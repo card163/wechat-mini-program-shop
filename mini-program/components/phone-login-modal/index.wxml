@@ -1,0 +1,13 @@
+<view class="phone-modal-mask" catchtouchmove="noop">
+  <view class="phone-modal-card">
+    <view class="phone-modal-title">手机号一键登录</view>
+    <view class="phone-modal-desc">需使用手机号登录后才能继续使用，请授权手机号完成登录</view>
+    <button
+      class="phone-modal-btn"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >手机号一键登录</button>
+  </view>
+</view>

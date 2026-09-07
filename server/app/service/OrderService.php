@@ -9,6 +9,7 @@ use app\model\DiningTable;
 use app\model\Goods;
 use app\model\Member;
 use app\model\MemberBalanceLog;
+use app\model\MemberDrinkCardBatch;
 use app\model\MemberPointLog;
 use app\model\Order;
 use app\model\OrderItem;
@@ -32,21 +33,26 @@ class OrderService
         $plan = self::planPayment(
             (int)$member->balance,
             (int)$member->gift_balance,
+            (int)$member->drink_card_balance,
             $checked['total_amount'],
-            $checked['gift_payable_amount']
+            $checked['gift_payable_amount'],
+            $checked['drink_card_payable_amount']
         );
 
         return [
-            'items'               => $checked['items'],
-            'total_amount'        => $checked['total_amount'],
-            'pay_amount'          => $checked['total_amount'],
-            'gift_payable_amount' => $checked['gift_payable_amount'],
-            'balance'             => (int)$member->balance,
-            'gift_balance'        => (int)$member->gift_balance,
-            'balance_enough'      => $plan['enough'],
-            'plan'                => [
-                'pay_gift'    => $plan['pay_gift'],
-                'pay_balance' => $plan['pay_balance'],
+            'items'                     => $checked['items'],
+            'total_amount'              => $checked['total_amount'],
+            'pay_amount'                => $checked['total_amount'],
+            'gift_payable_amount'       => $checked['gift_payable_amount'],
+            'drink_card_payable_amount' => $checked['drink_card_payable_amount'],
+            'balance'                   => (int)$member->balance,
+            'gift_balance'              => (int)$member->gift_balance,
+            'drink_card_balance'        => (int)$member->drink_card_balance,
+            'balance_enough'            => $plan['enough'],
+            'plan'                      => [
+                'pay_gift'       => $plan['pay_gift'],
+                'pay_drink_card' => $plan['pay_drink_card'],
+                'pay_balance'    => $plan['pay_balance'],
             ],
         ];
     }
@@ -94,13 +100,15 @@ class OrderService
                 $orderItem->price       = $item['price'];
                 $orderItem->quantity    = $item['quantity'];
                 $orderItem->subtotal    = $item['subtotal'];
+                $orderItem->drink_card_gift_amount      = $item['drink_card_gift_amount'];
+                $orderItem->drink_card_gift_expire_days = $item['drink_card_gift_expire_days'];
                 $orderItem->save();
             }
 
             self::reduceStock($checked['items']);
 
             if ($payType === Order::PAY_TYPE_BALANCE) {
-                self::payByBalance($member, $order, $checked['gift_payable_amount']);
+                self::payByBalance($member, $order, $checked['gift_payable_amount'], $checked['drink_card_payable_amount']);
             }
 
             return (int)$order->id;
@@ -135,7 +143,7 @@ class OrderService
             $order->save();
 
             if ($payType === Order::PAY_TYPE_BALANCE) {
-                self::payByBalance($member, $order, self::giftPayableAmountOfOrder($order));
+                self::payByBalance($member, $order, self::giftPayableAmountOfOrder($order), self::drinkCardPayableAmountOfOrder($order));
             }
         });
 
@@ -234,9 +242,10 @@ class OrderService
         }
 
         return self::format($order) + [
-            'pay_balance' => (int)$order->pay_balance,
-            'pay_gift'    => (int)$order->pay_gift,
-            'pay_wechat'  => (int)$order->pay_wechat,
+            'pay_balance'    => (int)$order->pay_balance,
+            'pay_gift'       => (int)$order->pay_gift,
+            'pay_drink_card' => (int)$order->pay_drink_card,
+            'pay_wechat'     => (int)$order->pay_wechat,
         ];
     }
 
@@ -276,11 +285,18 @@ class OrderService
     }
 
     /**
-     * 余额支付：优先扣赠金，不足部分扣本金
+     * 余额支付：优先扣赠金，其次扣饮品卡，不足部分扣本金
      */
-    private static function payByBalance(Member $member, Order $order, int $giftPayableAmount): void
+    private static function payByBalance(Member $member, Order $order, int $giftPayableAmount, int $drinkCardPayableAmount): void
     {
-        $plan = self::planPayment((int)$member->balance, (int)$member->gift_balance, (int)$order->pay_amount, $giftPayableAmount);
+        $plan = self::planPayment(
+            (int)$member->balance,
+            (int)$member->gift_balance,
+            (int)$member->drink_card_balance,
+            (int)$order->pay_amount,
+            $giftPayableAmount,
+            $drinkCardPayableAmount
+        );
         if (!$plan['enough']) {
             throw new BusinessException('余额不足，请先充值');
         }
@@ -288,15 +304,19 @@ class OrderService
         if ($plan['pay_gift'] > 0) {
             AccountService::decreaseGift($member, $plan['pay_gift'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
         }
+        if ($plan['pay_drink_card'] > 0) {
+            AccountService::decreaseDrinkCard($member, $plan['pay_drink_card'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
+        }
         if ($plan['pay_balance'] > 0) {
             AccountService::decreaseBalance($member, $plan['pay_balance'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
         }
 
-        $order->pay_balance  = $plan['pay_balance'];
-        $order->pay_gift     = $plan['pay_gift'];
-        $order->pay_status   = Order::PAY_STATUS_PAID;
-        $order->order_status = Order::STATUS_PAID;
-        $order->paid_at      = date('Y-m-d H:i:s');
+        $order->pay_balance    = $plan['pay_balance'];
+        $order->pay_gift       = $plan['pay_gift'];
+        $order->pay_drink_card = $plan['pay_drink_card'];
+        $order->pay_status     = Order::PAY_STATUS_PAID;
+        $order->order_status   = Order::STATUS_PAID;
+        $order->paid_at        = date('Y-m-d H:i:s');
         $order->save();
 
         self::afterPaid($member, $order);
@@ -322,24 +342,47 @@ class OrderService
 
         foreach ($order->items as $item) {
             Goods::query()->whereKey((int)$item->goods_id)->increment('sales', (int)$item->quantity);
+
+            $giftAmount = (int)$item->drink_card_gift_amount * (int)$item->quantity;
+            if ($giftAmount > 0) {
+                AccountService::grantDrinkCard(
+                    $member,
+                    $giftAmount,
+                    MemberDrinkCardBatch::SOURCE_ORDER_GIFT,
+                    (int)$order->id,
+                    (int)$item->drink_card_gift_expire_days,
+                    (string)$order->order_no,
+                    "购买赠送-{$item->goods_name}"
+                );
+            }
         }
     }
 
     /**
-     * 计算支付方案：赠金只能覆盖允许赠金支付的商品金额
+     * 计算支付方案：赠金/饮品卡只能分别覆盖允许其支付的商品金额，优先扣赠金、其次扣饮品卡，剩余由本金覆盖
      *
-     * @return array{pay_gift: int, pay_balance: int, enough: bool}
+     * @return array{pay_gift: int, pay_drink_card: int, pay_balance: int, enough: bool}
      */
-    private static function planPayment(int $balance, int $giftBalance, int $payAmount, int $giftPayableAmount): array
-    {
+    private static function planPayment(
+        int $balance,
+        int $giftBalance,
+        int $drinkCardBalance,
+        int $payAmount,
+        int $giftPayableAmount,
+        int $drinkCardPayableAmount
+    ): array {
         $giftEnabled = SettingService::int('order', 'gift_pay_enabled', 1) === 1;
         $payGift     = $giftEnabled ? min($giftBalance, $giftPayableAmount, $payAmount) : 0;
-        $payBalance  = $payAmount - $payGift;
+
+        $remainAfterGift = $payAmount - $payGift;
+        $payDrinkCard    = min($drinkCardBalance, $drinkCardPayableAmount, $remainAfterGift);
+        $payBalance      = $remainAfterGift - $payDrinkCard;
 
         return [
-            'pay_gift'    => $payGift,
-            'pay_balance' => $payBalance,
-            'enough'      => $balance >= $payBalance,
+            'pay_gift'       => $payGift,
+            'pay_drink_card' => $payDrinkCard,
+            'pay_balance'    => $payBalance,
+            'enough'         => $balance >= $payBalance,
         ];
     }
 
@@ -347,7 +390,7 @@ class OrderService
      * 校验商品并计算金额，$lock 为 true 时对商品行加锁
      *
      * @param array<int, array{goods_id: int|string, quantity: int|string}> $items
-     * @return array{items: array<int, array<string, mixed>>, total_amount: int, gift_payable_amount: int}
+     * @return array{items: array<int, array<string, mixed>>, total_amount: int, gift_payable_amount: int, drink_card_payable_amount: int}
      */
     private static function resolveItems(array $items, bool $lock = false): array
     {
@@ -371,9 +414,10 @@ class OrderService
         }
         $goodsList = $query->get()->keyBy('id');
 
-        $resolved          = [];
-        $totalAmount       = 0;
-        $giftPayableAmount = 0;
+        $resolved               = [];
+        $totalAmount            = 0;
+        $giftPayableAmount      = 0;
+        $drinkCardPayableAmount = 0;
 
         foreach ($quantities as $goodsId => $quantity) {
             /** @var Goods|null $goods */
@@ -388,17 +432,25 @@ class OrderService
             $subtotal    = (int)$goods->price * $quantity;
             $totalAmount += $subtotal;
             if ((int)$goods->gift_payable === 1) {
-                $giftPayableAmount += $subtotal;
+                // 赠金消耗量由商品自行配置(固定值)，与现金售价无关
+                $giftPayableAmount += (int)$goods->gift_amount * $quantity;
+            }
+            if ((int)$goods->drink_card_payable === 1) {
+                // 饮品卡消耗量同样由商品自行配置(固定值)，与赠金额度相互独立
+                $drinkCardPayableAmount += (int)$goods->drink_card_amount * $quantity;
             }
 
             $resolved[] = [
-                'goods_id'     => (int)$goods->id,
-                'goods_name'   => (string)$goods->name,
-                'goods_cover'  => (string)$goods->cover,
-                'price'        => (int)$goods->price,
-                'quantity'     => $quantity,
-                'subtotal'     => $subtotal,
-                'gift_payable' => (int)$goods->gift_payable,
+                'goods_id'                    => (int)$goods->id,
+                'goods_name'                  => (string)$goods->name,
+                'goods_cover'                 => (string)$goods->cover,
+                'price'                       => (int)$goods->price,
+                'quantity'                    => $quantity,
+                'subtotal'                    => $subtotal,
+                'gift_payable'                => (int)$goods->gift_payable,
+                'drink_card_payable'          => (int)$goods->drink_card_payable,
+                'drink_card_gift_amount'      => (int)$goods->drink_card_gift_amount,
+                'drink_card_gift_expire_days' => (int)$goods->drink_card_gift_expire_days,
             ];
         }
 
@@ -407,9 +459,10 @@ class OrderService
         }
 
         return [
-            'items'               => $resolved,
-            'total_amount'        => $totalAmount,
-            'gift_payable_amount' => $giftPayableAmount,
+            'items'                     => $resolved,
+            'total_amount'              => $totalAmount,
+            'gift_payable_amount'       => $giftPayableAmount,
+            'drink_card_payable_amount' => $drinkCardPayableAmount,
         ];
     }
 
@@ -470,7 +523,20 @@ class OrderService
         foreach ($order->items as $item) {
             $goods = Goods::query()->find((int)$item->goods_id);
             if ($goods !== null && (int)$goods->gift_payable === 1) {
-                $amount += (int)$item->subtotal;
+                $amount += (int)$goods->gift_amount * (int)$item->quantity;
+            }
+        }
+
+        return $amount;
+    }
+
+    private static function drinkCardPayableAmountOfOrder(Order $order): int
+    {
+        $amount = 0;
+        foreach ($order->items as $item) {
+            $goods = Goods::query()->find((int)$item->goods_id);
+            if ($goods !== null && (int)$goods->drink_card_payable === 1) {
+                $amount += (int)$goods->drink_card_amount * (int)$item->quantity;
             }
         }
 

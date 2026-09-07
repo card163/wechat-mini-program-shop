@@ -31,8 +31,13 @@
       </view>
       <view class="asset-sep"></view>
       <view class="asset-item">
-        <view class="asset-num">¥{{giftText}}</view>
-        <view class="sub">有效赠金</view>
+        <view class="asset-num">{{giftText}}</view>
+        <view class="sub">有效{{giftLabel}}</view>
+      </view>
+      <view class="asset-sep"></view>
+      <view class="asset-item" catchtap="goDrinkCardLogs">
+        <view class="asset-num">{{drinkCardText}}</view>
+        <view class="sub">有效{{drinkCardLabel}}</view>
       </view>
     </view>
   </view>
@@ -65,5 +70,6 @@
     </view>
   </view>
 
+  <phone-login-modal wx:if="{{showPhoneModal}}" bind:login="onPhoneBound" />
 </view>
 

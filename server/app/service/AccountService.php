@@ -7,6 +7,7 @@ namespace app\service;
 use app\exception\BusinessException;
 use app\model\Member;
 use app\model\MemberBalanceLog;
+use app\model\MemberDrinkCardBatch;
 use app\model\MemberGiftBatch;
 use app\model\MemberPointLog;
 use Illuminate\Database\Capsule\Manager as Db;
@@ -194,6 +195,127 @@ class AccountService
     }
 
     /**
+     * 发放饮品卡批次，结构与 grantGift 对称
+     *
+     * @param int $expireDays 有效天数，0 表示永久有效
+     */
+    public static function grantDrinkCard(
+        Member $member,
+        int $amount,
+        int $sourceType,
+        int $sourceId = 0,
+        int $expireDays = 0,
+        string $bizNo = '',
+        string $remark = '',
+        int $operatorId = 0
+    ): MemberDrinkCardBatch {
+        self::assertPositive($amount);
+
+        $batch = new MemberDrinkCardBatch();
+        $batch->member_id     = (int)$member->id;
+        $batch->amount        = $amount;
+        $batch->used_amount   = 0;
+        $batch->remain_amount = $amount;
+        $batch->source_type   = $sourceType;
+        $batch->source_id     = $sourceId;
+        $batch->effective_at  = date('Y-m-d H:i:s');
+        $batch->expired_at    = $expireDays > 0 ? date('Y-m-d H:i:s', strtotime("+$expireDays days")) : null;
+        $batch->status        = MemberDrinkCardBatch::STATUS_VALID;
+        $batch->remark        = $remark;
+        $batch->save();
+
+        $before = (int)$member->drink_card_balance;
+        $member->drink_card_balance = $before + $amount;
+        $member->save();
+
+        $bizType = match ($sourceType) {
+            MemberDrinkCardBatch::SOURCE_REFUND     => MemberBalanceLog::BIZ_REFUND,
+            MemberDrinkCardBatch::SOURCE_ORDER_GIFT => MemberBalanceLog::BIZ_ORDER_GIFT_DRINK_CARD,
+            default                                 => MemberBalanceLog::BIZ_ADMIN_ADJUST,
+        };
+
+        self::writeBalanceLog(
+            $member,
+            MemberBalanceLog::ACCOUNT_DRINK_CARD,
+            $amount,
+            $before,
+            (int)$member->drink_card_balance,
+            $bizType,
+            $sourceId,
+            $bizNo,
+            $remark,
+            $operatorId,
+            0,
+            (int)$batch->id
+        );
+
+        return $batch;
+    }
+
+    /**
+     * 饮品卡扣款：按到期时间由近及远消耗批次，永久有效批次最后消耗
+     *
+     * @return array<int, array{batch_id: int, amount: int}> 各批次实际扣减明细
+     */
+    public static function decreaseDrinkCard(
+        Member $member,
+        int $amount,
+        int $bizType,
+        int $bizId = 0,
+        string $bizNo = '',
+        string $remark = '',
+        int $operatorId = 0
+    ): array {
+        self::assertPositive($amount);
+
+        $now = date('Y-m-d H:i:s');
+        /** @var MemberDrinkCardBatch[] $batches */
+        $batches = MemberDrinkCardBatch::query()
+            ->where('member_id', (int)$member->id)
+            ->where('status', MemberDrinkCardBatch::STATUS_VALID)
+            ->where('remain_amount', '>', 0)
+            ->where(static function ($query) use ($now): void {
+                $query->whereNull('expired_at')->orWhere('expired_at', '>', $now);
+            })
+            ->orderByRaw('expired_at IS NULL ASC, expired_at ASC, id ASC')
+            ->lockForUpdate()
+            ->get()
+            ->all();
+
+        $available = array_sum(array_map(static fn(MemberDrinkCardBatch $b): int => (int)$b->remain_amount, $batches));
+        if ($available < $amount) {
+            throw new BusinessException('饮品卡余额不足');
+        }
+
+        $details   = [];
+        $remaining = $amount;
+        foreach ($batches as $batch) {
+            if ($remaining <= 0) {
+                break;
+            }
+            $deduct = min($remaining, (int)$batch->remain_amount);
+
+            $batch->used_amount   = (int)$batch->used_amount + $deduct;
+            $batch->remain_amount = (int)$batch->remain_amount - $deduct;
+            if ($batch->remain_amount === 0) {
+                $batch->status = MemberDrinkCardBatch::STATUS_USED_UP;
+            }
+            $batch->save();
+
+            $before = (int)$member->drink_card_balance;
+            $member->drink_card_balance = $before - $deduct;
+            $member->save();
+
+            self::writeBalanceLog($member, MemberBalanceLog::ACCOUNT_DRINK_CARD, -$deduct, $before, (int)$member->drink_card_balance, $bizType, $bizId, $bizNo, $remark, $operatorId, 0, (int)$batch->id);
+
+            $details[] = ['batch_id' => (int)$batch->id, 'amount' => $deduct];
+            $remaining -= $deduct;
+        }
+
+        return $details;
+    }
+
+    /**
      * 记分牌变动，$point 正数为增加、负数为扣减
      */
     public static function changePoint(
@@ -230,6 +352,64 @@ class AccountService
         $log->remark       = $remark;
         $log->operator_id  = $operatorId;
         $log->save();
+    }
+
+    /**
+     * 处理到期饮品卡：批次置为已过期，并从会员饮品卡余额中扣除
+     *
+     * @return int 本次过期的饮品卡总额
+     */
+    public static function expireDrinkCardBatches(): int
+    {
+        $now      = date('Y-m-d H:i:s');
+        $total    = 0;
+        $batchIds = MemberDrinkCardBatch::query()
+            ->where('status', MemberDrinkCardBatch::STATUS_VALID)
+            ->whereNotNull('expired_at')
+            ->where('expired_at', '<=', $now)
+            ->pluck('id')
+            ->all();
+
+        foreach ($batchIds as $batchId) {
+            $total += Db::connection()->transaction(static function () use ($batchId): int {
+                $batch = MemberDrinkCardBatch::query()->lockForUpdate()->find($batchId);
+                if ($batch === null || (int)$batch->status !== MemberDrinkCardBatch::STATUS_VALID) {
+                    return 0;
+                }
+
+                $remain        = (int)$batch->remain_amount;
+                $batch->status = MemberDrinkCardBatch::STATUS_EXPIRED;
+                $batch->save();
+
+                if ($remain <= 0) {
+                    return 0;
+                }
+
+                $member = self::lockMember((int)$batch->member_id);
+                $before = (int)$member->drink_card_balance;
+                $member->drink_card_balance = max(0, $before - $remain);
+                $member->save();
+
+                self::writeBalanceLog(
+                    $member,
+                    MemberBalanceLog::ACCOUNT_DRINK_CARD,
+                    -$remain,
+                    $before,
+                    (int)$member->drink_card_balance,
+                    MemberBalanceLog::BIZ_DRINK_CARD_EXPIRED,
+                    (int)$batch->id,
+                    '',
+                    '饮品卡到期失效',
+                    0,
+                    0,
+                    (int)$batch->id
+                );
+
+                return $remain;
+            });
+        }
+
+        return $total;
     }
 
     /**
@@ -300,12 +480,14 @@ class AccountService
         string $bizNo,
         string $remark,
         int $operatorId,
-        int $giftBatchId = 0
+        int $giftBatchId = 0,
+        int $drinkCardBatchId = 0
     ): void {
         $log = new MemberBalanceLog();
         $log->member_id      = (int)$member->id;
         $log->account_type   = $accountType;
         $log->gift_batch_id  = $giftBatchId;
+        $log->drink_card_batch_id = $drinkCardBatchId;
         $log->amount         = $amount;
         $log->before_balance = $before;
         $log->after_balance  = $after;

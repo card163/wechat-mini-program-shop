@@ -1,5 +1,5 @@
 const shopApi = require('../../api/shop');
-const { fen2yuan } = require('../../utils/format');
+const { fen2yuan, giftLabel, giftAmountText, drinkCardLabel, drinkCardAmountText } = require('../../utils/format');
 
 const CART_KEY = 'nf_cart';
 
@@ -14,9 +14,12 @@ Page({
     remark: '',
     preview: null,
     submitting: false,
+    giftLabel: '赠金',
+    drinkCardLabel: '饮品卡',
   },
 
   onLoad() {
+    this.setData({ giftLabel: giftLabel(), drinkCardLabel: drinkCardLabel() });
     const cart = wx.getStorageSync(CART_KEY) || {};
     const items = Object.keys(cart).map((key) => ({
       goods_id: cart[key].goods_id,
@@ -46,10 +49,12 @@ Page({
         this.setData({
           preview: Object.assign({}, preview, {
             totalText: fen2yuan(preview.total_amount),
-            payGiftText: fen2yuan(preview.plan.pay_gift),
+            payGiftText: giftAmountText(preview.plan.pay_gift),
+            payDrinkCardText: drinkCardAmountText(preview.plan.pay_drink_card),
             payBalanceText: fen2yuan(preview.plan.pay_balance),
             balanceText: fen2yuan(preview.balance),
-            giftBalanceText: fen2yuan(preview.gift_balance),
+            giftBalanceText: giftAmountText(preview.gift_balance),
+            drinkCardBalanceText: drinkCardAmountText(preview.drink_card_balance),
             items: preview.items.map((item) =>
               Object.assign({}, item, { priceText: fen2yuan(item.price), subtotalText: fen2yuan(item.subtotal) })
             ),

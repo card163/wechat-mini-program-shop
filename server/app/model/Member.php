@@ -13,6 +13,7 @@ namespace app\model;
  * @property string $phone
  * @property int $balance 本金余额(分)
  * @property int $gift_balance 有效赠金余额(分)
+ * @property int $drink_card_balance 有效饮品卡余额
  * @property int $point 当前记分牌
  * @property int $total_point 累计记分牌
  * @property int $status
@@ -25,8 +26,9 @@ class Member extends BaseModel
     protected $table = 'nf_member';
 
     protected $casts = [
-        'balance'        => 'integer',
-        'gift_balance'   => 'integer',
+        'balance'            => 'integer',
+        'gift_balance'       => 'integer',
+        'drink_card_balance' => 'integer',
         'point'          => 'integer',
         'total_point'    => 'integer',
         'total_recharge' => 'integer',

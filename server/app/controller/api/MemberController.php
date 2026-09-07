@@ -33,6 +33,14 @@ class MemberController
         return Result::page($result['list'], $result['total'], $page, $pageSize);
     }
 
+    public function drinkCardLogs(Request $request): Response
+    {
+        [$page, $pageSize] = $this->pagination($request);
+        $result = MemberService::balanceLogs((int)$request->memberId, MemberBalanceLog::ACCOUNT_DRINK_CARD, $page, $pageSize);
+
+        return Result::page($result['list'], $result['total'], $page, $pageSize);
+    }
+
     public function pointLogs(Request $request): Response
     {
         [$page, $pageSize] = $this->pagination($request);

@@ -6,6 +6,7 @@
     "pages/recharge/index",
     "pages/me/index",
     "pages/me/orders",
+    "pages/me/drink-card-logs",
     "pages/wine/index"
   ],
   "window": {

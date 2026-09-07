@@ -20,6 +20,10 @@
       "notice": "",
       "business_hours": ""
     },
+    "gift": {
+      "display_name": "赠金",
+      "unit": "元"
+    },
     "banners": [
       { "id": 1, "title": "", "image": "https://cdn/xx.png", "link": "/pages/shop/index" }
     ],
@@ -37,6 +41,8 @@
 
 未登录时 `member` 为 `null`。
 
+`gift.display_name`/`gift.unit` 由管理后台「系统设置-记分牌与赠金」配置（对应 `nf_setting` 的 `point.gift_display_name`/`point.gift_unit`）：`display_name` 默认「赠金」，可改为如「酒水卡」；`unit` 为 `元`(按分/元记账，2位小数展示) 或 `张`(按整数张数记账)。注意：此配置仅影响展示文案/录入换算，`gift_balance` 等字段名本身不变。
+
 ## 2. 门店信息
 
 `GET /api/shop/info` · 无需鉴权
@@ -52,7 +58,8 @@
     "phone": "",
     "address": "",
     "notice": "",
-    "business_hours": ""
+    "business_hours": "",
+    "gift": { "display_name": "赠金", "unit": "元" }
   }
 }
 ```

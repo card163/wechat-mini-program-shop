@@ -105,6 +105,7 @@ class CatalogService
             'stock'        => (int)$goods->stock,
             'sales'        => (int)$goods->sales,
             'gift_payable' => (int)$goods->gift_payable,
+            'drink_card_payable' => (int)$goods->drink_card_payable,
         ];
     }
 

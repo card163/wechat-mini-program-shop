@@ -23,6 +23,8 @@ class HomeController
 
         return Result::success([
             'shop'    => $this->shopSetting(),
+            'gift'    => $this->giftSetting(),
+            'drink_card' => $this->drinkCardSetting(),
             'banners' => $this->banners(),
             'member'  => $member === null ? null : MemberAuthService::profile($member),
         ]);
@@ -30,7 +32,7 @@ class HomeController
 
     public function shopInfo(): Response
     {
-        return Result::success($this->shopSetting());
+        return Result::success($this->shopSetting() + ['gift' => $this->giftSetting(), 'drink_card' => $this->drinkCardSetting()]);
     }
 
     public function ranking(Request $request): Response
@@ -53,6 +55,32 @@ class HomeController
             'address'        => $base['shop_address'] ?? '',
             'notice'         => $base['shop_notice'] ?? '',
             'business_hours' => $base['business_hours'] ?? '',
+        ];
+    }
+
+    /**
+     * 赠金展示名称/计量单位，供小程序统一格式化展示(如改名为“酒水卡”)
+     *
+     * @return array<string, string>
+     */
+    private function giftSetting(): array
+    {
+        return [
+            'display_name' => SettingService::giftDisplayName(),
+            'unit'         => SettingService::giftUnit(),
+        ];
+    }
+
+    /**
+     * 饮品卡展示名称/计量单位，供小程序统一格式化展示
+     *
+     * @return array<string, string>
+     */
+    private function drinkCardSetting(): array
+    {
+        return [
+            'display_name' => SettingService::drinkCardDisplayName(),
+            'unit'         => SettingService::drinkCardUnit(),
         ];
     }
 
