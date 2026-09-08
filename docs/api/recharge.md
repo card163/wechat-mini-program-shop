@@ -29,7 +29,7 @@
 |---|---|
 | `amount` | 实付金额（分），到账**本金** |
 | `gift_amount` | 赠送金额（分），到账**赠金**，单独批次 |
-| `gift_point` | 赠送记分牌 |
+| `gift_point` | 赠送礼品卡 |
 | `gift_expire_days` | 赠金有效天数，`0` 表示永久有效 |
 
 ## 2. 发起充值
@@ -72,7 +72,7 @@
 1. `nf_recharge_order.pay_status` 置 1。
 2. 本金入账：`nf_member.balance += amount`，写 `nf_member_balance_log`（`biz_type=1`）。
 3. 赠金入账：新建 `nf_member_gift_batch` 批次（`source_type=1`，按 `gift_expire_days` 计算 `expired_at`），同步 `nf_member.gift_balance`，写 `nf_member_balance_log`（`biz_type=2`，带 `gift_batch_id`）。
-4. 赠送记分牌（若有）：写 `nf_member_point_log`。
+4. 赠送礼品卡（若有）：写 `nf_member_point_log`。
 5. 累计充值 `total_recharge += amount`。
 
 ## 3. 查询充值结果

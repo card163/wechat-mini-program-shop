@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="balance-card">
+    <view class="asset-num">¥{{balanceText}}</view>
+    <view class="sub">当前余额</view>
+  </view>
+
+  <view wx:if="{{!loading && !list.length}}" class="empty">暂无余额流水</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card row-between log-row">
+    <view class="flex-1">
+      <view class="title" style="font-size:28rpx;">{{item.biz_type_text}}</view>
+      <view class="sub">{{item.remark || item.biz_no}}</view>
+      <view class="sub">{{item.created_at}}</view>
+    </view>
+    <view class="{{item.amount > 0 ? 'plus' : 'price'}}">{{item.amountText}}</view>
+  </view>
+
+  <view wx:if="{{!hasMore && list.length}}" class="sub more">没有更多了</view>
+</view>

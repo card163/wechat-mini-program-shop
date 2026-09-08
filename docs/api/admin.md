@@ -113,7 +113,7 @@
 
 核销成功后 `status=1`，记录 `verify_admin_id`、`verified_at`。
 
-### 5. 店内发放记分牌
+### 5. 店内发放礼品卡
 
 `POST /admin/member/point/adjust` · 仅超级管理员
 
@@ -133,13 +133,13 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/admin/members` | 会员列表，支持昵称/手机号搜索、按余额或累计记分牌排序 |
-| GET | `/admin/members/{id}` | 会员详情，含余额、赠金批次、记分牌 |
+| GET | `/admin/members` | 会员列表，支持昵称/手机号搜索、按余额或累计礼品卡排序 |
+| GET | `/admin/members/{id}` | 会员详情，含余额、赠金批次、礼品卡 |
 | POST | `/admin/members/{id}/status` | 启用 / 禁用 |
 | POST | `/admin/members/{id}/balance/adjust` | 调整本金余额，必填原因，落流水 |
 | POST | `/admin/members/{id}/gift/grant` | 发放赠金批次，可设有效期 |
 | GET | `/admin/members/{id}/balance-logs` | 余额流水 |
-| GET | `/admin/members/{id}/point-logs` | 记分牌流水 |
+| GET | `/admin/members/{id}/point-logs` | 礼品卡流水 |
 
 ### 商品与桌号
 

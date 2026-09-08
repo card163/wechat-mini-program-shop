@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\model;
 
 /**
- * 会员记分牌流水
+ * 会员礼品卡流水
  */
 class MemberPointLog extends BaseModel
 {

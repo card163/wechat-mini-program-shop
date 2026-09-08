@@ -121,7 +121,7 @@ class ExchangeService
 
             $member = AccountService::lockMember($memberId);
             if ((int)$member->point < (int)$goods->point) {
-                throw new BusinessException('记分牌不足');
+                throw new BusinessException('礼品卡不足');
             }
 
             $record = new ExchangeRecord();
@@ -158,7 +158,7 @@ class ExchangeService
                     (int)$record->id,
                     (int)$goods->gift_expire_days,
                     (string)$record->record_no,
-                    '记分牌兑换赠金'
+                    '礼品卡兑换赠金'
                 );
 
                 $record->status      = ExchangeRecord::STATUS_VERIFIED;

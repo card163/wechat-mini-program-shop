@@ -25,12 +25,12 @@
   <view class="asset-card" bindtap="goRecharge">
     <view class="asset-badge">点击充值</view>
     <view class="asset-row">
-      <view class="asset-item">
+      <view class="asset-item" catchtap="goBalanceLogs">
         <view class="asset-num">¥{{balanceText}}</view>
         <view class="sub">余额</view>
       </view>
       <view class="asset-sep"></view>
-      <view class="asset-item">
+      <view class="asset-item" catchtap="goGiftLogs">
         <view class="asset-num">{{giftText}}</view>
         <view class="sub">有效{{giftLabel}}</view>
       </view>
@@ -38,6 +38,11 @@
       <view class="asset-item" catchtap="goDrinkCardLogs">
         <view class="asset-num">{{drinkCardText}}</view>
         <view class="sub">有效{{drinkCardLabel}}</view>
+      </view>
+      <view class="asset-sep"></view>
+      <view class="asset-item" catchtap="goPointLogs">
+        <view class="asset-num">{{pointText}}</view>
+        <view class="sub">礼品卡</view>
       </view>
     </view>
   </view>

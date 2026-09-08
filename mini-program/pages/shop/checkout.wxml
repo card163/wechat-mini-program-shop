@@ -9,16 +9,36 @@
   <view class="pay-option {{payType === 1 ? 'active' : ''}}" data-type="1" bindtap="onPayTypeChange">
     <view class="pay-name">微信支付</view>
   </view>
-  <view class="pay-option balance-option {{payType === 2 ? 'active' : ''}}" data-type="2" bindtap="onPayTypeChange">
+  <view
+    class="pay-option balance-option {{payType === 2 ? 'active' : ''}} {{!preview.pay_options.balance.usable ? 'disabled' : ''}}"
+    data-type="2"
+    bindtap="onPayTypeChange"
+  >
     <view class="pay-name">余额支付</view>
     <view class="sub">本金余额：¥{{preview.balanceText}}</view>
-    <view class="sub">{{giftLabel}}余额：{{preview.giftBalanceText}}</view>
-    <view class="sub">{{drinkCardLabel}}余额：{{preview.drinkCardBalanceText}}</view>
-    <view class="sub accent" wx:if="{{payType === 2 && (preview.plan.pay_gift > 0 || preview.plan.pay_drink_card > 0)}}">
-      本单抵扣{{giftLabel}} {{preview.payGiftText}}，{{drinkCardLabel}} {{preview.payDrinkCardText}}，余额支付 ¥{{preview.payBalanceText}}
-    </view>
-    <view class="sub warn" wx:if="{{payType === 2 && !preview.balance_enough}}">余额不足，请先充值</view>
+    <view class="sub warn" wx:if="{{!preview.pay_options.balance.usable}}">余额不足，请先充值</view>
   </view>
+  <view
+    class="pay-option balance-option {{payType === 3 ? 'active' : ''}} {{!preview.pay_options.gift.usable ? 'disabled' : ''}}"
+    data-type="3"
+    bindtap="onPayTypeChange"
+  >
+    <view class="pay-name">{{giftLabel}}支付</view>
+    <view class="sub">{{giftLabel}}余额：{{preview.giftBalanceText}}</view>
+    <view class="sub warn" wx:if="{{!preview.pay_options.gift.available}}">本单暂无法使用{{giftLabel}}支付</view>
+    <view class="sub warn" wx:elif="{{!preview.pay_options.gift.usable}}">{{giftLabel}}余额不足，请先充值</view>
+  </view>
+  <view
+    class="pay-option balance-option {{payType === 4 ? 'active' : ''}} {{!preview.pay_options.drink_card.usable ? 'disabled' : ''}}"
+    data-type="4"
+    bindtap="onPayTypeChange"
+  >
+    <view class="pay-name">{{drinkCardLabel}}支付</view>
+    <view class="sub">{{drinkCardLabel}}余额：{{preview.drinkCardBalanceText}}</view>
+    <view class="sub warn" wx:if="{{!preview.pay_options.drink_card.available}}">本单暂无法使用{{drinkCardLabel}}支付</view>
+    <view class="sub warn" wx:elif="{{!preview.pay_options.drink_card.usable}}">{{drinkCardLabel}}余额不足，请先充值</view>
+  </view>
+
 
   <view class="section-label">已选餐品</view>
   <view class="item-box">

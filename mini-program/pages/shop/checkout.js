@@ -48,21 +48,72 @@ Page({
       .ensureLogin()
       .then(() => shopApi.preview(this.data.items))
       .then((preview) => {
+        if (this.removeInvalidItems(preview.removed_items)) return;
+
         this.setData({
           preview: Object.assign({}, preview, {
             totalText: fen2yuan(preview.total_amount),
-            payGiftText: giftAmountText(preview.plan.pay_gift),
-            payDrinkCardText: drinkCardAmountText(preview.plan.pay_drink_card),
-            payBalanceText: fen2yuan(preview.plan.pay_balance),
             balanceText: fen2yuan(preview.balance),
             giftBalanceText: giftAmountText(preview.gift_balance),
             drinkCardBalanceText: drinkCardAmountText(preview.drink_card_balance),
+            giftPayableText: giftAmountText(preview.gift_payable_amount),
+            drinkCardPayableText: drinkCardAmountText(preview.drink_card_payable_amount),
             items: preview.items.map((item) =>
               Object.assign({}, item, { priceText: fen2yuan(item.price), subtotalText: fen2yuan(item.subtotal) })
             ),
           }),
         });
+
+        this.ensurePayTypeUsable();
       });
+  },
+
+  /**
+   * 微信支付/余额支付/{{giftLabel}}支付/{{drinkCardLabel}}支付四种方式各自独立扣款，
+   * 不再互相组合；映射为预览接口 pay_options 里对应的 key
+   */
+  payOptionKey(payType) {
+    return { 2: 'balance', 3: 'gift', 4: 'drink_card' }[payType];
+  },
+  isPayOptionUsable(payType) {
+    if (payType === 1) return true;
+    const key = this.payOptionKey(payType);
+    const options = this.data.preview && this.data.preview.pay_options;
+    return !!(key && options && options[key] && options[key].usable);
+  },
+  // 预览刷新后（如购物车被清理）当前选中的支付方式可能不再可用，自动回退到微信支付
+  ensurePayTypeUsable() {
+    if (!this.isPayOptionUsable(this.data.payType)) {
+      this.setData({ payType: 1 });
+    }
+  },
+
+  /**
+   * 购物车里的商品在下单前被商家下架/删除时，预览接口会自动剔除并通过 removed_items 告知，
+   * 这里同步清理本地购物车缓存，避免用户永久卡在"商品已下架"的结算页
+   * @returns {boolean} 是否已处理（返回 true 时调用方应停止渲染本次预览结果）
+   */
+  removeInvalidItems(removedItems) {
+    if (!removedItems || !removedItems.length) return false;
+
+    const removedIds = removedItems.map((item) => item.goods_id);
+    const names = removedItems.map((item) => item.goods_name).filter(Boolean).join('、');
+    const remainItems = this.data.items.filter((item) => !removedIds.includes(item.goods_id));
+
+    const cart = wx.getStorageSync(CART_KEY) || {};
+    removedIds.forEach((id) => delete cart[id]);
+    wx.setStorageSync(CART_KEY, cart);
+
+    wx.showToast({ title: `${names || '部分商品'}已下架，已自动移出购物车`, icon: 'none' });
+
+    if (!remainItems.length) {
+      setTimeout(() => wx.navigateBack(), 1200);
+      return true;
+    }
+
+    this.setData({ items: remainItems });
+    this.loadPreview();
+    return true;
   },
 
   openTablePicker() {
@@ -93,7 +144,12 @@ Page({
   },
   noop() {},
   onPayTypeChange(e) {
-    this.setData({ payType: Number(e.currentTarget.dataset.type) });
+    const payType = Number(e.currentTarget.dataset.type);
+    if (!this.isPayOptionUsable(payType)) {
+      wx.showToast({ title: '该支付方式暂不可用', icon: 'none' });
+      return;
+    }
+    this.setData({ payType });
   },
   onRemarkInput(e) {
     this.setData({ remark: e.detail.value });

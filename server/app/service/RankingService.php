@@ -9,7 +9,7 @@ use app\model\Member;
 class RankingService
 {
     /**
-     * 按累计记分牌排行
+     * 按累计礼品卡排行
      *
      * @return array{list: array<int, array<string, mixed>>, me: array<string, mixed>|null}
      */

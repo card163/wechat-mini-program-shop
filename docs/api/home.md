@@ -41,7 +41,7 @@
 
 未登录时 `member` 为 `null`。
 
-`gift.display_name`/`gift.unit` 由管理后台「系统设置-记分牌与赠金」配置（对应 `nf_setting` 的 `point.gift_display_name`/`point.gift_unit`）：`display_name` 默认「赠金」，可改为如「酒水卡」；`unit` 为 `元`(按分/元记账，2位小数展示) 或 `张`(按整数张数记账)。注意：此配置仅影响展示文案/录入换算，`gift_balance` 等字段名本身不变。
+`gift.display_name`/`gift.unit` 由管理后台「系统设置-礼品卡与赠金」配置（对应 `nf_setting` 的 `point.gift_display_name`/`point.gift_unit`）：`display_name` 默认「赠金」，可改为如「酒水卡」；`unit` 为 `元`(按分/元记账，2位小数展示) 或 `张`(按整数张数记账)。注意：此配置仅影响展示文案/录入换算，`gift_balance` 等字段名本身不变。
 
 ## 2. 门店信息
 
@@ -68,7 +68,7 @@
 
 `GET /api/ranking` · 无需鉴权（带 token 时返回 `me` 字段）
 
-按累计记分牌 `total_point` 倒序排列。
+按累计礼品卡 `total_point` 倒序排列。
 
 **请求**
 
@@ -92,5 +92,5 @@
 ```
 
 - 昵称为空时后端返回默认值 `牌友`，前端不再兜底。
-- `me.rank` 为 `0` 表示未上榜（累计记分牌为 0）。
+- `me.rank` 为 `0` 表示未上榜（累计礼品卡为 0）。
 - 未登录时 `me` 为 `null`。

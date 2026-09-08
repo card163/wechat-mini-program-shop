@@ -19,6 +19,13 @@ use Illuminate\Database\Capsule\Manager as Db;
 
 class OrderService
 {
+    private const array PAY_TYPES = [
+        Order::PAY_TYPE_WECHAT,
+        Order::PAY_TYPE_BALANCE,
+        Order::PAY_TYPE_GIFT,
+        Order::PAY_TYPE_DRINK_CARD,
+    ];
+
     /**
      * 结算预览：金额与抵扣方案全部由服务端计算
      *
@@ -28,34 +35,47 @@ class OrderService
     public static function preview(int $memberId, array $items): array
     {
         $member  = Member::query()->findOrFail($memberId);
-        $checked = self::resolveItems($items);
+        // 预览用非严格模式：商品被下架/删除时自动剔除而不是直接报错卡住，交由前端清理购物车
+        $checked = self::resolveItems($items, false, false);
 
-        $plan = self::planPayment(
-            (int)$member->balance,
-            (int)$member->gift_balance,
-            (int)$member->drink_card_balance,
-            $checked['total_amount'],
-            $checked['gift_payable_amount'],
-            $checked['gift_cash_cap'],
-            $checked['drink_card_payable_amount'],
-            $checked['drink_card_cash_cap']
-        );
+        $totalAmount = $checked['total_amount'];
 
         return [
             'items'                     => $checked['items'],
-            'total_amount'              => $checked['total_amount'],
-            'pay_amount'                => $checked['total_amount'],
-            'gift_payable_amount'       => $checked['gift_payable_amount'],
-            'drink_card_payable_amount' => $checked['drink_card_payable_amount'],
+            'removed_items'             => $checked['removed_items'],
+            'total_amount'              => $totalAmount,
+            'pay_amount'                => $totalAmount,
             'balance'                   => (int)$member->balance,
             'gift_balance'              => (int)$member->gift_balance,
             'drink_card_balance'        => (int)$member->drink_card_balance,
-            'balance_enough'            => $plan['enough'],
-            'plan'                      => [
-                'pay_gift'       => $plan['pay_gift'],
-                'pay_drink_card' => $plan['pay_drink_card'],
-                'pay_balance'    => $plan['pay_balance'],
-            ],
+            // 选择酒水卡/饮品卡支付时需要消耗的凭证数量（仅当对应 pay_options.*.available 为 true 时整单才可被该凭证覆盖）
+            'gift_payable_amount'       => $checked['gift_payable_amount'],
+            'drink_card_payable_amount' => $checked['drink_card_payable_amount'],
+            'pay_options'               => self::buildPayOptions($member, $totalAmount, $checked),
+        ];
+    }
+
+    /**
+     * 计算「微信支付/余额支付/酒水卡支付/饮品卡支付」四种支付方式各自是否可用：
+     * 每种非微信支付方式都是独立扣款，不再跟其他账户组合，因此某账户要么足额覆盖整单，要么不可选。
+     *
+     * @param array{gift_payable_amount: int, gift_cash_cap: int, drink_card_payable_amount: int, drink_card_cash_cap: int} $checked
+     * @return array<string, array{available: bool, usable: bool}>
+     */
+    private static function buildPayOptions(Member $member, int $totalAmount, array $checked): array
+    {
+        $giftEnabled = SettingService::int('order', 'gift_pay_enabled', 1) === 1;
+
+        $giftAvailable = $giftEnabled && $totalAmount > 0 && $checked['gift_cash_cap'] === $totalAmount;
+        $giftUsable    = $giftAvailable && (int)$member->gift_balance >= $checked['gift_payable_amount'];
+
+        $drinkCardAvailable = $totalAmount > 0 && $checked['drink_card_cash_cap'] === $totalAmount;
+        $drinkCardUsable    = $drinkCardAvailable && (int)$member->drink_card_balance >= $checked['drink_card_payable_amount'];
+
+        return [
+            'balance'    => ['available' => true, 'usable' => $totalAmount > 0 && (int)$member->balance >= $totalAmount],
+            'gift'       => ['available' => $giftAvailable, 'usable' => $giftUsable],
+            'drink_card' => ['available' => $drinkCardAvailable, 'usable' => $drinkCardUsable],
         ];
     }
 
@@ -67,7 +87,7 @@ class OrderService
      */
     public static function create(int $memberId, array $items, int $tableId, int $payType, string $remark): array
     {
-        if (!in_array($payType, [Order::PAY_TYPE_WECHAT, Order::PAY_TYPE_BALANCE], true)) {
+        if (!in_array($payType, self::PAY_TYPES, true)) {
             throw new BusinessException('支付方式不正确');
         }
 
@@ -110,10 +130,11 @@ class OrderService
 
             self::reduceStock($checked['items']);
 
-            if ($payType === Order::PAY_TYPE_BALANCE) {
-                self::payByBalance(
+            if ($payType !== Order::PAY_TYPE_WECHAT) {
+                self::payByAccount(
                     $member,
                     $order,
+                    $payType,
                     $checked['gift_payable_amount'],
                     $checked['gift_cash_cap'],
                     $checked['drink_card_payable_amount'],
@@ -125,7 +146,7 @@ class OrderService
         });
 
         // 支付事务提交后再推送打印，避免占用会员/库存行锁；打印失败不影响下单结果
-        if ($payType === Order::PAY_TYPE_BALANCE) {
+        if ($payType !== Order::PAY_TYPE_WECHAT) {
             PrinterService::autoPrint($orderId);
         }
 
@@ -139,7 +160,7 @@ class OrderService
      */
     public static function pay(int $memberId, int $orderId, int $payType): array
     {
-        if (!in_array($payType, [Order::PAY_TYPE_WECHAT, Order::PAY_TYPE_BALANCE], true)) {
+        if (!in_array($payType, self::PAY_TYPES, true)) {
             throw new BusinessException('支付方式不正确');
         }
 
@@ -152,14 +173,14 @@ class OrderService
             $order->pay_type = $payType;
             $order->save();
 
-            if ($payType === Order::PAY_TYPE_BALANCE) {
+            if ($payType !== Order::PAY_TYPE_WECHAT) {
                 [$giftUnits, $giftCashCap]           = self::giftPayableAmountOfOrder($order);
                 [$drinkCardUnits, $drinkCardCashCap]  = self::drinkCardPayableAmountOfOrder($order);
-                self::payByBalance($member, $order, $giftUnits, $giftCashCap, $drinkCardUnits, $drinkCardCashCap);
+                self::payByAccount($member, $order, $payType, $giftUnits, $giftCashCap, $drinkCardUnits, $drinkCardCashCap);
             }
         });
 
-        if ($payType === Order::PAY_TYPE_BALANCE) {
+        if ($payType !== Order::PAY_TYPE_WECHAT) {
             PrinterService::autoPrint($orderId);
         }
 
@@ -297,43 +318,68 @@ class OrderService
     }
 
     /**
-     * 余额支付：优先扣赠金，其次扣饮品卡，不足部分扣本金
+     * 非微信支付的三种账户各自独立扣款：本单必须能被该账户全额覆盖才允许使用，不再跟其他账户组合
      */
-    private static function payByBalance(
+    private static function payByAccount(
         Member $member,
         Order $order,
+        int $payType,
         int $giftPayableAmount,
         int $giftCashCap,
         int $drinkCardPayableAmount,
         int $drinkCardCashCap
     ): void {
-        $plan = self::planPayment(
-            (int)$member->balance,
-            (int)$member->gift_balance,
-            (int)$member->drink_card_balance,
-            (int)$order->pay_amount,
-            $giftPayableAmount,
-            $giftCashCap,
-            $drinkCardPayableAmount,
-            $drinkCardCashCap
-        );
-        if (!$plan['enough']) {
-            throw new BusinessException('余额不足，请先充值');
+        $payAmount    = (int)$order->pay_amount;
+        $payGift      = 0;
+        $payDrinkCard = 0;
+        $payBalance   = 0;
+
+        switch ($payType) {
+            case Order::PAY_TYPE_BALANCE:
+                if ((int)$member->balance < $payAmount) {
+                    throw new BusinessException('余额不足，请先充值');
+                }
+                $payBalance = $payAmount;
+                break;
+
+            case Order::PAY_TYPE_GIFT:
+                $giftEnabled = SettingService::int('order', 'gift_pay_enabled', 1) === 1;
+                if (!$giftEnabled || $giftCashCap !== $payAmount) {
+                    throw new BusinessException(SettingService::giftDisplayName() . '暂不支持支付本单，请选择其他支付方式');
+                }
+                if ((int)$member->gift_balance < $giftPayableAmount) {
+                    throw new BusinessException(SettingService::giftDisplayName() . '余额不足，请先充值');
+                }
+                $payGift = $giftPayableAmount;
+                break;
+
+            case Order::PAY_TYPE_DRINK_CARD:
+                if ($drinkCardCashCap !== $payAmount) {
+                    throw new BusinessException(SettingService::drinkCardDisplayName() . '暂不支持支付本单，请选择其他支付方式');
+                }
+                if ((int)$member->drink_card_balance < $drinkCardPayableAmount) {
+                    throw new BusinessException(SettingService::drinkCardDisplayName() . '余额不足，请先充值');
+                }
+                $payDrinkCard = $drinkCardPayableAmount;
+                break;
+
+            default:
+                throw new BusinessException('支付方式不正确');
         }
 
-        if ($plan['pay_gift'] > 0) {
-            AccountService::decreaseGift($member, $plan['pay_gift'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
+        if ($payGift > 0) {
+            AccountService::decreaseGift($member, $payGift, MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
         }
-        if ($plan['pay_drink_card'] > 0) {
-            AccountService::decreaseDrinkCard($member, $plan['pay_drink_card'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
+        if ($payDrinkCard > 0) {
+            AccountService::decreaseDrinkCard($member, $payDrinkCard, MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
         }
-        if ($plan['pay_balance'] > 0) {
-            AccountService::decreaseBalance($member, $plan['pay_balance'], MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
+        if ($payBalance > 0) {
+            AccountService::decreaseBalance($member, $payBalance, MemberBalanceLog::BIZ_CONSUME, (int)$order->id, (string)$order->order_no, '点单消费');
         }
 
-        $order->pay_balance    = $plan['pay_balance'];
-        $order->pay_gift       = $plan['pay_gift'];
-        $order->pay_drink_card = $plan['pay_drink_card'];
+        $order->pay_balance    = $payBalance;
+        $order->pay_gift       = $payGift;
+        $order->pay_drink_card = $payDrinkCard;
         $order->pay_status     = Order::PAY_STATUS_PAID;
         $order->order_status   = Order::STATUS_PAID;
         $order->paid_at        = date('Y-m-d H:i:s');
@@ -343,7 +389,7 @@ class OrderService
     }
 
     /**
-     * 支付成功后的通用处理：累计消费、赠送记分牌、增加销量
+     * 支付成功后的通用处理：累计消费、赠送礼品卡、增加销量
      */
     private static function afterPaid(Member $member, Order $order): void
     {
@@ -379,60 +425,14 @@ class OrderService
     }
 
     /**
-     * 计算支付方案：赠金/饮品卡只能分别覆盖允许其支付的商品金额，优先扣赠金、其次扣饮品卡，剩余由本金覆盖。
-     * $giftPayableAmount/$drinkCardPayableAmount 是需要消耗的凭证数量（与余额同单位，可能是“张”这种与分不同的记账单位）；
-     * $giftCashCap/$drinkCardCashCap 是这些凭证足额消耗后能够抵扣的现金金额（分），两者单位不同，不能直接相减，
-     * 按“实际可用凭证数 / 所需凭证数”的比例折算实际抵扣的现金金额，避免“张”模式下把凭证数当成分来减导致抵扣金额畸小。
-     *
-     * @return array{pay_gift: int, pay_drink_card: int, pay_balance: int, enough: bool}
-     */
-    private static function planPayment(
-        int $balance,
-        int $giftBalance,
-        int $drinkCardBalance,
-        int $payAmount,
-        int $giftPayableAmount,
-        int $giftCashCap,
-        int $drinkCardPayableAmount,
-        int $drinkCardCashCap
-    ): array {
-        $giftEnabled = SettingService::int('order', 'gift_pay_enabled', 1) === 1;
-
-        $payGiftUnits = 0;
-        $payGiftCash  = 0;
-        if ($giftEnabled && $giftPayableAmount > 0) {
-            $payGiftUnits = min($giftBalance, $giftPayableAmount);
-            $payGiftCash  = intdiv($giftCashCap * $payGiftUnits, $giftPayableAmount);
-        }
-        $payGiftCash = min($payGiftCash, $payAmount);
-
-        $remainAfterGift = $payAmount - $payGiftCash;
-
-        $payDrinkCardUnits = 0;
-        $payDrinkCardCash  = 0;
-        if ($drinkCardPayableAmount > 0) {
-            $payDrinkCardUnits = min($drinkCardBalance, $drinkCardPayableAmount);
-            $payDrinkCardCash  = intdiv($drinkCardCashCap * $payDrinkCardUnits, $drinkCardPayableAmount);
-        }
-        $payDrinkCardCash = min($payDrinkCardCash, $remainAfterGift);
-
-        $payBalance = $remainAfterGift - $payDrinkCardCash;
-
-        return [
-            'pay_gift'       => $payGiftUnits,
-            'pay_drink_card' => $payDrinkCardUnits,
-            'pay_balance'    => $payBalance,
-            'enough'         => $balance >= $payBalance,
-        ];
-    }
-
-    /**
      * 校验商品并计算金额，$lock 为 true 时对商品行加锁
+     * $strict 为 false 时（仅预览场景使用），商品被下架/删除不再抛异常中断，
+     * 而是剔除后计入 removed_items 返回给前端，由前端自动清理购物车，避免用户永久卡在结算页
      *
      * @param array<int, array{goods_id: int|string, quantity: int|string}> $items
-     * @return array{items: array<int, array<string, mixed>>, total_amount: int, gift_payable_amount: int, gift_cash_cap: int, drink_card_payable_amount: int, drink_card_cash_cap: int}
+     * @return array{items: array<int, array<string, mixed>>, removed_items: array<int, array{goods_id: int, goods_name: string}>, total_amount: int, gift_payable_amount: int, gift_cash_cap: int, drink_card_payable_amount: int, drink_card_cash_cap: int}
      */
-    private static function resolveItems(array $items, bool $lock = false): array
+    private static function resolveItems(array $items, bool $lock = false, bool $strict = true): array
     {
         if ($items === []) {
             throw new BusinessException('请先选择商品');
@@ -457,6 +457,7 @@ class OrderService
         $giftUnit               = SettingService::giftUnit();
         $drinkCardUnit          = SettingService::drinkCardUnit();
         $resolved               = [];
+        $removed                = [];
         $totalAmount            = 0;
         $giftPayableAmount      = 0;
         $giftCashCap            = 0;
@@ -467,7 +468,11 @@ class OrderService
             /** @var Goods|null $goods */
             $goods = $goodsList->get($goodsId);
             if ($goods === null || (int)$goods->status !== Goods::STATUS_ON) {
-                throw new BusinessException('商品已下架，请重新选择');
+                if ($strict) {
+                    throw new BusinessException('商品已下架，请重新选择');
+                }
+                $removed[] = ['goods_id' => $goodsId, 'goods_name' => (string)($goods?->name ?? '')];
+                continue;
             }
             if ((int)$goods->stock !== Goods::STOCK_UNLIMITED && (int)$goods->stock < $quantity) {
                 throw new BusinessException("「{$goods->name}」库存不足");
@@ -501,12 +506,13 @@ class OrderService
             ];
         }
 
-        if ($totalAmount <= 0) {
+        if ($strict && $totalAmount <= 0) {
             throw new BusinessException('订单金额不正确');
         }
 
         return [
             'items'                     => $resolved,
+            'removed_items'             => $removed,
             'total_amount'              => $totalAmount,
             'gift_payable_amount'       => $giftPayableAmount,
             'gift_cash_cap'             => $giftCashCap,

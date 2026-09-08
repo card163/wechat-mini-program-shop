@@ -48,9 +48,9 @@ SELECT '充1000送200', 100000, 20000, 0, 90, 2, 1 FROM DUAL WHERE NOT EXISTS (S
 INSERT INTO `nf_recharge_package` (`title`, `amount`, `gift_amount`, `gift_point`, `gift_expire_days`, `sort`, `status`)
 SELECT '充3000送800', 300000, 80000, 0, 0, 3, 1 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `nf_recharge_package` WHERE `title` = '充3000送800');
 
--- 记分牌兑换
+-- 礼品卡兑换
 INSERT INTO `nf_exchange_goods` (`type`, `name`, `point`, `gift_amount`, `gift_expire_days`, `stock`, `description`, `sort`, `status`)
-SELECT 2, '1元赠金', 300, 100, 90, -1, '300记分牌兑换1元赠金', 1, 1
+SELECT 2, '1元赠金', 300, 100, 90, -1, '300礼品卡兑换1元赠金', 1, 1
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `nf_exchange_goods` WHERE `name` = '1元赠金');
 INSERT INTO `nf_exchange_goods` (`type`, `name`, `point`, `gift_amount`, `gift_expire_days`, `stock`, `description`, `sort`, `status`)
 SELECT 1, '精酿啤酒一扎', 2000, 0, 0, 50, '凭兑换码到吧台核销', 2, 1

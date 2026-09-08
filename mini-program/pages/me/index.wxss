@@ -20,7 +20,8 @@
 .asset-badge {
   position: absolute;
   top: -20rpx;
-  left: 50%;
+  /* 对齐 4 等分 asset-row 中第一列（余额）的中心，而非整卡居中 */
+  left: calc(20rpx + (100% - 40rpx) / 8);
   transform: translateX(-50%);
   background: #d9d9d9;
   color: #1a1a1a;

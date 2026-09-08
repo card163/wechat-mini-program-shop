@@ -192,7 +192,7 @@ class MemberService
             MemberBalanceLog::BIZ_RECHARGE_GIFT  => '充值赠送',
             MemberBalanceLog::BIZ_CONSUME        => '消费',
             MemberBalanceLog::BIZ_REFUND         => '退款',
-            MemberBalanceLog::BIZ_POINT_EXCHANGE => '记分牌兑换',
+            MemberBalanceLog::BIZ_POINT_EXCHANGE => '礼品卡兑换',
             MemberBalanceLog::BIZ_GIFT_EXPIRED   => '赠金过期',
             MemberBalanceLog::BIZ_ADMIN_ADJUST   => '管理员调整',
             MemberBalanceLog::BIZ_DRINK_CARD_EXPIRED => '饮品卡过期',
@@ -204,7 +204,7 @@ class MemberService
     public static function pointBizText(int $bizType): string
     {
         return match ($bizType) {
-            MemberPointLog::BIZ_STORE_IN        => '店内存记分牌',
+            MemberPointLog::BIZ_STORE_IN        => '店内存礼品卡',
             MemberPointLog::BIZ_CONSUME_GAIN    => '消费获得',
             MemberPointLog::BIZ_EXCHANGE_GIFT   => '兑换赠金',
             MemberPointLog::BIZ_EXCHANGE_GOODS  => '兑换商品',
@@ -218,7 +218,7 @@ class MemberService
     {
         return match ($sourceType) {
             MemberGiftBatch::SOURCE_RECHARGE => '充值赠送',
-            MemberGiftBatch::SOURCE_EXCHANGE => '记分牌兑换',
+            MemberGiftBatch::SOURCE_EXCHANGE => '礼品卡兑换',
             MemberGiftBatch::SOURCE_ADMIN    => '管理员发放',
             MemberGiftBatch::SOURCE_REFUND   => '订单退回',
             default                          => '其他',

@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Order extends BaseModel
 {
-    public const int PAY_TYPE_WECHAT  = 1;
-    public const int PAY_TYPE_BALANCE = 2;
+    public const int PAY_TYPE_WECHAT     = 1;
+    public const int PAY_TYPE_BALANCE    = 2;
+    public const int PAY_TYPE_GIFT       = 3;
+    public const int PAY_TYPE_DRINK_CARD = 4;
 
     public const int PAY_STATUS_UNPAID   = 0;
     public const int PAY_STATUS_PAID     = 1;

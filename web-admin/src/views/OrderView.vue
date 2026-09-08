@@ -148,7 +148,7 @@ async function reprint(row: any) {
           <el-descriptions-item label="应付">¥{{ fen2yuan(detail.pay_amount) }}</el-descriptions-item>
           <el-descriptions-item label="微信支付">¥{{ fen2yuan(detail.pay_wechat) }}</el-descriptions-item>
           <el-descriptions-item label="余额支付">¥{{ fen2yuan(detail.pay_balance) }}</el-descriptions-item>
-          <el-descriptions-item :label="`${giftConfig.displayName}抵扣`">{{ giftText(detail.pay_gift) }}</el-descriptions-item>          <el-descriptions-item :label="`${drinkCardConfig.displayName}扣扣`">{{ drinkCardText(detail.pay_drink_card) }}</el-descriptions-item>          <el-descriptions-item label="获得记分牌">{{ detail.gain_point }}</el-descriptions-item>
+          <el-descriptions-item :label="`${giftConfig.displayName}抵扣`">{{ giftText(detail.pay_gift) }}</el-descriptions-item>          <el-descriptions-item :label="`${drinkCardConfig.displayName}扣扣`">{{ drinkCardText(detail.pay_drink_card) }}</el-descriptions-item>          <el-descriptions-item label="获得礼品卡">{{ detail.gain_point }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.remark || '-' }}</el-descriptions-item>
           <el-descriptions-item label="下单时间">{{ detail.created_at }}</el-descriptions-item>
           <el-descriptions-item label="支付时间">{{ detail.paid_at || '-' }}</el-descriptions-item>

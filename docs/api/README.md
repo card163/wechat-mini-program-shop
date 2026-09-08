@@ -79,12 +79,12 @@ HTTP 状态码恒为 `200`（网络层错误除外），业务结果由 `code` �
 |---|---|---|
 | 余额（本金） | `balance` | 充值实付部分，可用于全部商品 |
 | 赠金 | `gift_balance` | 充值/兑换赠送，**按批次记录、可过期**，仅限店内酒水小吃，不可转赠、交易、提现 |
-| 记分牌（积分） | `point` | 当前可用记分牌 |
-| 累计记分牌 | `total_point` | 只增不减，排行榜依据 |
+| 礼品卡（积分） | `point` | 当前可用礼品卡 |
+| 累计礼品卡 | `total_point` | 只增不减，排行榜依据 |
 
-- 记分牌兑换赠金比例：**记分牌 : 赠金 = 300 : 1**（300 记分牌 = 1 元赠金），由配置 `point.point_to_gift_rate` 控制。
+- 礼品卡兑换赠金比例：**礼品卡 : 赠金 = 300 : 1**（300 礼品卡 = 1 元赠金），由配置 `point.point_to_gift_rate` 控制。
 - 赠金消耗顺序：按 `expired_at` 由近及远，先到期的先扣。
-- 任何余额、赠金、记分牌变动都会写入对应流水表，前端可通过流水接口回溯。
+- 任何余额、赠金、礼品卡变动都会写入对应流水表，前端可通过流水接口回溯。
 
 ## 7. 模块索引
 
@@ -95,8 +95,8 @@ HTTP 状态码恒为 `200`（网络层错误除外），业务结果由 `code` �
 | [goods.md](goods.md) | 商品分类、商品、桌号 | `shoping-index.png`、`shoping-checkout-select-table.png` |
 | [order.md](order.md) | 结算、下单、支付、订单 | `shoping-checkout.png`、`me-order-list.png` |
 | [recharge.md](recharge.md) | 充值套餐、充值下单、支付回调 | `rechage.png` |
-| [member.md](member.md) | 个人中心、余额/记分牌/赠金流水 | `me-index.png`、`me-sorce-rows.png`、`me-gift-sorce-rows.png` |
-| [exchange.md](exchange.md) | 记分牌兑换 | `me-exchage-sorce.png` |
+| [member.md](member.md) | 个人中心、余额/礼品卡/赠金流水 | `me-index.png`、`me-sorce-rows.png`、`me-gift-sorce-rows.png` |
+| [exchange.md](exchange.md) | 礼品卡兑换 | `me-exchage-sorce.png` |
 | [wine.md](wine.md) | 存酒、取酒 | `me-store-drink.png`、`me-store-drink-qrcode.png` |
 | [admin.md](admin.md) | 管理后台与店员核销 | — |
 | [printer.md](printer.md) | 接单打印机配置与自动出单 | — |

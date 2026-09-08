@@ -16,6 +16,7 @@
   border: 2rpx solid transparent;
 }
 .pay-option.active { border-color: #e05b5b; }
+.pay-option.disabled { opacity: .5; }
 .pay-name { font-size: 30rpx; font-weight: 700; }
 .balance-option .sub { line-height: 40rpx; }
 .warn { color: #e05b5b; }

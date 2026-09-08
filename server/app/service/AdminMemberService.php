@@ -20,6 +20,7 @@ class AdminMemberService
     public static function paginate(string $keyword, ?int $status, string $orderBy, int $page, int $pageSize): array
     {
         $query = Member::query();
+        $query->where('phone', '<>', '');
 
         if ($keyword !== '') {
             $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $keyword);

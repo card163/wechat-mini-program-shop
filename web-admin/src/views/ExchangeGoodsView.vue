@@ -8,7 +8,7 @@ onMounted(loadGiftConfig)
 
 const columns = computed<CrudColumn[]>(() => [
   { prop: 'name', label: '名称' },
-  { prop: 'point', label: '所需记分牌', width: 130 },
+  { prop: 'point', label: '所需礼品卡', width: 130 },
   { prop: 'gift_amount', label: `兑换${giftConfig.displayName}`, width: 120, type: 'giftAmount' },
   { prop: 'stock', label: '库存', width: 90 },
   { prop: 'exchanged', label: '已兑换', width: 90 },
@@ -28,7 +28,7 @@ const fields = computed<CrudField[]>(() => [
     ],
   },
   { prop: 'cover', label: '封面图', type: 'image' },
-  { prop: 'point', label: '所需记分牌', type: 'number', required: true, default: 0 },
+  { prop: 'point', label: '所需礼品卡', type: 'number', required: true, default: 0 },
   { prop: 'gift_amount', label: `兑换${giftConfig.displayName}`, type: 'giftAmount', default: 0, tip: `仅${giftConfig.displayName}类型有效` },
   { prop: 'gift_expire_days', label: `${giftConfig.displayName}有效天数`, type: 'number', default: 0, tip: '0 表示永久有效' },
   { prop: 'stock', label: '库存', type: 'number', default: -1, tip: '-1 表示不限量' },

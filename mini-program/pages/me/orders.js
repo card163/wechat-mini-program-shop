@@ -1,5 +1,5 @@
 const shopApi = require('../../api/shop');
-const { fen2yuan } = require('../../utils/format');
+const { fen2yuan, giftLabel, drinkCardLabel } = require('../../utils/format');
 
 Page({
   data: {
@@ -53,10 +53,11 @@ Page({
 
   onPay(e) {
     const id = Number(e.currentTarget.dataset.id);
+    const payTypes = [1, 2, 3, 4];
     wx.showActionSheet({
-      itemList: ['余额支付', '微信支付'],
+      itemList: ['微信支付', '余额支付', `${giftLabel()}支付`, `${drinkCardLabel()}支付`],
       success: ({ tapIndex }) => {
-        const payType = tapIndex === 0 ? 2 : 1;
+        const payType = payTypes[tapIndex];
         shopApi.payOrder(id, payType).then((order) => {
           if (order.pay_type === 1 && order.pay_params) {
             wx.requestPayment(

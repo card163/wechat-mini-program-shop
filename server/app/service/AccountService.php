@@ -13,12 +13,12 @@ use app\model\MemberPointLog;
 use Illuminate\Database\Capsule\Manager as Db;
 
 /**
- * 资金与记分牌账户引擎
+ * 资金与礼品卡账户引擎
  *
  * 约定：
  * - 所有方法都必须在外层事务中调用，内部对会员行加 FOR UPDATE 行锁
  * - 金额单位为分，只接受正整数入参，增减由方法语义决定
- * - 任何余额/赠金/记分牌变动都会写入对应流水表
+ * - 任何余额/赠金/礼品卡变动都会写入对应流水表
  */
 class AccountService
 {
@@ -316,7 +316,7 @@ class AccountService
     }
 
     /**
-     * 记分牌变动，$point 正数为增加、负数为扣减
+     * 礼品卡变动，$point 正数为增加、负数为扣减
      */
     public static function changePoint(
         Member $member,
@@ -333,7 +333,7 @@ class AccountService
         $before = (int)$member->point;
         $after  = $before + $point;
         if ($after < 0) {
-            throw new BusinessException('记分牌不足');
+            throw new BusinessException('礼品卡不足');
         }
 
         $member->point = $after;

@@ -5,7 +5,7 @@ import { settingApi } from '@/api'
 
 const GROUPS = [
   { name: 'base', label: '门店信息' },
-  { name: 'point', label: '记分牌/赠金/饮品卡' },
+  { name: 'point', label: '礼品卡/赠金/饮品卡' },
   { name: 'order', label: '订单规则' },
   { name: 'wine', label: '存酒规则' },
 ]
@@ -16,14 +16,14 @@ const LABELS: Record<string, string> = {
   shop_address: '门店地址',
   shop_notice: '门店公告',
   business_hours: '营业时间',
-  point_to_gift_rate: '记分牌兑换赠金比例',
+  point_to_gift_rate: '礼品卡兑换赠金比例',
   gift_default_days: '赠金默认有效天数',
   gift_display_name: '赠金展示名称（可改为如"酒水卡"，仅影响展示文案）',
   gift_unit: '赠金计量单位',
   drink_card_display_name: '饮品卡展示名称（仅影响展示文案）',
   drink_card_unit: '饮品卡计量单位',
   auto_cancel_minutes: '未支付订单自动取消(分钟)',
-  consume_point_rate: '每消费1元赠送记分牌',
+  consume_point_rate: '每消费1元赠送礼品卡',
   gift_pay_enabled: '允许赠金参与点单支付(1开/0关)',
   default_expire_days: '存酒默认保存天数',
   take_code_expire_min: '取酒码有效分钟数',

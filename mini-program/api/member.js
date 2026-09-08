@@ -3,7 +3,9 @@ const { get, post } = require('../utils/request');
 module.exports = {
   info: () => get('/api/member/info'),
   balanceLogs: (params) => get('/api/member/balance-logs', params),
+  giftLogs: (params) => get('/api/member/gift-logs', params),
   drinkCardLogs: (params) => get('/api/member/drink-card-logs', params),
+  pointLogs: (params) => get('/api/member/point-logs', params),
 
   rechargePackages: () => get('/api/recharge/packages'),
   createRecharge: (packageId) => post('/api/recharge/orders', { package_id: packageId }),

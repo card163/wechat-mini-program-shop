@@ -105,7 +105,7 @@ async function loadRecords() {
           <el-table-column prop="record_no" label="兑换单号" width="210" />
           <el-table-column prop="member_id" label="会员ID" width="90" />
           <el-table-column prop="goods_name" label="兑换商品" />
-          <el-table-column prop="point" label="消耗记分牌" width="120" />
+          <el-table-column prop="point" label="消耗礼品卡" width="120" />
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
               <el-tag :type="(EXCHANGE_STATUS[row.status]?.type as any)">{{ EXCHANGE_STATUS[row.status]?.label }}</el-tag>

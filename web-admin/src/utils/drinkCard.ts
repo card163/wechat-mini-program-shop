@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 import { settingApi } from '@/api'
 import { fen2yuan, yuan2fen } from './money'
 
-/** 饮品卡展示名称与计量单位，后台"系统设置-记分牌与赠金"可配置 */
+/** 饮品卡展示名称与计量单位，后台"系统设置-礼品卡与赠金"可配置 */
 export const drinkCardConfig = reactive({
   displayName: '饮品卡',
   unit: '元',

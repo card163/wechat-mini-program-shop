@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\model;
 
 /**
- * 记分牌兑换记录
+ * 礼品卡兑换记录
  */
 class ExchangeRecord extends BaseModel
 {

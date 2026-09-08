@@ -14,8 +14,8 @@ namespace app\model;
  * @property int $balance 本金余额(分)
  * @property int $gift_balance 有效赠金余额(分)
  * @property int $drink_card_balance 有效饮品卡余额
- * @property int $point 当前记分牌
- * @property int $total_point 累计记分牌
+ * @property int $point 当前礼品卡
+ * @property int $total_point 累计礼品卡
  * @property int $status
  */
 class Member extends BaseModel

@@ -129,7 +129,7 @@ class RechargeService
                     (int)$order->gift_point,
                     MemberPointLog::BIZ_STORE_IN,
                     (int)$order->id,
-                    '充值赠送记分牌'
+                    '充值赠送礼品卡'
                 );
             }
 

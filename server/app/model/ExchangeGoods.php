@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\model;
 
 /**
- * 记分牌兑换商品
+ * 礼品卡兑换商品
  */
 class ExchangeGoods extends BaseModel
 {

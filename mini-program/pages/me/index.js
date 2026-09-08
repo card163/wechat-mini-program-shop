@@ -22,6 +22,7 @@ Page({
           giftLabel: giftLabel(),
           drinkCardText: drinkCardAmountText(member.drink_card_balance),
           drinkCardLabel: drinkCardLabel(),
+          pointText: String(member.point || 0),
         });
       })
       .catch(() => {});
@@ -47,6 +48,7 @@ Page({
         giftLabel: giftLabel(),
         drinkCardText: drinkCardAmountText(member.drink_card_balance),
         drinkCardLabel: drinkCardLabel(),
+        pointText: String(member.point || 0),
       });
       const action = this.pendingAction;
       this.pendingAction = null;
@@ -101,8 +103,17 @@ Page({
   goWineCode() {
     wx.navigateTo({ url: '/pages/wine/index?autoCode=1' });
   },
+  goBalanceLogs() {
+    wx.navigateTo({ url: '/pages/me/balance-logs' });
+  },
+  goGiftLogs() {
+    wx.navigateTo({ url: '/pages/me/gift-logs' });
+  },
   goDrinkCardLogs() {
     wx.navigateTo({ url: '/pages/me/drink-card-logs' });
+  },
+  goPointLogs() {
+    wx.navigateTo({ url: '/pages/me/point-logs' });
   },
 
   go(e) {

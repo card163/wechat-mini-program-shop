@@ -155,7 +155,7 @@ class AdminOrderService
                     -(int)$order->gain_point,
                     MemberPointLog::BIZ_REFUND_ROLLBACK,
                     (int)$order->id,
-                    '订单退款回滚记分牌',
+                    '订单退款回滚礼品卡',
                     $operatorId
                 );
             }
