@@ -8,6 +8,10 @@
   <view class="section-label">支付方式</view>
   <view class="pay-option {{payType === 1 ? 'active' : ''}}" data-type="1" bindtap="onPayTypeChange">
     <view class="pay-name">微信支付</view>
+    <view class="sub" wx:if="{{payType === 1 && comboConfirmed}}">
+      已启用组合支付：{{giftLabel}}抵¥{{comboSummary.giftCashText}} + {{drinkCardLabel}}抵¥{{comboSummary.drinkCardCashText}}，微信实付 ¥{{comboSummary.wechatAmountText}}
+    </view>
+    <view class="sub" wx:elif="{{payType === 1 && preview.combo_pay.show}}">可尝试{{giftLabel}}/{{drinkCardLabel}}余额合并微信支付，点击选择</view>
   </view>
   <view
     class="pay-option balance-option {{payType === 2 ? 'active' : ''}} {{!preview.pay_options.balance.usable ? 'disabled' : ''}}"
@@ -86,6 +90,29 @@
       </block>
     </scroll-view>
     <view class="btn-gold table-picker-confirm" bindtap="confirmTablePicker">确定</view>
+  </view>
+</view>
+
+<view class="modal-mask" wx:if="{{comboModalVisible}}" bindtap="closeComboModal">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeComboModal">✕</view>
+    <view class="modal-title">组合支付</view>
+    <view class="sub" style="margin-bottom: 20rpx;">
+      您的{{giftLabel}}/{{drinkCardLabel}}余额不足以单独支付整单，可选择合并抵扣，不足部分仍由微信支付
+    </view>
+    <view class="combo-row {{comboTempUseGift ? 'active' : ''}}" bindtap="onToggleComboGift">
+      <view>{{comboTempUseGift ? '✓' : ''}} 使用{{giftLabel}}余额</view>
+      <view class="price">可抵¥{{comboPreview.giftCashText}}</view>
+    </view>
+    <view class="combo-row {{comboTempUseDrinkCard ? 'active' : ''}}" bindtap="onToggleComboDrinkCard">
+      <view>{{comboTempUseDrinkCard ? '✓' : ''}} 使用{{drinkCardLabel}}余额</view>
+      <view class="price">可抵¥{{comboPreview.drinkCardCashText}}</view>
+    </view>
+    <view class="combo-summary">微信需支付：¥{{comboPreview.wechatAmountText}}</view>
+    <view class="modal-actions">
+      <view class="btn-ghost" bindtap="useWechatOnly">仅微信支付</view>
+      <view class="btn-gold" bindtap="confirmCombo">确认组合支付</view>
+    </view>
   </view>
 </view>
 

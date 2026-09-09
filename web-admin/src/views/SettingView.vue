@@ -22,6 +22,8 @@ const LABELS: Record<string, string> = {
   gift_unit: '赠金计量单位',
   drink_card_display_name: '饮品卡展示名称（仅影响展示文案）',
   drink_card_unit: '饮品卡计量单位',
+  gift_cash_rate: '酒水卡兑法币汇率(元)，用于微信组合支付折算，0=不开启',
+  drink_card_cash_rate: '饮品卡兑法币汇率(元)，用于微信组合支付折算，0=不开启',
   auto_cancel_minutes: '未支付订单自动取消(分钟)',
   consume_point_rate: '每消费1元赠送礼品卡',
   gift_pay_enabled: '允许赠金参与点单支付(1开/0关)',
@@ -59,7 +61,7 @@ async function save(group: string) {
     <el-tabs v-model="active" @tab-change="onTabChange as any">
       <el-tab-pane v-for="group in GROUPS" :key="group.name" :label="group.label" :name="group.name">
         <el-card v-loading="loading">
-          <el-form label-width="220px" v-if="forms[group.name]">
+          <el-form label-width="450px" v-if="forms[group.name]">
             <el-form-item v-for="(_, key) in forms[group.name]" :key="key" :label="LABELS[key] || key">
               <el-select v-if="key === 'gift_unit' || key === 'drink_card_unit'" v-model="forms[group.name][key]" style="max-width: 420px">
                 <el-option label="元（按金额记账，2位小数展示）" value="元" />

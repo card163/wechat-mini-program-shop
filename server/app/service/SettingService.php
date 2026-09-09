@@ -68,4 +68,25 @@ class SettingService
     {
         return self::get('point', 'drink_card_unit', '元') === '张' ? '张' : '元';
     }
+
+    /**
+     * 酒水卡(赠金)兑法币汇率，单位分/张(或分/元记账单位)，仅用于微信组合支付折算；0 表示不开启
+     */
+    public static function giftCashRate(): int
+    {
+        return self::yuanToFen(self::get('point', 'gift_cash_rate', '0'));
+    }
+
+    /**
+     * 饮品卡兑法币汇率，单位分/张(或分/元记账单位)，仅用于微信组合支付折算；0 表示不开启
+     */
+    public static function drinkCardCashRate(): int
+    {
+        return self::yuanToFen(self::get('point', 'drink_card_cash_rate', '0'));
+    }
+
+    private static function yuanToFen(string $value): int
+    {
+        return $value === '' ? 0 : (int)round(((float)$value) * 100);
+    }
 }

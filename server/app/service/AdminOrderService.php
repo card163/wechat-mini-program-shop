@@ -175,11 +175,14 @@ class AdminOrderService
             }
 
             if ((int)$order->pay_wechat > 0) {
+                // 微信退款接口的 total 必须是当初该笔交易在微信侧实际收到的金额：
+                // 纯微信支付时 pay_wechat===pay_amount；微信+酒水卡/饮品卡组合支付时微信只收了差额，
+                // 传 pay_amount 会与微信侧记录的原始交易金额不符导致退款失败，故统一改用 pay_wechat
                 WechatPayService::refund(
                     (string)$order->order_no,
                     'RF' . (string)$order->order_no,
                     (int)$order->pay_wechat,
-                    (int)$order->pay_amount
+                    (int)$order->pay_wechat
                 );
             }
 

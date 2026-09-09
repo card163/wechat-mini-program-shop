@@ -6,7 +6,12 @@ module.exports = {
   goodsDetail: (id) => get(`/api/goods/${id}`),
   tables: () => get('/api/tables'),
 
-  preview: (items) => post('/api/order/preview', { items: JSON.stringify(items) }),
+  preview: (items, useGift, useDrinkCard) =>
+    post('/api/order/preview', {
+      items: JSON.stringify(items),
+      use_gift: useGift === false ? 0 : 1,
+      use_drink_card: useDrinkCard === false ? 0 : 1,
+    }),
   createOrder: (payload) => post('/api/orders', payload),
   orders: (params) => get('/api/orders', params),
   orderDetail: (id) => get(`/api/orders/${id}`),

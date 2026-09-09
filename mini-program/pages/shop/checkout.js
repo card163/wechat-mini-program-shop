@@ -18,6 +18,15 @@ Page({
     submitting: false,
     giftLabel: '赠金',
     drinkCardLabel: '饮品卡',
+    // 微信+酒水卡/饮品卡组合支付：comboConfirmed 表示用户已在弹窗里确认启用组合抵扣
+    comboModalVisible: false,
+    comboConfirmed: false,
+    comboUseGift: true,
+    comboUseDrinkCard: true,
+    comboTempUseGift: true,
+    comboTempUseDrinkCard: true,
+    comboSummary: null,
+    comboPreview: null,
   },
 
   onLoad() {
@@ -149,10 +158,65 @@ Page({
       wx.showToast({ title: '该支付方式暂不可用', icon: 'none' });
       return;
     }
-    this.setData({ payType });
+    // 微信支付若检测到酒水卡/饮品卡余额不足以单独支付整单，弹窗询问是否合并微信组合支付
+    if (payType === 1 && this.data.preview.combo_pay && this.data.preview.combo_pay.show) {
+      this.openComboModal();
+      return;
+    }
+    this.setData({ payType, comboConfirmed: false });
   },
   onRemarkInput(e) {
     this.setData({ remark: e.detail.value });
+  },
+
+  openComboModal() {
+    this.setData({
+      comboModalVisible: true,
+      comboTempUseGift: this.data.comboUseGift,
+      comboTempUseDrinkCard: this.data.comboUseDrinkCard,
+    });
+    this.loadComboPreview();
+  },
+  closeComboModal() {
+    this.setData({ comboModalVisible: false });
+  },
+  // 弹窗内实时按当前勾选状态向服务端要「本次微信实付多少钱」，前端不自行计算金额
+  loadComboPreview() {
+    shopApi
+      .preview(this.data.items, this.data.comboTempUseGift, this.data.comboTempUseDrinkCard)
+      .then((preview) => {
+        const combo = preview.combo_pay;
+        this.setData({
+          comboPreview: Object.assign({}, combo, {
+            giftCashText: fen2yuan(combo.gift_cash),
+            drinkCardCashText: fen2yuan(combo.drink_card_cash),
+            wechatAmountText: fen2yuan(combo.wechat_amount),
+          }),
+        });
+      });
+  },
+  onToggleComboGift() {
+    this.setData({ comboTempUseGift: !this.data.comboTempUseGift }, () => this.loadComboPreview());
+  },
+  onToggleComboDrinkCard() {
+    this.setData({ comboTempUseDrinkCard: !this.data.comboTempUseDrinkCard }, () => this.loadComboPreview());
+  },
+  useWechatOnly() {
+    this.setData({ payType: 1, comboConfirmed: false, comboModalVisible: false });
+  },
+  confirmCombo() {
+    if (!this.data.comboTempUseGift && !this.data.comboTempUseDrinkCard) {
+      wx.showToast({ title: '请至少选择一种余额参与组合支付', icon: 'none' });
+      return;
+    }
+    this.setData({
+      payType: 1,
+      comboConfirmed: true,
+      comboUseGift: this.data.comboTempUseGift,
+      comboUseDrinkCard: this.data.comboTempUseDrinkCard,
+      comboSummary: this.data.comboPreview,
+      comboModalVisible: false,
+    });
   },
 
   submit() {
@@ -164,15 +228,19 @@ Page({
 
     this.setData({ submitting: true });
 
+    const useCombo = this.data.payType === 1 && this.data.comboConfirmed && (this.data.comboUseGift || this.data.comboUseDrinkCard);
+
     shopApi
       .createOrder({
         items: JSON.stringify(this.data.items),
         table_id: this.data.tableId,
-        pay_type: this.data.payType,
+        pay_type: useCombo ? 5 : this.data.payType,
         remark: this.data.remark,
+        use_gift: useCombo && this.data.comboUseGift ? 1 : 0,
+        use_drink_card: useCombo && this.data.comboUseDrinkCard ? 1 : 0,
       })
       .then((order) => {
-        if (order.pay_type === 1 && order.pay_params) {
+        if ((order.pay_type === 1 || order.pay_type === 5) && order.pay_params) {
           return this.requestPayment(order);
         }
         this.onPaid();

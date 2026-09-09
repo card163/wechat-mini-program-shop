@@ -51,3 +51,12 @@
 }
 .table-cell.active { border-color: var(--accent); color: var(--accent); background: rgba(212, 175, 55, .12); }
 .table-picker-confirm { margin-top: 28rpx; height: 76rpx; line-height: 76rpx; text-align: center; border-radius: 12rpx; font-size: 28rpx; }
+
+.combo-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20rpx; margin-bottom: 16rpx;
+  background: var(--bg-card); border: 2rpx solid transparent; border-radius: 12rpx;
+  font-size: 28rpx;
+}
+.combo-row.active { border-color: var(--accent); color: var(--accent); }
+.combo-summary { text-align: right; font-size: 28rpx; color: var(--accent); margin: 12rpx 0 4rpx; }

@@ -14,27 +14,34 @@ class OrderController
 {
     public function preview(Request $request): Response
     {
-        return Result::success(OrderService::preview((int)$request->memberId, $this->items($request)));
+        $useGift      = (string)$request->post('use_gift', '1') !== '0';
+        $useDrinkCard = (string)$request->post('use_drink_card', '1') !== '0';
+
+        return Result::success(OrderService::preview((int)$request->memberId, $this->items($request), $useGift, $useDrinkCard));
     }
 
     public function create(Request $request): Response
     {
-        $tableId = (int)$request->post('table_id', 0);
-        $payType = (int)$request->post('pay_type', 0);
-        $remark  = (string)$request->post('remark', '');
+        $tableId      = (int)$request->post('table_id', 0);
+        $payType      = (int)$request->post('pay_type', 0);
+        $remark       = (string)$request->post('remark', '');
+        $useGift      = (string)$request->post('use_gift', '0') === '1';
+        $useDrinkCard = (string)$request->post('use_drink_card', '0') === '1';
 
         v::intVal()->positive()->setTemplate('请选择桌号')->assert($tableId);
 
-        $result = OrderService::create((int)$request->memberId, $this->items($request), $tableId, $payType, $remark);
+        $result = OrderService::create((int)$request->memberId, $this->items($request), $tableId, $payType, $remark, $useGift, $useDrinkCard);
 
         return Result::success($result);
     }
 
     public function pay(Request $request, int $id): Response
     {
-        $payType = (int)$request->post('pay_type', 0);
+        $payType      = (int)$request->post('pay_type', 0);
+        $useGift      = (string)$request->post('use_gift', '0') === '1';
+        $useDrinkCard = (string)$request->post('use_drink_card', '0') === '1';
 
-        return Result::success(OrderService::pay((int)$request->memberId, $id, $payType));
+        return Result::success(OrderService::pay((int)$request->memberId, $id, $payType, $useGift, $useDrinkCard));
     }
 
     public function index(Request $request): Response
