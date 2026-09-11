@@ -62,9 +62,10 @@
 
 - `stock` 为 `-1` 表示不限库存。
 - `gift_payable=1` 表示该商品可用赠金支付；为 `0` 时结算页不得把赠金计入抵扣。
-- 管理后台维护商品时，`gift_payable=1` 还需填写 `gift_amount`（兑换该商品单件固定消耗的赠金数量，与现金售价无关，`gift_payable` 关闭时可不填/忽略），该字段不对小程序端 `/api/goods` 暴露，结算抵扣由 `/api/order/preview` 与 `/api/orders` 服务端自动计算。
+- 管理后台维护商品时，`gift_payable=1` 还需填写 `gift_amount`（兑换该商品单件固定消耗的赠金数量，与现金售价无关，`gift_payable` 关闭时可不填/忽略），结算抵扣仍由 `/api/order/preview` 与 `/api/orders` 服务端自动计算。
 - 「赠金」的对外展示名称与计量单位（元/张）可在管理后台「系统设置-礼品卡与赠金」配置，参见 [home.md](./home.md) 的 `gift` 字段。
-- 管理后台维护商品时可额外配置 `drink_card_gift_amount`（购买该商品单件自动赠送的饮品卡数量，0 表示不赠送）与 `drink_card_gift_expire_days`（赠送的饮品卡有效天数，0 表示永久有效）。顾客下单支付成功（微信支付/余额支付均适用）后，服务端按 `drink_card_gift_amount × 购买数量` 自动发放一批饮品卡到会员账户，与该商品是否支持“饮品卡抵扣支付”（`drink_card_payable`/`drink_card_amount`）互不影响。这两个字段仅供管理后台维护，不对小程序端 `/api/goods` 暴露。
+- 管理后台维护商品时可额外配置 `drink_card_gift_amount`（购买该商品单件自动赠送的饮品卡数量，0 表示不赠送）与 `drink_card_gift_expire_days`（赠送的饮品卡有效天数，0 表示永久有效）。顾客下单支付成功（微信支付/余额支付均适用）后，服务端按 `drink_card_gift_amount × 购买数量` 自动发放一批饮品卡到会员账户，与该商品是否支持“饮品卡抵扣支付”（`drink_card_payable`/`drink_card_amount`）互不影响。
+- `gift_amount`/`drink_card_amount`/`drink_card_gift_amount`/`drink_card_gift_expire_days` 这 4 个字段**只在商品详情接口** `GET /api/goods/{id}` 暴露（供小程序点单页底部详情抽屉展示“可用赠金/饮品卡支付需消耗多少”“购买赠送多少饮品卡”），商品列表接口 `GET /api/goods` 不返回，减少列表接口体积。
 
 ## 3. 商品详情
 
@@ -89,7 +90,12 @@
     "stock": -1,
     "sales": 32,
     "gift_payable": 1,
-    "description": "<p>商品详情</p>"
+    "drink_card_payable": 0,
+    "description": "<p>商品详情</p>",
+    "gift_amount": 12800,
+    "drink_card_amount": 0,
+    "drink_card_gift_amount": 0,
+    "drink_card_gift_expire_days": 0
   }
 }
 ```

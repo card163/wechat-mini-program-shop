@@ -69,6 +69,10 @@ class CatalogService
         return self::formatGoods($goods) + [
             'images'      => (array)($goods->images ?? []),
             'description' => (string)$goods->description,
+            'gift_amount'                 => (int)$goods->gift_amount,
+            'drink_card_amount'           => (int)$goods->drink_card_amount,
+            'drink_card_gift_amount'      => (int)$goods->drink_card_gift_amount,
+            'drink_card_gift_expire_days' => (int)$goods->drink_card_gift_expire_days,
         ];
     }
 

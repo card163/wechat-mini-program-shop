@@ -18,19 +18,17 @@
   <scroll-view class="list" scroll-y>
     <view wx:if="{{!loading && !goods.length}}" class="empty">暂无商品</view>
 
-    <view wx:for="{{goods}}" wx:key="id" class="goods">
+    <view wx:for="{{goods}}" wx:key="id" class="goods" data-id="{{item.id}}" bindtap="openGoodsDetail">
       <image class="goods-img" src="{{item.cover}}" mode="aspectFill" />
       <view class="goods-info">
         <view class="goods-name">{{item.name}}</view>
         <view class="sub goods-desc">{{item.subtitle}}</view>
-        <view class="sub" wx:if="{{item.gift_payable === 0}}">不支持{{giftLabel}}支付</view>
-        <view class="sub" wx:if="{{item.drink_card_payable === 1}}">支持{{drinkCardLabel}}支付</view>
         <view class="row-between goods-bottom">
           <view class="price">¥{{item.priceText}}</view>
-          <view class="stepper">
-            <view wx:if="{{item.quantity > 0}}" class="step-btn" data-id="{{item.id}}" bindtap="onMinus">-</view>
+          <view class="stepper" catchtap="noop">
+            <view wx:if="{{item.quantity > 0}}" class="step-btn" data-id="{{item.id}}" catchtap="onMinus">-</view>
             <view wx:if="{{item.quantity > 0}}" class="step-num">{{item.quantity}}</view>
-            <view class="step-btn add" data-id="{{item.id}}" bindtap="onAdd">+</view>
+            <view class="step-btn add" data-id="{{item.id}}" catchtap="onAdd">+</view>
           </view>
         </view>
       </view>
@@ -40,11 +38,90 @@
 </view>
 
 <view class="cart-bar">
-  <view class="cart-info">
+  <view class="cart-info" bindtap="openCartModal">
     <view class="price">¥{{cartAmountText}}</view>
     <view class="sub">共{{cartCount}}件</view>
   </view>
   <view class="cart-btn {{cartCount ? '' : 'disabled'}}" bindtap="goCheckout">去结算</view>
+</view>
+
+<view class="modal-mask" wx:if="{{showCartModal}}" bindtap="closeCartModal">
+  <view class="modal-box cart-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeCartModal">✕</view>
+    <view class="modal-title">已选商品</view>
+    <scroll-view class="cart-list-scroll" scroll-y>
+      <view wx:for="{{cartList}}" wx:key="goods_id" class="cart-row">
+        <image class="cart-row-img" src="{{item.cover}}" mode="aspectFill" />
+        <view class="cart-row-info">
+          <view class="cart-row-name">{{item.name}}</view>
+          <view class="row-between">
+            <view class="price">¥{{item.priceText}}</view>
+            <view class="sub">小计 ¥{{item.subtotalText}}</view>
+          </view>
+        </view>
+        <view class="stepper">
+          <view class="step-btn" data-id="{{item.goods_id}}" bindtap="onMinus">-</view>
+          <view class="step-num">{{item.quantity}}</view>
+          <view class="step-btn add" data-id="{{item.goods_id}}" bindtap="onAdd">+</view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="modal-actions">
+      <view class="btn-ghost" bindtap="onClearCart">清空购物车</view>
+      <view class="btn-gold" bindtap="closeCartModal">继续点单</view>
+    </view>
+  </view>
+</view>
+
+<view class="drawer-mask" wx:if="{{showDetailModal}}" bindtap="closeDetailModal">
+  <view class="drawer-box" catchtap="noop">
+    <view class="drawer-handle" />
+    <view wx:if="{{detailLoading}}" class="drawer-loading">加载中...</view>
+
+    <block wx:if="{{!detailLoading}}">
+      <scroll-view class="drawer-scroll" scroll-y>
+        <image class="drawer-cover" src="{{detailGoods.cover}}" mode="aspectFill" />
+        <view class="drawer-body">
+          <view class="drawer-name">{{detailGoods.name}}</view>
+          <view class="sub" wx:if="{{detailGoods.subtitle}}">{{detailGoods.subtitle}}</view>
+
+          <view class="row-between drawer-price-row">
+            <view>
+              <text class="price big">¥{{detailGoods.priceText}}</text>
+              <text class="sub strike" wx:if="{{detailGoods.origin_price > 0}}">¥{{detailGoods.originPriceText}}</text>
+            </view>
+            <view class="sub">销量{{detailGoods.sales}} · 库存{{detailGoods.stockText}}</view>
+          </view>
+
+          <view class="drawer-tags">
+            <view class="drawer-tag {{detailGoods.gift_payable === 1 ? '' : 'off'}}">
+              {{detailGoods.gift_payable === 1 ? '可用' + giftLabel + '支付，需' + detailGoods.giftAmountText : '不支持' + giftLabel + '支付'}}
+            </view>
+            <view class="drawer-tag {{detailGoods.drink_card_payable === 1 ? '' : 'off'}}">
+              {{detailGoods.drink_card_payable === 1 ? '可用' + drinkCardLabel + '支付，需' + detailGoods.drinkCardAmountText : '不支持' + drinkCardLabel + '支付'}}
+            </view>
+            <view class="drawer-tag gift" wx:if="{{detailGoods.drink_card_gift_amount > 0}}">
+              购买即赠{{detailGoods.drinkCardGiftAmountText}}{{drinkCardLabel}}，{{detailGoods.drinkCardGiftExpireText}}
+            </view>
+          </view>
+
+          <block wx:if="{{detailGoods.description}}">
+            <view class="section-label">商品详情</view>
+            <view class="drawer-desc">{{detailGoods.description}}</view>
+          </block>
+        </view>
+      </scroll-view>
+
+      <view class="drawer-footer">
+        <view class="stepper">
+          <view wx:if="{{detailGoods.quantity > 0}}" class="step-btn" bindtap="onDetailMinus">-</view>
+          <view wx:if="{{detailGoods.quantity > 0}}" class="step-num">{{detailGoods.quantity}}</view>
+          <view class="step-btn add" bindtap="onDetailAdd">+</view>
+        </view>
+        <view class="cart-btn" bindtap="onDetailPrimary">{{detailGoods.quantity > 0 ? '关闭' : '加入购物车'}}</view>
+      </view>
+    </block>
+  </view>
 </view>
 
 <phone-login-modal wx:if="{{showPhoneModal}}" bind:login="onPhoneBound" />

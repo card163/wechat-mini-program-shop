@@ -1,7 +1,7 @@
 const shopApi = require('../../api/shop');
 const memberApi = require('../../api/member');
 const { shopInfo } = require('../../api/auth');
-const { fen2yuan, giftLabel, drinkCardLabel } = require('../../utils/format');
+const { fen2yuan, giftLabel, drinkCardLabel, giftAmountText, drinkCardAmountText } = require('../../utils/format');
 
 const CART_KEY = 'nf_cart';
 
@@ -12,10 +12,15 @@ Page({
     currentCategory: 0,
     goods: [],
     cart: {},
+    cartList: [],
     cartCount: 0,
     cartAmountText: '0.00',
     loading: true,
     showPhoneModal: false,
+    showCartModal: false,
+    showDetailModal: false,
+    detailLoading: false,
+    detailGoods: {},
     giftLabel: '赠金',
     drinkCardLabel: '饮品卡',
   },
@@ -58,21 +63,37 @@ Page({
 
   onAdd(e) {
     const id = Number(e.currentTarget.dataset.id);
-    const goods = this.data.goods.find((item) => item.id === id);
-    const cart = Object.assign({}, this.data.cart);
-    const current = cart[id] ? cart[id].quantity : 0;
+    this.addOne(id, this.data.goods.find((item) => item.id === id));
+  },
 
-    if (goods.stock !== -1 && current + 1 > goods.stock) {
+  onMinus(e) {
+    this.minusOne(Number(e.currentTarget.dataset.id));
+  },
+
+  /** 加购一件，goodsRef 为商品列表中的原始记录，找不到时回退用购物车里已存的快照 */
+  addOne(id, goodsRef) {
+    const cart = Object.assign({}, this.data.cart);
+    const existing = cart[id];
+    const current = existing ? existing.quantity : 0;
+    const stock = goodsRef ? goodsRef.stock : existing ? existing.stock : -1;
+
+    if (stock !== -1 && current + 1 > stock) {
       wx.showToast({ title: '库存不足', icon: 'none' });
       return;
     }
 
-    cart[id] = { goods_id: id, name: goods.name, price: goods.price, quantity: current + 1 };
+    cart[id] = {
+      goods_id: id,
+      name: goodsRef ? goodsRef.name : existing.name,
+      price: goodsRef ? goodsRef.price : existing.price,
+      cover: goodsRef ? goodsRef.cover : existing ? existing.cover : '',
+      stock,
+      quantity: current + 1,
+    };
     this.updateCart(cart);
   },
 
-  onMinus(e) {
-    const id = Number(e.currentTarget.dataset.id);
+  minusOne(id) {
     const cart = Object.assign({}, this.data.cart);
     if (!cart[id]) return;
 
@@ -88,14 +109,23 @@ Page({
   updateCart(cart) {
     let count = 0;
     let amount = 0;
+    const cartList = [];
     Object.keys(cart).forEach((key) => {
-      count += cart[key].quantity;
-      amount += cart[key].price * cart[key].quantity;
+      const item = cart[key];
+      count += item.quantity;
+      amount += item.price * item.quantity;
+      cartList.push(
+        Object.assign({}, item, {
+          priceText: fen2yuan(item.price),
+          subtotalText: fen2yuan(item.price * item.quantity),
+        })
+      );
     });
 
     wx.setStorageSync(CART_KEY, cart);
-    this.setData({ cart, cartCount: count, cartAmountText: fen2yuan(amount) });
+    this.setData({ cart, cartList, cartCount: count, cartAmountText: fen2yuan(amount) });
     this.syncCartToGoods(cart);
+    if (!count) this.setData({ showCartModal: false });
   },
 
   restoreCart() {
@@ -109,6 +139,72 @@ Page({
       Object.assign({}, item, { quantity: source[item.id] ? source[item.id].quantity : 0 })
     );
     this.setData({ goods });
+  },
+
+  openCartModal() {
+    if (!this.data.cartCount) return;
+    this.setData({ showCartModal: true });
+  },
+
+  closeCartModal() {
+    this.setData({ showCartModal: false });
+  },
+
+  onClearCart() {
+    this.clearCart();
+  },
+
+  noop() {},
+
+  /** 点击商品行打开底部详情抽屉，拉取完整详情字段（包含可用赠金/饮品卡支付需消耗量、购买赠送饮品卡等） */
+  openGoodsDetail(e) {
+    const id = Number(e.currentTarget.dataset.id);
+    this.setData({ showDetailModal: true, detailLoading: true, detailGoods: {} });
+    shopApi
+      .goodsDetail(id)
+      .then((goods) => {
+        const quantity = this.data.cart[id] ? this.data.cart[id].quantity : 0;
+        const detailGoods = Object.assign({}, goods, {
+          quantity,
+          priceText: fen2yuan(goods.price),
+          originPriceText: fen2yuan(goods.origin_price),
+          stockText: goods.stock === -1 ? '不限' : String(goods.stock),
+          giftAmountText: giftAmountText(goods.gift_amount),
+          drinkCardAmountText: drinkCardAmountText(goods.drink_card_amount),
+          drinkCardGiftAmountText: drinkCardAmountText(goods.drink_card_gift_amount),
+          drinkCardGiftExpireText:
+            goods.drink_card_gift_expire_days > 0 ? `有效期${goods.drink_card_gift_expire_days}天` : '永久有效',
+        });
+        this.setData({ detailGoods, detailLoading: false });
+      })
+      .catch(() => {
+        this.setData({ detailLoading: false });
+        wx.showToast({ title: '商品不存在或已下架', icon: 'none' });
+        this.closeDetailModal();
+      });
+  },
+
+  closeDetailModal() {
+    this.setData({ showDetailModal: false });
+  },
+
+  onDetailAdd() {
+    const id = this.data.detailGoods.id;
+    this.addOne(id, this.data.detailGoods);
+    this.setData({ 'detailGoods.quantity': this.data.cart[id] ? this.data.cart[id].quantity : 0 });
+  },
+
+  onDetailMinus() {
+    const id = this.data.detailGoods.id;
+    this.minusOne(id);
+    this.setData({ 'detailGoods.quantity': this.data.cart[id] ? this.data.cart[id].quantity : 0 });
+  },
+
+  onDetailPrimary() {
+    if (!this.data.detailGoods.quantity) {
+      this.onDetailAdd();
+    }
+    this.closeDetailModal();
   },
 
   goCheckout() {
