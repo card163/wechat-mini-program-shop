@@ -5,34 +5,47 @@
 </view>
 
 <view class="shop">
-  <scroll-view class="side" scroll-y>
+  <scroll-view class="side" scroll-y scroll-with-animation scroll-into-view="{{sideScrollIntoViewId}}">
     <view
       wx:for="{{categories}}"
       wx:key="id"
+      id="side-{{item.id}}"
       class="side-item {{currentCategory === item.id ? 'active' : ''}}"
       data-id="{{item.id}}"
       bindtap="onCategoryTap"
     >{{item.name}}</view>
   </scroll-view>
 
-  <scroll-view class="list" scroll-y>
-    <view wx:if="{{!loading && !goods.length}}" class="empty">暂无商品</view>
+  <scroll-view
+    class="list"
+    scroll-y
+    scroll-with-animation
+    scroll-into-view="{{scrollIntoViewId}}"
+    bindscroll="onListScroll"
+  >
+    <view wx:if="{{!loading && !hasGoods}}" class="empty">暂无商品</view>
 
-    <view wx:for="{{goods}}" wx:key="id" class="goods" data-id="{{item.id}}" bindtap="openGoodsDetail">
-      <image class="goods-img" src="{{item.cover}}" mode="aspectFill" />
-      <view class="goods-info">
-        <view class="goods-name">{{item.name}}</view>
-        <view class="sub goods-desc">{{item.subtitle}}</view>
-        <view class="row-between goods-bottom">
-          <view class="price">¥{{item.priceText}}</view>
-          <view class="stepper" catchtap="noop">
-            <view wx:if="{{item.quantity > 0}}" class="step-btn" data-id="{{item.id}}" catchtap="onMinus">-</view>
-            <view wx:if="{{item.quantity > 0}}" class="step-num">{{item.quantity}}</view>
-            <view class="step-btn add" data-id="{{item.id}}" catchtap="onAdd">+</view>
+    <block wx:for="{{sections}}" wx:for-item="section" wx:key="id">
+      <view id="anchor-{{section.id}}" class="section-anchor" />
+      <view class="section-title">{{section.name}}</view>
+      <view wx:if="{{!section.goods.length}}" class="section-empty">该分类暂无商品</view>
+
+      <view wx:for="{{section.goods}}" wx:for-item="item" wx:key="id" class="goods" data-id="{{item.id}}" bindtap="openGoodsDetail">
+        <image class="goods-img" src="{{item.cover}}" mode="aspectFill" />
+        <view class="goods-info">
+          <view class="goods-name">{{item.name}}</view>
+          <view class="sub goods-desc">{{item.subtitle}}</view>
+          <view class="row-between goods-bottom">
+            <view class="price">¥{{item.priceText}}</view>
+            <view class="stepper" catchtap="noop">
+              <view wx:if="{{item.quantity > 0}}" class="step-btn" data-id="{{item.id}}" catchtap="onMinus">-</view>
+              <view wx:if="{{item.quantity > 0}}" class="step-num">{{item.quantity}}</view>
+              <view class="step-btn add" data-id="{{item.id}}" catchtap="onAdd">+</view>
+            </view>
           </view>
         </view>
       </view>
-    </view>
+    </block>
     <view class="list-bottom" />
   </scroll-view>
 </view>

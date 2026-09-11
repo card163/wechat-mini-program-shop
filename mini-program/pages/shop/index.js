@@ -10,7 +10,10 @@ Page({
     shop: {},
     categories: [],
     currentCategory: 0,
-    goods: [],
+    sections: [],
+    hasGoods: false,
+    scrollIntoViewId: '',
+    sideScrollIntoViewId: '',
     cart: {},
     cartList: [],
     cartCount: 0,
@@ -24,6 +27,10 @@ Page({
     giftLabel: '赠金',
     drinkCardLabel: '饮品卡',
   },
+
+  // 各分类锚点相对滚动内容顶部的偏移量（滚动时联动左侧tab用），非响应式数据故不放 data 里
+  sectionTops: [],
+  ignoreScrollSpy: false,
 
   onLoad() {
     this.setData({ giftLabel: giftLabel(), drinkCardLabel: drinkCardLabel() });
@@ -39,35 +46,98 @@ Page({
     shopApi
       .categories()
       .then((list) => {
-        this.setData({ categories: list });
-        return this.loadGoods(list.length ? list[0].id : 0);
+        this.setData({ categories: list, currentCategory: list.length ? list[0].id : 0 });
+        return this.loadAllSections(list);
       })
       .catch(() => this.setData({ loading: false }));
   },
 
-  loadGoods(categoryId) {
-    this.setData({ loading: true, currentCategory: categoryId });
-    return shopApi
-      .goods({ category_id: categoryId, page: 1, page_size: 100 })
-      .then((res) => {
-        const goods = res.list.map((item) => Object.assign({}, item, { priceText: fen2yuan(item.price) }));
-        this.setData({ goods, loading: false });
-        this.syncCartToGoods();
+  /** 一次性拉取全部分类的商品，拼成单条可滚动列表（各分类内部按原有 sort 排序） */
+  loadAllSections(categories) {
+    this.setData({ loading: true });
+    return Promise.all(categories.map((cat) => shopApi.goods({ category_id: cat.id, page: 1, page_size: 100 })))
+      .then((results) => {
+        const sections = categories.map((cat, idx) => ({
+          id: cat.id,
+          name: cat.name,
+          goods: (results[idx].list || []).map((item) => Object.assign({}, item, { priceText: fen2yuan(item.price) })),
+        }));
+        const hasGoods = sections.some((section) => section.goods.length > 0);
+        this.setData({ sections, hasGoods, loading: false }, () => {
+          this.syncCartToGoods();
+          wx.nextTick(() => this.measureSections());
+        });
       })
       .catch(() => this.setData({ loading: false }));
   },
 
+  /** 测量每个分类锚点相对滚动内容顶部的偏移量，供滚动时判断当前应高亮的分类 */
+  measureSections() {
+    if (!this.data.sections.length) return;
+    const query = wx.createSelectorQuery().in(this);
+    query.select('.list').boundingClientRect();
+    query.selectAll('.section-anchor').boundingClientRect();
+    query.exec((res) => {
+      const listRect = res[0];
+      const anchors = res[1];
+      if (!listRect || !anchors || !anchors.length) return;
+      this.sectionTops = anchors.map((rect, idx) => ({
+        id: this.data.sections[idx].id,
+        top: rect.top - listRect.top,
+      }));
+    });
+  },
+
+  /** 点击左侧分类：滚动右侧商品列表到对应锚点，滚动动画期间暂停自动分类联动，避免和滚动监听打架 */
   onCategoryTap(e) {
-    this.loadGoods(Number(e.currentTarget.dataset.id));
+    const id = Number(e.currentTarget.dataset.id);
+    if (id === this.data.currentCategory) return;
+    this.ignoreScrollSpy = true;
+    this.setData({ currentCategory: id, scrollIntoViewId: 'anchor-' + id });
+    clearTimeout(this.scrollSpyTimer);
+    this.scrollSpyTimer = setTimeout(() => {
+      this.ignoreScrollSpy = false;
+    }, 600);
+  },
+
+  /** 右侧商品列表滚动时，根据滚动位置自动切换左侧高亮分类（节流，避免频繁 setData 造成卡顿） */
+  onListScroll(e) {
+    if (this.ignoreScrollSpy || !this.sectionTops.length) return;
+    const now = Date.now();
+    if (now - (this.lastSpyTime || 0) < 100) return;
+    this.lastSpyTime = now;
+
+    const scrollTop = e.detail.scrollTop;
+    const tops = this.sectionTops;
+    let active = tops[0].id;
+    for (let i = 0; i < tops.length; i++) {
+      if (scrollTop + 40 >= tops[i].top) {
+        active = tops[i].id;
+      } else {
+        break;
+      }
+    }
+    if (active !== this.data.currentCategory) {
+      this.setData({ currentCategory: active, sideScrollIntoViewId: 'side-' + active });
+    }
   },
 
   onAdd(e) {
     const id = Number(e.currentTarget.dataset.id);
-    this.addOne(id, this.data.goods.find((item) => item.id === id));
+    this.addOne(id, this.findGoodsRef(id));
   },
 
   onMinus(e) {
     this.minusOne(Number(e.currentTarget.dataset.id));
+  },
+
+  /** 在全部分类的商品里查找原始记录（用于取名称/价格/库存等快照信息） */
+  findGoodsRef(id) {
+    for (const section of this.data.sections) {
+      const found = section.goods.find((item) => item.id === id);
+      if (found) return found;
+    }
+    return null;
   },
 
   /** 加购一件，goodsRef 为商品列表中的原始记录，找不到时回退用购物车里已存的快照 */
@@ -135,10 +205,14 @@ Page({
   /** 把购物车数量同步到商品列表，供 wxml 直接渲染 */
   syncCartToGoods(cart) {
     const source = cart || this.data.cart;
-    const goods = this.data.goods.map((item) =>
-      Object.assign({}, item, { quantity: source[item.id] ? source[item.id].quantity : 0 })
+    const sections = this.data.sections.map((section) =>
+      Object.assign({}, section, {
+        goods: section.goods.map((item) =>
+          Object.assign({}, item, { quantity: source[item.id] ? source[item.id].quantity : 0 })
+        ),
+      })
     );
-    this.setData({ goods });
+    this.setData({ sections });
   },
 
   openCartModal() {

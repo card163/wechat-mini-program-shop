@@ -33,6 +33,14 @@
 .list { flex: 1; padding: 20rpx; }
 .list-bottom { height: 40rpx; }
 
+/* 高度为0，仅用于 scroll-into-view 定位与滚动时计算分类归属 */
+.section-anchor { height: 0; }
+.section-title {
+  font-size: 26rpx; font-weight: 700; color: var(--text-sub);
+  padding: 16rpx 4rpx 8rpx;
+}
+.section-empty { font-size: 24rpx; color: var(--text-sub); padding: 12rpx 4rpx 24rpx; }
+
 .goods { display: flex; padding: 20rpx 0; border-bottom: 1rpx solid var(--line); }
 .goods-img { width: 160rpx; height: 160rpx; border-radius: 12rpx; background: #2a2a2a; flex: none; }
 .goods-info { flex: 1; margin-left: 20rpx; display: flex; flex-direction: column; min-width: 0; }
@@ -76,12 +84,18 @@
 .drawer-box {
   width: 100%; max-height: 85vh; display: flex; flex-direction: column;
   background: var(--bg-card-2); border-radius: 24rpx 24rpx 0 0;
-  padding: 16rpx 0 0;
+  overflow: hidden;
+  position: relative;
 }
-.drawer-handle { width: 72rpx; height: 8rpx; border-radius: 4rpx; background: var(--line); margin: 0 auto 12rpx; }
-.drawer-loading { padding: 80rpx 0; text-align: center; color: var(--text-sub); }
+/* 悬浮在封面图上方，不占布局位置，避免图片顶部留出方角缺口 */
+.drawer-handle {
+  position: absolute; top: 16rpx; left: 50%; transform: translateX(-50%);
+  width: 72rpx; height: 8rpx; border-radius: 4rpx; background: rgba(255, 255, 255, .7);
+  z-index: 1;
+}
+.drawer-loading { padding: 96rpx 0 80rpx; text-align: center; color: var(--text-sub); }
 .drawer-scroll { flex: 1; overflow: hidden; }
-.drawer-cover { width: 100%; height: 360rpx; background: #2a2a2a; }
+.drawer-cover { width: 100%; height: 360rpx; background: #2a2a2a; display: block; }
 .drawer-body { padding: 24rpx 32rpx; }
 .drawer-name { font-size: 34rpx; font-weight: 700; margin-bottom: 8rpx; }
 .drawer-price-row { margin: 16rpx 0; }
