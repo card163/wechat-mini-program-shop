@@ -6,6 +6,7 @@ namespace app\service;
 
 use app\exception\BusinessException;
 use app\model\Goods;
+use app\model\Member;
 use app\model\MemberBalanceLog;
 use app\model\MemberDrinkCardBatch;
 use app\model\MemberGiftBatch;
@@ -19,12 +20,9 @@ class AdminOrderService
 {
     /**
      * @param array<string, mixed> $filters
-     * @return array{list: array<int, array<string, mixed>>, total: int}
      */
-    public static function paginate(array $filters, int $page, int $pageSize): array
+    private static function applyFilters(\Illuminate\Database\Eloquent\Builder $query, array $filters): void
     {
-        $query = Order::query()->with('items');
-
         if (!empty($filters['order_no'])) {
             $query->where('order_no', (string)$filters['order_no']);
         }
@@ -37,21 +35,78 @@ class AdminOrderService
         if (!empty($filters['member_id'])) {
             $query->where('member_id', (int)$filters['member_id']);
         }
+        if (!empty($filters['phone'])) {
+            $memberIds = Member::query()->where('phone', 'like', '%' . (string)$filters['phone'] . '%')->pluck('id');
+            $query->whereIn('member_id', $memberIds);
+        }
         if (!empty($filters['start_date'])) {
-            $query->where('created_at', '>=', $filters['start_date'] . ' 00:00:00');
+            $query->where('created_at', '>=', self::normalizeDate((string)$filters['start_date'], true));
         }
         if (!empty($filters['end_date'])) {
-            $query->where('created_at', '<=', $filters['end_date'] . ' 23:59:59');
+            $query->where('created_at', '<=', self::normalizeDate((string)$filters['end_date'], false));
+        }
+    }
+
+    /**
+     * 兼容纯日期(YYYY-MM-DD)与精确到分钟(YYYY-MM-DD HH:mm)两种入参，纯日期按当天首尾补全
+     */
+    private static function normalizeDate(string $value, bool $isStart): string
+    {
+        $value = trim($value);
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+            return $value . ($isStart ? ' 00:00:00' : ' 23:59:59');
+        }
+        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $value) === 1) {
+            return $value . ($isStart ? ':00' : ':59');
         }
 
+        return $value;
+    }
+
+    /**
+     * @param array<string, mixed> $filters
+     * @return array{list: array<int, array<string, mixed>>, total: int}
+     */
+    public static function paginate(array $filters, int $page, int $pageSize): array
+    {
+        $query = Order::query()->with('items');
+        self::applyFilters($query, $filters);
+
         $total = (int)$query->count();
-        $list  = $query->orderByDesc('id')
+        $orders = $query->orderByDesc('id')
             ->forPage($page, $pageSize)
-            ->get()
-            ->map(static fn(Order $order): array => self::format($order))
+            ->get();
+
+        $phoneMap = Member::query()
+            ->whereIn('id', $orders->pluck('member_id')->unique()->all())
+            ->pluck('phone', 'id');
+        $list = $orders
+            ->map(static fn(Order $order): array => self::format($order, (string)($phoneMap[$order->member_id] ?? '')))
             ->all();
 
         return ['list' => $list, 'total' => $total];
+    }
+
+    /**
+     * 统计当前筛选条件下的支付金额构成
+     *
+     * @param array<string, mixed> $filters
+     * @return array{count: int, pay_wechat: int, pay_balance: int, pay_gift: int, pay_drink_card: int}
+     */
+    public static function summary(array $filters): array
+    {
+        $query = Order::query();
+        self::applyFilters($query, $filters);
+
+        $row = $query->selectRaw('count(*) as cnt, sum(pay_wechat) as sum_wechat, sum(pay_balance) as sum_balance, sum(pay_gift) as sum_gift, sum(pay_drink_card) as sum_drink_card')->first();
+
+        return [
+            'count'          => (int)($row?->cnt ?? 0),
+            'pay_wechat'     => (int)($row?->sum_wechat ?? 0),
+            'pay_balance'    => (int)($row?->sum_balance ?? 0),
+            'pay_gift'       => (int)($row?->sum_gift ?? 0),
+            'pay_drink_card' => (int)($row?->sum_drink_card ?? 0),
+        ];
     }
 
     /**
@@ -64,7 +119,9 @@ class AdminOrderService
             throw new BusinessException('订单不存在', Result::NOT_FOUND);
         }
 
-        return self::format($order);
+        $phone = (string)(Member::query()->where('id', $order->member_id)->value('phone') ?? '');
+
+        return self::format($order, $phone);
     }
 
     public static function finish(int $orderId): void
@@ -197,13 +254,14 @@ class AdminOrderService
     /**
      * @return array<string, mixed>
      */
-    public static function format(Order $order): array
+    public static function format(Order $order, string $memberPhone = ''): array
     {
         return [
             'id'           => (int)$order->id,
             'order_no'     => (string)$order->order_no,
             'daily_no'     => (int)$order->daily_no,
             'member_id'    => (int)$order->member_id,
+            'member_phone' => $memberPhone,
             'table_name'   => (string)$order->table_name,
             'total_amount' => (int)$order->total_amount,
             'pay_amount'   => (int)$order->pay_amount,

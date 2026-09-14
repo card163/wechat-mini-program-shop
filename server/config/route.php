@@ -131,6 +131,7 @@ Route::group('/admin', function (): void {
 
     // 订单处理
     Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::get('/orders/summary', [AdminOrderController::class, 'summary']);
     Route::get('/orders/{id:\d+}', [AdminOrderController::class, 'show']);
     Route::post('/orders/{id:\d+}/finish', [AdminOrderController::class, 'finish']);
     Route::post('/orders/{id:\d+}/print', [AdminOrderController::class, 'print']);

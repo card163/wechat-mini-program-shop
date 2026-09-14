@@ -19,12 +19,16 @@ const STATUS = [
 const loading = ref(false)
 const rows = ref<any[]>([])
 const total = ref(0)
-const query = reactive({ page: 1, page_size: 20, order_no: '', order_status: '', start_date: '', end_date: '' })
+const query = reactive({ page: 1, page_size: 20, order_no: '', order_status: '', phone: '', start_date: '', end_date: '' })
 
 const detail = ref<any>(null)
 const detailVisible = ref(false)
 
+const summary = reactive({ count: 0, pay_wechat: 0, pay_balance: 0, pay_gift: 0, pay_drink_card: 0 })
+const summaryLoading = ref(false)
+
 onMounted(load)
+onMounted(loadSummary)
 onMounted(loadGiftConfig)
 onMounted(loadDrinkCardConfig)
 
@@ -39,9 +43,24 @@ async function load() {
   }
 }
 
+async function loadSummary() {
+  summaryLoading.value = true
+  try {
+    const res: any = await orderApi.summary(query)
+    summary.count = res.count
+    summary.pay_wechat = res.pay_wechat
+    summary.pay_balance = res.pay_balance
+    summary.pay_gift = res.pay_gift
+    summary.pay_drink_card = res.pay_drink_card
+  } finally {
+    summaryLoading.value = false
+  }
+}
+
 function search() {
   query.page = 1
   load()
+  loadSummary()
 }
 
 function statusMeta(value: number) {
@@ -91,19 +110,58 @@ async function reprint(row: any) {
   <div class="page">
     <div class="toolbar">
       <el-input v-model="query.order_no" placeholder="订单号" clearable style="width: 220px" @keyup.enter="search" />
+      <el-input v-model="query.phone" placeholder="手机号" clearable style="width: 160px" @keyup.enter="search" />
       <el-select v-model="query.order_status" placeholder="订单状态" clearable style="width: 140px">
         <el-option v-for="item in STATUS" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
-      <el-date-picker v-model="query.start_date" type="date" placeholder="开始日期" value-format="YYYY-MM-DD" />
-      <el-date-picker v-model="query.end_date" type="date" placeholder="结束日期" value-format="YYYY-MM-DD" />
+      <el-date-picker
+        v-model="query.start_date"
+        type="datetime"
+        placeholder="开始时间"
+        format="YYYY-MM-DD HH:mm"
+        value-format="YYYY-MM-DD HH:mm"
+      />
+      <el-date-picker
+        v-model="query.end_date"
+        type="datetime"
+        placeholder="结束时间"
+        format="YYYY-MM-DD HH:mm"
+        value-format="YYYY-MM-DD HH:mm"
+      />
       <el-button type="primary" @click="search">查询</el-button>
+    </div>
+
+    <div class="summary-bar" v-loading="summaryLoading">
+      <div class="summary-item">
+        <span class="summary-label">共</span>
+        <b class="summary-value">{{ summary.count }}</b>
+        <span class="summary-label">笔</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">微信支付合计</span>
+        <b class="summary-value money">¥{{ fen2yuan(summary.pay_wechat) }}</b>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">余额支付合计</span>
+        <b class="summary-value money">¥{{ fen2yuan(summary.pay_balance) }}</b>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">{{ giftConfig.displayName }}支付合计</span>
+        <b class="summary-value money">{{ giftText(summary.pay_gift) }}</b>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">{{ drinkCardConfig.displayName }}支付合计</span>
+        <b class="summary-value money">{{ drinkCardText(summary.pay_drink_card) }}</b>
+      </div>
     </div>
 
     <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
       <el-table-column prop="daily_no" label="出单序号" width="90" />
       <el-table-column prop="order_no" label="订单号" min-width="180" />
       <el-table-column prop="table_name" label="桌号" width="90" />
-      <el-table-column prop="member_id" label="会员ID" width="90" />
+      <el-table-column label="会员ID/手机号" width="150">
+        <template #default="{ row }">{{ row.member_id }}{{ row.member_phone ? `(${row.member_phone})` : '' }}</template>
+      </el-table-column>
       <el-table-column label="金额" width="110">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.pay_amount) }}</span></template>
       </el-table-column>
@@ -144,7 +202,7 @@ async function reprint(row: any) {
           <el-descriptions-item label="出单序号">{{ detail.daily_no }}</el-descriptions-item>
           <el-descriptions-item label="订单号">{{ detail.order_no }}</el-descriptions-item>
           <el-descriptions-item label="桌号">{{ detail.table_name }}</el-descriptions-item>
-          <el-descriptions-item label="会员ID">{{ detail.member_id }}</el-descriptions-item>
+          <el-descriptions-item label="会员ID/手机号">{{ detail.member_id }}{{ detail.member_phone ? `(${detail.member_phone})` : '' }}</el-descriptions-item>
           <el-descriptions-item label="应付">¥{{ fen2yuan(detail.pay_amount) }}</el-descriptions-item>
           <el-descriptions-item label="微信支付">¥{{ fen2yuan(detail.pay_wechat) }}</el-descriptions-item>
           <el-descriptions-item label="余额支付">¥{{ fen2yuan(detail.pay_balance) }}</el-descriptions-item>
@@ -165,3 +223,34 @@ async function reprint(row: any) {
     </el-drawer>
   </div>
 </template>
+
+<style scoped>
+.summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 36px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.summary-label {
+  color: #86909c;
+  font-size: 13px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+</style>
+

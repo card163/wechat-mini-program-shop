@@ -159,7 +159,8 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/admin/orders` | 订单列表，支持按状态、桌号、时间区间、订单号筛选 · 店员可用 |
+| GET | `/admin/orders` | 订单列表，支持按状态、桌号、时间区间(精确到分钟)、订单号筛选 · 店员可用 |
+| GET | `/admin/orders/summary` | 按与列表相同的筛选条件统计订单数与微信/余额/酒水卡(赠金)/饮品卡支付金额合计 · 店员可用 |
 | GET | `/admin/orders/{id}` | 订单详情 · 店员可用 |
 | POST | `/admin/orders/{id}/finish` | 标记已完成（出品完成）· 店员可用 |
 | POST | `/admin/orders/{id}/refund` | 退款，按原路退回本金/赠金批次，落流水 |

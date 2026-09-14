@@ -15,7 +15,7 @@ page {
   font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
-view, text, input, button, scroll-view { box-sizing: border-box; }
+view, text, input, button, scroll-view, textarea { box-sizing: border-box; }
 
 .container { padding: 24rpx; }
 

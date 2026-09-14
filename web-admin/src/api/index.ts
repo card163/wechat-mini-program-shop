@@ -42,6 +42,7 @@ export const memberApi = {
 
 export const orderApi = {
   list: (params: Record<string, any>) => get<PageResult<any>>('/admin/orders', params),
+  summary: (params: Record<string, any>) => get('/admin/orders/summary', params),
   detail: (id: number) => get(`/admin/orders/${id}`),
   finish: (id: number) => post(`/admin/orders/${id}/finish`),
   refund: (id: number, remark: string) => post(`/admin/orders/${id}/refund`, { remark }),

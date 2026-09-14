@@ -21,11 +21,25 @@ class OrderController
             'order_status' => $request->get('order_status'),
             'table_id'     => $request->get('table_id'),
             'member_id'    => $request->get('member_id'),
+            'phone'        => $request->get('phone'),
             'start_date'   => $request->get('start_date'),
             'end_date'     => $request->get('end_date'),
         ], $page, $pageSize);
 
         return Result::page($result['list'], $result['total'], $page, $pageSize);
+    }
+
+    public function summary(Request $request): Response
+    {
+        return Result::success(AdminOrderService::summary([
+            'order_no'     => $request->get('order_no'),
+            'order_status' => $request->get('order_status'),
+            'table_id'     => $request->get('table_id'),
+            'member_id'    => $request->get('member_id'),
+            'phone'        => $request->get('phone'),
+            'start_date'   => $request->get('start_date'),
+            'end_date'     => $request->get('end_date'),
+        ]));
     }
 
     public function show(Request $request, int $id): Response
