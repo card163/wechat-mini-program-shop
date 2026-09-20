@@ -150,6 +150,9 @@
 | GET/POST | `/admin/goods` | 商品列表 / 新增 |
 | PUT/DELETE | `/admin/goods/{id}` | 编辑 / 删除 |
 | POST | `/admin/goods/{id}/status` | 上下架 |
+| POST | `/admin/goods/{id}/move` | 同分类内与相邻商品交换排序（`direction=up\|down`） |
+| POST | `/admin/goods/batch-sort` | 批量排序：传入同一分类下商品id的最终顺序（`category_id`+`ids`数组），按数组顺序重写 sort=1..N |
+| POST | `/admin/goods/batch-category` | 批量分类：把选中的商品(`ids`数组)统一移动到目标分类(`category_id`) |
 | GET/POST | `/admin/table-zones` | 桌号分区列表 / 新增（先划区，如“一号台”“二号台”） |
 | PUT/DELETE | `/admin/table-zones/{id}` | 编辑 / 删除（分区下还有桌号时禁止删除） |
 | GET/POST | `/admin/tables` | 桌号列表 / 新增，需指定所属分区 `zone_id` |
@@ -159,7 +162,7 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/admin/orders` | 订单列表，支持按状态、桌号、时间区间(精确到分钟)、订单号筛选 · 店员可用 |
+| GET | `/admin/orders` | 订单列表，支持按状态、桌号、时间区间(精确到分钟)、订单号、支付方式(`pay_type`,逗号分隔如`1,5`)、支付状态(`pay_status`)筛选，`date_field=paid`时时间区间按支付时间(`paid_at`)而非默认的下单时间(`created_at`)过滤 · 店员可用 |
 | GET | `/admin/orders/summary` | 按与列表相同的筛选条件统计订单数与微信/余额/酒水卡(赠金)/饮品卡支付金额合计 · 店员可用 |
 | GET | `/admin/orders/{id}` | 订单详情 · 店员可用 |
 | POST | `/admin/orders/{id}/finish` | 标记已完成（出品完成）· 店员可用 |
@@ -204,5 +207,9 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/admin/stat/overview` | 今日营业额、订单数、新增会员、充值金额 |
-| GET | `/admin/stat/trend` | 近 N 天营业额与订单趋势 |
+| GET | `/admin/stat/overview` | 今日营业额、订单数、新增会员、充值金额、今日/昨日各支付渠道（微信/余额/酒水卡/饮品卡）金额、会员总数、待出品订单数 |
+| GET | `/admin/stat/trend?days=7` | 近 N 天营业额、订单数与微信/酒水卡/饮品卡三渠道金额趋势 |
+
+`overview` 响应新增字段：`today_pay_wechat`/`today_pay_balance`（单位分）、`today_pay_gift_units`/`today_pay_drink_card_units`（单位张，实际消耗的酒水卡/饮品卡凭证数量，不做现金折算）、`yesterday_pay_wechat`/`yesterday_pay_balance`（单位分）、`yesterday_pay_gift_units`/`yesterday_pay_drink_card_units`（单位张）。`gift`/`drink_card` 对应系统设置里可改名的展示名称，如"酒水卡"/"饮品卡"。
+`trend` 每条记录新增 `wechat_amount`/`balance_amount`/`gift_amount`/`drink_card_amount`（单位分，`amount` 字段本身即总营业额）与 `gift_units`/`drink_card_units`（单位张，实际消耗的凭证数量，不做现金折算）。组合支付（微信+酒水卡/饮品卡）订单的酒水卡/饮品卡现金部分按系统设置的"兑法币汇率"折算，历史汇率变更后存在近似误差，仅供趋势展示参考；前端展示时若系统设置的计量单位为"张"，应改用 `gift_units`/`drink_card_units` 而非折算金额。
+

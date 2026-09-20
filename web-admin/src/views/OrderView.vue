@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { orderApi } from '@/api'
 import { useAuthStore } from '@/stores/auth'
@@ -8,6 +9,7 @@ import { giftConfig, giftText, loadGiftConfig } from '@/utils/gift'
 import { drinkCardConfig, drinkCardText, loadDrinkCardConfig } from '@/utils/drinkCard'
 
 const auth = useAuthStore()
+const route = useRoute()
 
 const STATUS = [
   { label: '待支付', value: 0, type: 'info' },
@@ -16,10 +18,31 @@ const STATUS = [
   { label: '已取消', value: 3, type: 'danger' },
 ]
 
+/** 取值与数据概览各支付渠道卡片跳转时携带的 pay_type 完全一致（如"微信支付"对应 1+5 两种pay_type），
+ * 保证从概览点进来时下拉框能匹配到对应选项正常显示文案，而不是显示原始的 "1,5" 字符串 */
+const PAY_TYPES = computed(() => [
+  { label: '微信支付', value: '1,5' },
+  { label: '余额支付', value: '2' },
+  { label: `${giftConfig.displayName}支付`, value: '3,5' },
+  { label: `${drinkCardConfig.displayName}支付`, value: '4,5' },
+  { label: '微信组合支付', value: '5' },
+])
+
 const loading = ref(false)
 const rows = ref<any[]>([])
 const total = ref(0)
-const query = reactive({ page: 1, page_size: 20, order_no: '', order_status: '', phone: '', start_date: '', end_date: '' })
+const query = reactive({
+  page: 1,
+  page_size: 20,
+  order_no: '',
+  order_status: '' as number | string,
+  pay_type: '',
+  pay_status: '',
+  date_field: '',
+  phone: '',
+  start_date: '',
+  end_date: '',
+})
 
 const detail = ref<any>(null)
 const detailVisible = ref(false)
@@ -27,8 +50,22 @@ const detailVisible = ref(false)
 const summary = reactive({ count: 0, pay_wechat: 0, pay_balance: 0, pay_gift: 0, pay_drink_card: 0 })
 const summaryLoading = ref(false)
 
-onMounted(load)
-onMounted(loadSummary)
+/** 支持从数据概览统计卡跳转过来时带上的筛选条件（如按支付渠道/支付时间范围） */
+function applyRouteQuery() {
+  const q = route.query
+  if (typeof q.order_status === 'string' && q.order_status !== '') query.order_status = Number(q.order_status)
+  if (typeof q.pay_type === 'string') query.pay_type = q.pay_type
+  if (typeof q.pay_status === 'string') query.pay_status = q.pay_status
+  if (typeof q.date_field === 'string') query.date_field = q.date_field
+  if (typeof q.start_date === 'string') query.start_date = q.start_date
+  if (typeof q.end_date === 'string') query.end_date = q.end_date
+}
+
+onMounted(() => {
+  applyRouteQuery()
+  load()
+  loadSummary()
+})
 onMounted(loadGiftConfig)
 onMounted(loadDrinkCardConfig)
 
@@ -59,6 +96,9 @@ async function loadSummary() {
 
 function search() {
   query.page = 1
+  // 手动查询时清掉从数据概览带来的隐藏筛选条件（按支付时间/支付状态），避免用户改了筛选框却不知道背后仍按支付时间过滤
+  query.date_field = ''
+  query.pay_status = ''
   load()
   loadSummary()
 }
@@ -114,6 +154,9 @@ async function reprint(row: any) {
       <el-select v-model="query.order_status" placeholder="订单状态" clearable style="width: 140px">
         <el-option v-for="item in STATUS" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
+      <el-select v-model="query.pay_type" placeholder="支付方式" clearable style="width: 140px">
+        <el-option v-for="item in PAY_TYPES" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
       <el-date-picker
         v-model="query.start_date"
         type="datetime"
@@ -167,7 +210,13 @@ async function reprint(row: any) {
       </el-table-column>
       <el-table-column label="支付构成" min-width="320">
         <template #default="{ row }">
-          <span>微信 ¥{{ fen2yuan(row.pay_wechat) }} / 余额 ¥{{ fen2yuan(row.pay_balance) }} / {{ giftConfig.displayName }} {{ giftText(row.pay_gift) }} / {{ drinkCardConfig.displayName }} {{ drinkCardText(row.pay_drink_card) }}</span>
+          <span class="pay-part" :class="{ hl: row.pay_wechat > 0 }">微信 ¥{{ fen2yuan(row.pay_wechat) }}</span>
+          /
+          <span class="pay-part" :class="{ hl: row.pay_balance > 0 }">余额 ¥{{ fen2yuan(row.pay_balance) }}</span>
+          /
+          <span class="pay-part" :class="{ hl: row.pay_gift > 0 }">{{ giftConfig.displayName }} {{ giftText(row.pay_gift) }}</span>
+          /
+          <span class="pay-part" :class="{ hl: row.pay_drink_card > 0 }">{{ drinkCardConfig.displayName }} {{ drinkCardText(row.pay_drink_card) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="100">
@@ -204,9 +253,11 @@ async function reprint(row: any) {
           <el-descriptions-item label="桌号">{{ detail.table_name }}</el-descriptions-item>
           <el-descriptions-item label="会员ID/手机号">{{ detail.member_id }}{{ detail.member_phone ? `(${detail.member_phone})` : '' }}</el-descriptions-item>
           <el-descriptions-item label="应付">¥{{ fen2yuan(detail.pay_amount) }}</el-descriptions-item>
-          <el-descriptions-item label="微信支付">¥{{ fen2yuan(detail.pay_wechat) }}</el-descriptions-item>
-          <el-descriptions-item label="余额支付">¥{{ fen2yuan(detail.pay_balance) }}</el-descriptions-item>
-          <el-descriptions-item :label="`${giftConfig.displayName}抵扣`">{{ giftText(detail.pay_gift) }}</el-descriptions-item>          <el-descriptions-item :label="`${drinkCardConfig.displayName}扣扣`">{{ drinkCardText(detail.pay_drink_card) }}</el-descriptions-item>          <el-descriptions-item label="获得礼品卡">{{ detail.gain_point }}</el-descriptions-item>
+          <el-descriptions-item label="微信支付"><span class="pay-part" :class="{ hl: detail.pay_wechat > 0 }">¥{{ fen2yuan(detail.pay_wechat) }}</span></el-descriptions-item>
+          <el-descriptions-item label="余额支付"><span class="pay-part" :class="{ hl: detail.pay_balance > 0 }">¥{{ fen2yuan(detail.pay_balance) }}</span></el-descriptions-item>
+          <el-descriptions-item :label="`${giftConfig.displayName}抵扣`"><span class="pay-part" :class="{ hl: detail.pay_gift > 0 }">{{ giftText(detail.pay_gift) }}</span></el-descriptions-item>
+          <el-descriptions-item :label="`${drinkCardConfig.displayName}抵扣`"><span class="pay-part" :class="{ hl: detail.pay_drink_card > 0 }">{{ drinkCardText(detail.pay_drink_card) }}</span></el-descriptions-item>
+          <el-descriptions-item label="获得礼品卡">{{ detail.gain_point }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.remark || '-' }}</el-descriptions-item>
           <el-descriptions-item label="下单时间">{{ detail.created_at }}</el-descriptions-item>
           <el-descriptions-item label="支付时间">{{ detail.paid_at || '-' }}</el-descriptions-item>
@@ -251,6 +302,15 @@ async function reprint(row: any) {
 .summary-value {
   font-size: 16px;
   font-weight: 600;
+}
+
+.pay-part {
+  color: #86909c;
+}
+
+.pay-part.hl {
+  color: #c0392b;
+  font-weight: 700;
 }
 </style>
 

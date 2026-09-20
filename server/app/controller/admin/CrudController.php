@@ -44,8 +44,9 @@ abstract class CrudController
      * 保存(新增/编辑)前的业务校验，子类按需覆写
      *
      * @param array<string, mixed> $data
+     * @param int $id 编辑时为当前记录ID，新增时为0（供"排除自身"的唯一性校验使用）
      */
-    protected function validateInput(array $data): void
+    protected function validateInput(array $data, int $id = 0): void
     {
     }
 
@@ -103,7 +104,7 @@ abstract class CrudController
     {
         $item = $this->find($id);
         $data = $this->input($request);
-        $this->validateInput($data);
+        $this->validateInput($data, $id);
         $item->fill($data);
         $item->save();
 

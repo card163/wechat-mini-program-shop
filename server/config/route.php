@@ -150,6 +150,8 @@ Route::group('/admin', function () use ($crud): void {
     Route::post('/members/{id:\d+}/balance/adjust', [AdminMemberController::class, 'adjustBalance']);
     Route::post('/members/{id:\d+}/gift/grant', [AdminMemberController::class, 'grantGift']);
     Route::post('/members/{id:\d+}/drink-card/grant', [AdminMemberController::class, 'grantDrinkCard']);
+    Route::post('/members/{id:\d+}/gift/deduct', [AdminMemberController::class, 'deductGift']);
+    Route::post('/members/{id:\d+}/drink-card/deduct', [AdminMemberController::class, 'deductDrinkCard']);
     Route::post('/members/{id:\d+}/point/adjust', [AdminMemberController::class, 'adjustPoint']);
     Route::get('/members/{id:\d+}/balance-logs', [AdminMemberController::class, 'balanceLogs']);
     Route::get('/members/{id:\d+}/point-logs', [AdminMemberController::class, 'pointLogs']);
@@ -157,6 +159,10 @@ Route::group('/admin', function () use ($crud): void {
     $crud('/goods-categories', GoodsCategoryController::class);
     $crud('/goods', AdminGoodsController::class);
     Route::post('/goods/{id:\d+}/status', [AdminGoodsController::class, 'status']);
+    Route::post('/goods/{id:\d+}/move', [AdminGoodsController::class, 'move']);
+    Route::post('/goods/batch-sort', [AdminGoodsController::class, 'batchSort']);
+    Route::post('/goods/batch-category', [AdminGoodsController::class, 'batchCategory']);
+    Route::post('/goods/batch-stock', [AdminGoodsController::class, 'batchStock']);
     $crud('/table-zones', TableZoneController::class);
     $crud('/tables', TableController::class);
     $crud('/recharge-packages', RechargePackageController::class);

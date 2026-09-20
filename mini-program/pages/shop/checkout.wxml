@@ -57,7 +57,10 @@
   </view>
 
   <view class="section-label">订单备注</view>
-  <textarea class="remark-box" placeholder="请填写你的其他要求" placeholder-class="sub" bindinput="onRemarkInput" maxlength="200" />
+  <view class="select-box" bindtap="openRemarkPicker">
+    <view class="remark-preview {{remark ? '' : 'sub'}}">{{remark || '选填，点击填写'}}</view>
+    <view class="select-arrow">✎</view>
+  </view>
 
   <view class="footer">
     <view class="flex-1">
@@ -90,6 +93,23 @@
       </block>
     </scroll-view>
     <view class="btn-gold table-picker-confirm" bindtap="confirmTablePicker">确定</view>
+  </view>
+</view>
+
+<view class="modal-mask" wx:if="{{showRemarkPicker}}" bindtap="closeRemarkPicker">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-close" bindtap="closeRemarkPicker">✕</view>
+    <view class="modal-title">订单备注</view>
+    <textarea
+      class="remark-box"
+      placeholder="请填写你的其他要求"
+      placeholder-class="sub"
+      value="{{tempRemark}}"
+      bindinput="onRemarkInput"
+      maxlength="200"
+      focus="{{showRemarkPicker}}"
+    />
+    <view class="btn-gold table-picker-confirm" bindtap="confirmRemarkPicker">确定</view>
   </view>
 </view>
 

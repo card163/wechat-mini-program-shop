@@ -9,6 +9,10 @@
   padding: 26rpx 24rpx; font-size: 30rpx;
 }
 .select-arrow { color: var(--text-sub); }
+.remark-preview {
+  flex: 1; margin-right: 16rpx;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 .pay-option {
   padding: 24rpx; margin-bottom: 16rpx;
@@ -28,8 +32,8 @@
 
 .remark-box {
   box-sizing: border-box;
-  width: 100%; min-height: 200rpx;
-  background: var(--bg-card-2); border-radius: 16rpx;
+  width: 100%; min-height: 240rpx;
+  background: var(--bg-card); border-radius: 16rpx;
   padding: 20rpx; font-size: 28rpx; color: var(--text);
 }
 

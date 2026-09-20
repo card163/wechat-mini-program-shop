@@ -29,6 +29,15 @@ class AdminOrderService
         if (isset($filters['order_status']) && $filters['order_status'] !== '') {
             $query->where('order_status', (int)$filters['order_status']);
         }
+        if (isset($filters['pay_status']) && $filters['pay_status'] !== '') {
+            $query->where('pay_status', (int)$filters['pay_status']);
+        }
+        if (!empty($filters['pay_type'])) {
+            $types = array_values(array_filter(array_map('intval', explode(',', (string)$filters['pay_type']))));
+            if ($types !== []) {
+                $query->whereIn('pay_type', $types);
+            }
+        }
         if (!empty($filters['table_id'])) {
             $query->where('table_id', (int)$filters['table_id']);
         }
@@ -39,11 +48,13 @@ class AdminOrderService
             $memberIds = Member::query()->where('phone', 'like', '%' . (string)$filters['phone'] . '%')->pluck('id');
             $query->whereIn('member_id', $memberIds);
         }
+        // date_field=paid 时按支付时间筛选（用于从数据概览按支付渠道跳转，与概览统计口径保持一致），默认仍按下单时间
+        $dateField = ((string)($filters['date_field'] ?? 'created')) === 'paid' ? 'paid_at' : 'created_at';
         if (!empty($filters['start_date'])) {
-            $query->where('created_at', '>=', self::normalizeDate((string)$filters['start_date'], true));
+            $query->where($dateField, '>=', self::normalizeDate((string)$filters['start_date'], true));
         }
         if (!empty($filters['end_date'])) {
-            $query->where('created_at', '<=', self::normalizeDate((string)$filters['end_date'], false));
+            $query->where($dateField, '<=', self::normalizeDate((string)$filters['end_date'], false));
         }
     }
 

@@ -19,11 +19,14 @@ class OrderController
         $result = AdminOrderService::paginate([
             'order_no'     => $request->get('order_no'),
             'order_status' => $request->get('order_status'),
+            'pay_status'   => $request->get('pay_status'),
+            'pay_type'     => $request->get('pay_type'),
             'table_id'     => $request->get('table_id'),
             'member_id'    => $request->get('member_id'),
             'phone'        => $request->get('phone'),
             'start_date'   => $request->get('start_date'),
             'end_date'     => $request->get('end_date'),
+            'date_field'   => $request->get('date_field'),
         ], $page, $pageSize);
 
         return Result::page($result['list'], $result['total'], $page, $pageSize);
@@ -34,11 +37,14 @@ class OrderController
         return Result::success(AdminOrderService::summary([
             'order_no'     => $request->get('order_no'),
             'order_status' => $request->get('order_status'),
+            'pay_status'   => $request->get('pay_status'),
+            'pay_type'     => $request->get('pay_type'),
             'table_id'     => $request->get('table_id'),
             'member_id'    => $request->get('member_id'),
             'phone'        => $request->get('phone'),
             'start_date'   => $request->get('start_date'),
             'end_date'     => $request->get('end_date'),
+            'date_field'   => $request->get('date_field'),
         ]));
     }
 

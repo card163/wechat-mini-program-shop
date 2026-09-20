@@ -14,6 +14,8 @@ Page({
     showTablePicker: false,
     payType: 1,
     remark: '',
+    tempRemark: '',
+    showRemarkPicker: false,
     preview: null,
     submitting: false,
     giftLabel: '赠金',
@@ -152,6 +154,15 @@ Page({
     });
   },
   noop() {},
+  openRemarkPicker() {
+    this.setData({ tempRemark: this.data.remark, showRemarkPicker: true });
+  },
+  closeRemarkPicker() {
+    this.setData({ showRemarkPicker: false });
+  },
+  confirmRemarkPicker() {
+    this.setData({ remark: this.data.tempRemark, showRemarkPicker: false });
+  },
   onPayTypeChange(e) {
     const payType = Number(e.currentTarget.dataset.type);
     if (!this.isPayOptionUsable(payType)) {
@@ -166,7 +177,7 @@ Page({
     this.setData({ payType, comboConfirmed: false });
   },
   onRemarkInput(e) {
-    this.setData({ remark: e.detail.value });
+    this.setData({ tempRemark: e.detail.value });
   },
 
   openComboModal() {

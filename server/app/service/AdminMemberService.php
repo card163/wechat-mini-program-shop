@@ -158,6 +158,42 @@ class AdminMemberService
         });
     }
 
+    /**
+     * 扣减赠金，按批次到期时间由近及远消耗（与订单消费扣减走同一套批次逻辑）
+     */
+    public static function deductGift(int $memberId, int $amount, string $remark, int $operatorId): void
+    {
+        if ($amount <= 0) {
+            throw new BusinessException('扣减数量必须大于0');
+        }
+        if (trim($remark) === '') {
+            throw new BusinessException('请填写扣减原因');
+        }
+
+        Db::connection()->transaction(static function () use ($memberId, $amount, $remark, $operatorId): void {
+            $member = AccountService::lockMember($memberId);
+            AccountService::decreaseGift($member, $amount, MemberBalanceLog::BIZ_ADMIN_ADJUST, 0, '', $remark, $operatorId);
+        });
+    }
+
+    /**
+     * 扣减饮品卡，按批次到期时间由近及远消耗（与订单消费扣减走同一套批次逻辑）
+     */
+    public static function deductDrinkCard(int $memberId, int $amount, string $remark, int $operatorId): void
+    {
+        if ($amount <= 0) {
+            throw new BusinessException('扣减数量必须大于0');
+        }
+        if (trim($remark) === '') {
+            throw new BusinessException('请填写扣减原因');
+        }
+
+        Db::connection()->transaction(static function () use ($memberId, $amount, $remark, $operatorId): void {
+            $member = AccountService::lockMember($memberId);
+            AccountService::decreaseDrinkCard($member, $amount, MemberBalanceLog::BIZ_ADMIN_ADJUST, 0, '', $remark, $operatorId);
+        });
+    }
+
     public static function adjustPoint(int $memberId, int $point, string $remark, int $operatorId): void
     {
         if ($point === 0) {

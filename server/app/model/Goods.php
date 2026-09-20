@@ -9,6 +9,7 @@ namespace app\model;
  *
  * @property int $price 售价(分)
  * @property int $stock 库存，-1 表示不限
+ * @property string $code 外部编码，选填，应用层校验同店铺内唯一
  * @property int $gift_payable 是否可用赠金支付
  * @property int $gift_amount 使用赠金支付时兑换该商品(单件)需消耗的赠金数量，单位见配置 point.gift_unit
  * @property int $drink_card_payable 是否可用饮品卡支付
@@ -22,6 +23,9 @@ class Goods extends BaseModel
     public const int STATUS_OFF = 0;
 
     public const int STOCK_UNLIMITED = -1;
+
+    /** 库存低于此值（且非不限库存）视为缺货 */
+    public const int LOW_STOCK_THRESHOLD = 5;
 
     protected $table = 'nf_goods';
 

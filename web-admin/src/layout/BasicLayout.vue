@@ -2,22 +2,21 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Odometer,
-  List,
-  Checked,
-  GobletFull,
-  User,
-  Goods,
-  Menu as MenuIcon,
-  Grid,
-  Wallet,
-  Present,
-  Picture,
-  Printer,
-  Setting,
-  UserFilled,
-} from '@element-plus/icons-vue'
+import { Fold, Expand } from '@element-plus/icons-vue'
+import IconOverview from '@/components/icons/IconOverview.vue'
+import IconOrders from '@/components/icons/IconOrders.vue'
+import IconVerify from '@/components/icons/IconVerify.vue'
+import IconWineStorage from '@/components/icons/IconWineStorage.vue'
+import IconMembers from '@/components/icons/IconMembers.vue'
+import IconGoods from '@/components/icons/IconGoods.vue'
+import IconCategory from '@/components/icons/IconCategory.vue'
+import IconTables from '@/components/icons/IconTables.vue'
+import IconRecharge from '@/components/icons/IconRecharge.vue'
+import IconExchange from '@/components/icons/IconExchange.vue'
+import IconBanner from '@/components/icons/IconBanner.vue'
+import IconPrinter from '@/components/icons/IconPrinter.vue'
+import IconSettings from '@/components/icons/IconSettings.vue'
+import IconAdmin from '@/components/icons/IconAdmin.vue'
 import { authApi } from '@/api'
 import { ROLE_SUPER, useAuthStore } from '@/stores/auth'
 
@@ -26,21 +25,20 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const menus = [
-  { path: '/dashboard', title: '数据概览', icon: Odometer },
-  { path: '/orders', title: '订单管理', icon: List },
-  { path: '/verify', title: '店员核销', icon: Checked },
-  { path: '/wine', title: '存酒管理', icon: GobletFull },
-  { path: '/members', title: '会员管理', icon: User, super: true },
-  { path: '/goods', title: '商品管理', icon: Goods, super: true },
-  { path: '/categories', title: '商品分类', icon: MenuIcon, super: true },
-  { path: '/table-zones', title: '桌号分区', icon: Grid, super: true },
-  { path: '/tables', title: '桌号管理', icon: Grid, super: true },
-  { path: '/recharge-packages', title: '充值套餐', icon: Wallet, super: true },
-  { path: '/exchange-goods', title: '兑换商品', icon: Present, super: true },
-  { path: '/banners', title: '轮播图', icon: Picture, super: true },
-  { path: '/printers', title: '打印机管理', icon: Printer, super: true },
-  { path: '/settings', title: '系统配置', icon: Setting, super: true },
-  { path: '/admin-users', title: '账号管理', icon: UserFilled, super: true },
+  { path: '/dashboard', title: '数据概览', icon: IconOverview },
+  { path: '/orders', title: '订单管理', icon: IconOrders },
+  { path: '/verify', title: '店员核销', icon: IconVerify },
+  { path: '/wine', title: '存酒管理', icon: IconWineStorage },
+  { path: '/members', title: '会员管理', icon: IconMembers, super: true },
+  { path: '/goods', title: '商品管理', icon: IconGoods, super: true },
+  { path: '/categories', title: '商品分类', icon: IconCategory, super: true },
+  { path: '/tables', title: '桌号管理', icon: IconTables, super: true },
+  { path: '/recharge-packages', title: '充值套餐', icon: IconRecharge, super: true },
+  { path: '/exchange-goods', title: '兑换商品', icon: IconExchange, super: true },
+  { path: '/banners', title: '轮播图', icon: IconBanner, super: true },
+  { path: '/printers', title: '打印机管理', icon: IconPrinter, super: true },
+  { path: '/settings', title: '系统配置', icon: IconSettings, super: true },
+  { path: '/admin-users', title: '账号管理', icon: IconAdmin, super: true },
 ]
 
 const visibleMenus = computed(() =>
@@ -49,6 +47,13 @@ const visibleMenus = computed(() =>
 
 const passwordVisible = ref(false)
 const passwordForm = ref({ old_password: '', new_password: '' })
+
+const collapsed = ref(localStorage.getItem('nf_admin_aside_collapsed') === '1')
+
+function toggleCollapse() {
+  collapsed.value = !collapsed.value
+  localStorage.setItem('nf_admin_aside_collapsed', collapsed.value ? '1' : '0')
+}
 
 onMounted(() => {
   if (!auth.profile) auth.loadProfile()
@@ -73,9 +78,17 @@ function logout() {
 
 <template>
   <el-container class="layout">
-    <el-aside width="200px" class="aside">
-      <div class="logo">六六弗尔豪斯</div>
-      <el-menu :default-active="route.path" router background-color="#1f2329" text-color="#c9cdd4" active-text-color="#d4af37">
+    <el-aside :width="collapsed ? '64px' : '200px'" class="aside" :class="{ 'is-collapsed': collapsed }">
+      <div class="logo">{{ collapsed ? '六' : '六六弗尔豪斯' }}</div>
+      <el-menu
+        :default-active="route.path"
+        :collapse="collapsed"
+        :collapse-transition="false"
+        router
+        background-color="#1f2329"
+        text-color="#c9cdd4"
+        active-text-color="#d4af37"
+      >
         <el-menu-item v-for="menu in visibleMenus" :key="menu.path" :index="menu.path">
           <el-icon><component :is="menu.icon" /></el-icon>
           <span>{{ menu.title }}</span>
@@ -85,7 +98,10 @@ function logout() {
 
     <el-container>
       <el-header class="header">
-        <div class="title">{{ route.meta.title || '管理后台' }}</div>
+        <div class="header-left">
+          <el-icon class="collapse-btn" @click="toggleCollapse"><component :is="collapsed ? Expand : Fold" /></el-icon>
+          <div class="title">{{ route.meta.title || '管理后台' }}</div>
+        </div>
         <el-dropdown>
           <span class="user">
             {{ auth.profile?.real_name || auth.profile?.username }}
@@ -131,6 +147,8 @@ function logout() {
 .aside {
   background: #1f2329;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.2s;
 }
 .logo {
   height: 60px;
@@ -140,9 +158,33 @@ function logout() {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 1px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .aside :deep(.el-menu) {
   border-right: none;
+}
+.aside :deep(.el-menu-item) {
+  height: 52px;
+  line-height: 52px;
+  padding-left: 18px !important;
+  font-size: 15px;
+  font-weight: 400;
+}
+.aside :deep(.el-menu-item span) {
+  font-size: 15px;
+}
+.aside :deep(.el-menu-item .el-icon) {
+  font-size: 24px;
+  margin-right: 12px;
+  transition: font-size 0.2s;
+}
+.aside.is-collapsed :deep(.el-menu-item .el-icon) {
+  font-size: 36px;
+  margin-right: 0;
+}
+.aside :deep(.el-menu-item.is-active) {
+  background: rgba(212, 175, 55, 0.16) !important;
 }
 .header {
   display: flex;
@@ -150,6 +192,15 @@ function logout() {
   justify-content: space-between;
   background: #fff;
   border-bottom: 1px solid #e5e6eb;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.collapse-btn {
+  cursor: pointer;
+  font-size: 18px;
 }
 .title {
   font-size: 16px;

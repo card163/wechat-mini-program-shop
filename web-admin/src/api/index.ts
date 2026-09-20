@@ -32,6 +32,10 @@ export const memberApi = {
     post(`/admin/members/${id}/gift/grant`, { amount, expire_days: expireDays, remark }),
   grantDrinkCard: (id: number, amount: number, expireDays: number, remark: string) =>
     post(`/admin/members/${id}/drink-card/grant`, { amount, expire_days: expireDays, remark }),
+  deductGift: (id: number, amount: number, remark: string) =>
+    post(`/admin/members/${id}/gift/deduct`, { amount, remark }),
+  deductDrinkCard: (id: number, amount: number, remark: string) =>
+    post(`/admin/members/${id}/drink-card/deduct`, { amount, remark }),
   adjustPoint: (id: number, point: number, remark: string) =>
     post(`/admin/members/${id}/point/adjust`, { point, remark }),
   balanceLogs: (id: number, params: Record<string, any>) =>
@@ -61,6 +65,10 @@ export const crudApi = (prefix: string) => ({
 export const goodsApi = {
   ...crudApi('/admin/goods'),
   changeStatus: (id: number, status: number) => post(`/admin/goods/${id}/status`, { status }),
+  move: (id: number, direction: 'up' | 'down') => post(`/admin/goods/${id}/move`, { direction }),
+  batchSort: (categoryId: number, ids: number[]) => post('/admin/goods/batch-sort', { category_id: categoryId, ids }),
+  batchCategory: (categoryId: number, ids: number[]) => post('/admin/goods/batch-category', { category_id: categoryId, ids }),
+  batchStock: (items: { id: number; stock: number }[]) => post('/admin/goods/batch-stock', { items }),
 }
 export const categoryApi = crudApi('/admin/goods-categories')
 export const tableZoneApi = crudApi('/admin/table-zones')

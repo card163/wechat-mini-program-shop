@@ -20,7 +20,7 @@ class TableController extends CrudController
         return ['zone_id', 'name', 'sort', 'status'];
     }
 
-    protected function validateInput(array $data): void
+    protected function validateInput(array $data, int $id = 0): void
     {
         $zoneId = (int)($data['zone_id'] ?? 0);
         if ($zoneId <= 0 || TableZone::query()->find($zoneId) === null) {

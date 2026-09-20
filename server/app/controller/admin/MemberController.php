@@ -87,6 +87,30 @@ class MemberController
         return Result::success(null, '发放成功');
     }
 
+    public function deductGift(Request $request, int $id): Response
+    {
+        AdminMemberService::deductGift(
+            $id,
+            (int)$request->post('amount', 0),
+            (string)$request->post('remark', ''),
+            (int)$request->adminId
+        );
+
+        return Result::success(null, '扣减成功');
+    }
+
+    public function deductDrinkCard(Request $request, int $id): Response
+    {
+        AdminMemberService::deductDrinkCard(
+            $id,
+            (int)$request->post('amount', 0),
+            (string)$request->post('remark', ''),
+            (int)$request->adminId
+        );
+
+        return Result::success(null, '扣减成功');
+    }
+
     public function adjustPoint(Request $request, int $id): Response
     {
         AdminMemberService::adjustPoint(
