@@ -37,17 +37,10 @@ class UploadService
             throw new BusinessException('文件不是有效的图片');
         }
 
-        $dir = public_path() . '/uploads/' . date('Ym');
-        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-            throw new BusinessException('上传目录创建失败');
-        }
-
         $filename = bin2hex(random_bytes(16)) . '.' . $extension;
-        $file->move($dir . '/' . $filename);
+        $key      = 'uploads/' . date('Ym') . '/' . $filename;
+        $url      = CosService::uploadFile($file->getRealPath(), $key, $extension);
 
-        $path = '/uploads/' . date('Ym') . '/' . $filename;
-        $url  = rtrim((string)env('APP_URL', ''), '/') . $path;
-
-        return ['url' => $url, 'path' => $path];
+        return ['url' => $url, 'path' => '/' . $key];
     }
 }

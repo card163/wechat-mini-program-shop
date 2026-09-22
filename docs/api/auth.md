@@ -87,11 +87,13 @@
   "code": 0,
   "msg": "ok",
   "data": {
-    "url": "https://api-nf.dwj.la/uploads/202609/xxxx.jpg",
+    "url": "https://cos1.dwj.la/uploads/202609/xxxx.jpg",
     "path": "/uploads/202609/xxxx.jpg"
   }
 }
 ```
+
+图片实际存储在腾讯云 COS（不再落地服务器本地磁盘），`url` 为 COS/CDN 可直接访问的完整地址；`path` 仅为 COS 对象 key（不含域名），供排查问题参考，业务上只需使用 `url`。
 
 **响应**
 
