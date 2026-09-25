@@ -24,25 +24,58 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const menus = [
-  { path: '/dashboard', title: '数据概览', icon: IconOverview },
-  { path: '/orders', title: '订单管理', icon: IconOrders },
-  { path: '/verify', title: '店员核销', icon: IconVerify },
-  { path: '/wine', title: '存酒管理', icon: IconWineStorage },
-  { path: '/members', title: '会员管理', icon: IconMembers, super: true },
-  { path: '/goods', title: '商品管理', icon: IconGoods, super: true },
-  { path: '/categories', title: '商品分类', icon: IconCategory, super: true },
-  { path: '/tables', title: '桌号管理', icon: IconTables, super: true },
-  { path: '/recharge-packages', title: '充值套餐', icon: IconRecharge, super: true },
-  { path: '/exchange-goods', title: '兑换商品', icon: IconExchange, super: true },
-  { path: '/banners', title: '轮播图', icon: IconBanner, super: true },
-  { path: '/printers', title: '打印机管理', icon: IconPrinter, super: true },
-  { path: '/settings', title: '系统配置', icon: IconSettings, super: true },
-  { path: '/admin-users', title: '账号管理', icon: IconAdmin, super: true },
+interface MenuItem {
+  path: string
+  title: string
+  icon: unknown
+  super?: boolean
+}
+
+// 无 title 的分组渲染为顶部平铺项，有 title 的分组渲染为 el-menu-item-group
+const menuGroups: { title: string; items: MenuItem[] }[] = [
+  {
+    title: '',
+    items: [
+      { path: '/dashboard', title: '数据概览', icon: IconOverview },
+      { path: '/orders', title: '订单管理', icon: IconOrders },
+      { path: '/verify', title: '店员核销', icon: IconVerify },
+      { path: '/wine', title: '存酒管理', icon: IconWineStorage },
+    ],
+  },
+  {
+    title: '会员运营',
+    items: [
+      { path: '/members', title: '会员管理', icon: IconMembers, super: true },
+      { path: '/recharge-packages', title: '充值套餐', icon: IconRecharge, super: true },
+      { path: '/exchange-goods', title: '兑换商品', icon: IconExchange, super: true },
+    ],
+  },
+  {
+    title: '商品管理',
+    items: [
+      { path: '/goods', title: '商品管理', icon: IconGoods, super: true },
+      { path: '/categories', title: '商品分类', icon: IconCategory, super: true },
+      { path: '/tables', title: '桌号管理', icon: IconTables, super: true },
+      { path: '/banners', title: '轮播图', icon: IconBanner, super: true },
+    ],
+  },
+  {
+    title: '系统设置',
+    items: [
+      { path: '/printers', title: '设备管理', icon: IconPrinter, super: true },
+      { path: '/settings', title: '系统配置', icon: IconSettings, super: true },
+      { path: '/admin-users', title: '账号管理', icon: IconAdmin, super: true },
+    ],
+  },
 ]
 
-const visibleMenus = computed(() =>
-  menus.filter((menu) => !menu.super || auth.profile?.role === ROLE_SUPER),
+const visibleMenuGroups = computed(() =>
+  menuGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((menu) => !menu.super || auth.profile?.role === ROLE_SUPER),
+    }))
+    .filter((group) => group.items.length > 0),
 )
 
 const passwordVisible = ref(false)
@@ -87,12 +120,22 @@ function logout() {
         router
         background-color="#1f2329"
         text-color="#c9cdd4"
-        active-text-color="#d4af37"
+        active-text-color="#c3d6ea"
       >
-        <el-menu-item v-for="menu in visibleMenus" :key="menu.path" :index="menu.path">
-          <el-icon><component :is="menu.icon" /></el-icon>
-          <span>{{ menu.title }}</span>
-        </el-menu-item>
+        <template v-for="group in visibleMenuGroups" :key="group.title || '__top'">
+          <el-menu-item-group v-if="group.title" :title="group.title">
+            <el-menu-item v-for="menu in group.items" :key="menu.path" :index="menu.path">
+              <el-icon><component :is="menu.icon" /></el-icon>
+              <span>{{ menu.title }}</span>
+            </el-menu-item>
+          </el-menu-item-group>
+          <template v-else>
+            <el-menu-item v-for="menu in group.items" :key="menu.path" :index="menu.path">
+              <el-icon><component :is="menu.icon" /></el-icon>
+              <span>{{ menu.title }}</span>
+            </el-menu-item>
+          </template>
+        </template>
       </el-menu>
     </el-aside>
 
@@ -165,27 +208,59 @@ function logout() {
   border-right: none;
 }
 .aside :deep(.el-menu-item) {
-  height: 52px;
-  line-height: 52px;
-  padding-left: 18px !important;
-  font-size: 15px;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 12px !important;
+  margin: 2px 8px;
+  width: auto;
+  font-size: 14px;
   font-weight: 400;
 }
+.aside.is-collapsed :deep(.el-menu-item) {
+  margin: 2px 4px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .aside :deep(.el-menu-item span) {
-  font-size: 15px;
+  font-size: 14px;
 }
 .aside :deep(.el-menu-item .el-icon) {
-  font-size: 24px;
-  margin-right: 12px;
+  font-size: 18px;
+  margin-right: 10px;
   transition: font-size 0.2s;
 }
 .aside.is-collapsed :deep(.el-menu-item .el-icon) {
-  font-size: 36px;
+  font-size: 26px;
   margin-right: 0;
 }
-.aside :deep(.el-menu-item.is-active) {
-  background: rgba(212, 175, 55, 0.16) !important;
+.aside :deep(.el-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #e5e6eb;
 }
+.aside :deep(.el-menu-item.is-active) {
+  background: rgba(90, 118, 148, 0.35) !important;
+}
+.aside :deep(.el-menu-item.is-active:hover) {
+  background: rgba(90, 118, 148, 0.45) !important;
+}
+.aside :deep(.el-menu-item-group__title) {
+  padding: 12px 20px 4px;
+  font-size: 12px;
+  line-height: 1;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.aside.is-collapsed :deep(.el-menu-item span) {
+  display: none;
+}
+.aside.is-collapsed :deep(.el-menu-item-group__title) {
+  display: none;
+}
+
 .header {
   display: flex;
   align-items: center;

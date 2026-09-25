@@ -107,6 +107,17 @@ function statusMeta(value: number) {
   return STATUS.find((item) => item.value === value) || { label: '未知', type: 'info' }
 }
 
+/** 最多展示前两件商品，超过2件在末尾追加"（等N件商品）" */
+function goodsInfoText(row: any): string {
+  const items: any[] = row.items || []
+  if (items.length === 0) return '-'
+  const shown = items
+    .slice(0, 2)
+    .map((item) => (item.quantity > 1 ? `${item.goods_name}x${item.quantity}` : item.goods_name))
+    .join('、')
+  return items.length > 2 ? `${shown}（等${items.length}件商品）` : shown
+}
+
 async function showDetail(row: any) {
   detail.value = await orderApi.detail(row.id)
   detailVisible.value = true
@@ -199,33 +210,40 @@ async function reprint(row: any) {
     </div>
 
     <el-table :data="rows" v-loading="loading" border stripe style="width: 100%">
-      <el-table-column prop="daily_no" label="出单序号" width="90" />
-      <el-table-column prop="order_no" label="订单号" min-width="180" />
-      <el-table-column prop="table_name" label="桌号" width="90" />
-      <el-table-column label="会员ID/手机号" width="150">
+      <el-table-column label="出单序号" width="95" class-name="nowrap-cell">
+        <template #default="{ row }">#{{ row.daily_no }}</template>
+      </el-table-column>
+      <el-table-column prop="order_no" label="订单号" width="230" class-name="nowrap-cell" />
+      <el-table-column prop="table_name" label="桌号" width="140" class-name="nowrap-cell" />
+      <el-table-column label="会员ID/手机号" width="160" class-name="nowrap-cell">
         <template #default="{ row }">{{ row.member_id }}{{ row.member_phone ? `(${row.member_phone})` : '' }}</template>
       </el-table-column>
-      <el-table-column label="金额" width="110">
+      <el-table-column label="金额" width="90" class-name="nowrap-cell">
         <template #default="{ row }"><span class="money">¥{{ fen2yuan(row.pay_amount) }}</span></template>
       </el-table-column>
-      <el-table-column label="支付构成" min-width="320">
+      <el-table-column label="支付构成" min-width="360">
         <template #default="{ row }">
-          <span class="pay-part" :class="{ hl: row.pay_wechat > 0 }">微信 ¥{{ fen2yuan(row.pay_wechat) }}</span>
-          /
-          <span class="pay-part" :class="{ hl: row.pay_balance > 0 }">余额 ¥{{ fen2yuan(row.pay_balance) }}</span>
-          /
-          <span class="pay-part" :class="{ hl: row.pay_gift > 0 }">{{ giftConfig.displayName }} {{ giftText(row.pay_gift) }}</span>
-          /
-          <span class="pay-part" :class="{ hl: row.pay_drink_card > 0 }">{{ drinkCardConfig.displayName }} {{ drinkCardText(row.pay_drink_card) }}</span>
+          <span class="pay-line">
+            <span class="pay-part" :class="{ hl: row.pay_wechat > 0 }">微信 ¥{{ fen2yuan(row.pay_wechat) }}</span>
+            /
+            <span class="pay-part" :class="{ hl: row.pay_balance > 0 }">余额 ¥{{ fen2yuan(row.pay_balance) }}</span>
+            /
+            <span class="pay-part" :class="{ hl: row.pay_gift > 0 }">{{ giftConfig.displayName }} {{ giftText(row.pay_gift) }}</span>
+            /
+            <span class="pay-part" :class="{ hl: row.pay_drink_card > 0 }">{{ drinkCardConfig.displayName }} {{ drinkCardText(row.pay_drink_card) }}</span>
+          </span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="100">
+      <el-table-column label="商品信息" min-width="220" show-overflow-tooltip>
+        <template #default="{ row }">{{ goodsInfoText(row) }}</template>
+      </el-table-column>
+      <el-table-column label="状态" width="90">
         <template #default="{ row }">
           <el-tag :type="statusMeta(row.order_status).type as any">{{ statusMeta(row.order_status).label }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created_at" label="下单时间" width="170" />
-      <el-table-column label="操作" width="280" fixed="right">
+      <el-table-column prop="created_at" label="下单时间" width="180" class-name="nowrap-cell" />
+      <el-table-column label="操作" width="230" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="showDetail(row)">详情</el-button>
           <el-button v-if="row.pay_status === 1" link type="primary" @click="reprint(row)">补打印</el-button>
@@ -248,7 +266,7 @@ async function reprint(row: any) {
     <el-drawer v-model="detailVisible" title="订单详情" size="520px">
       <template v-if="detail">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="出单序号">{{ detail.daily_no }}</el-descriptions-item>
+          <el-descriptions-item label="出单序号">#{{ detail.daily_no }}</el-descriptions-item>
           <el-descriptions-item label="订单号">{{ detail.order_no }}</el-descriptions-item>
           <el-descriptions-item label="桌号">{{ detail.table_name }}</el-descriptions-item>
           <el-descriptions-item label="会员ID/手机号">{{ detail.member_id }}{{ detail.member_phone ? `(${detail.member_phone})` : '' }}</el-descriptions-item>
@@ -284,7 +302,6 @@ async function reprint(row: any) {
   padding: 16px 20px;
   margin-bottom: 16px;
   background: #fff;
-  border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -306,6 +323,14 @@ async function reprint(row: any) {
 
 .pay-part {
   color: #86909c;
+}
+
+.pay-line {
+  white-space: nowrap;
+}
+
+:deep(.nowrap-cell .cell) {
+  white-space: nowrap;
 }
 
 .pay-part.hl {

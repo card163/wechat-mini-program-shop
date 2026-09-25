@@ -471,7 +471,7 @@ function moveDown(row: any) {
         </div>
 
         <div class="grid" v-loading="loading">
-          <div class="card" v-for="row in rows" :key="row.id">
+          <div class="card" :class="{ 'is-off-sale': row.status !== 1 }" v-for="row in rows" :key="row.id">
             <span class="low-stock-badge" v-if="isLowStock(row)">缺货</span>
             <el-checkbox
               v-if="classifyMode || stockMode"
@@ -490,8 +490,8 @@ function moveDown(row: any) {
                   <span class="origin" v-if="row.origin_price">¥{{ fen2yuan(row.origin_price) }}</span>
                 </div>
                 <div class="pay-tags" v-if="row.gift_payable === 1 || row.drink_card_payable === 1">
-                  <span class="pay-tag" v-if="row.gift_payable === 1">可用{{ giftConfig.displayName }}：{{ giftText(row.gift_amount) }}</span>
-                  <span class="pay-tag" v-if="row.drink_card_payable === 1">可用{{ drinkCardConfig.displayName }}：{{ drinkCardText(row.drink_card_amount) }}</span>
+                  <span class="pay-tag pay-tag--gift" v-if="row.gift_payable === 1">可用{{ giftConfig.displayName }}：{{ giftText(row.gift_amount) }}</span>
+                  <span class="pay-tag pay-tag--drink-card" v-if="row.drink_card_payable === 1">可用{{ drinkCardConfig.displayName }}：{{ drinkCardText(row.drink_card_amount) }}</span>
                 </div>
                 <div class="meta">库存 {{ row.stock === -1 ? '不限' : row.stock }} · 销量 {{ row.sales }}</div>
               </div>
@@ -523,7 +523,7 @@ function moveDown(row: any) {
       </div>
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="(editingId ? '编辑' : '新增') + '商品'" width="640px">
+    <el-drawer v-model="dialogVisible" :title="(editingId ? '编辑' : '新增') + '商品'" direction="rtl" size="640px" class="goods-edit-drawer">
       <el-form label-width="150px">
         <el-form-item label="商品名称">
           <el-input v-model="form.name" />
@@ -621,7 +621,7 @@ function moveDown(row: any) {
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submit">保存</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <el-dialog v-model="classifyDialogVisible" title="移动到分类" width="360px">
       <p class="tip">已选中 {{ selectedIds.length }} 个商品</p>
@@ -691,12 +691,13 @@ function moveDown(row: any) {
   width: 160px;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 6px;
   overflow: hidden;
 }
 
 .sidebar-item {
-  padding: 12px 16px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 16px;
   cursor: pointer;
   font-size: 14px;
   border-bottom: 1px solid #f0f0f0;
@@ -707,8 +708,8 @@ function moveDown(row: any) {
 }
 
 .sidebar-item.active {
-  background: #ecf5ff;
-  color: #409eff;
+  background: rgba(90, 118, 148, 0.35);
+  color: #1f2329;
   font-weight: 600;
 }
 
@@ -728,25 +729,43 @@ function moveDown(row: any) {
 .card {
   position: relative;
   background: #fff;
-  border-radius: 6px;
   padding: 12px 16px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  overflow: hidden;
+}
+
+.card.is-off-sale {
+  opacity: 0.5;
+}
+
+.card.is-off-sale::after {
+  content: '已下架';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: 42px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .low-stock-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 6px;
+  right: 6px;
   background: #f56c6c;
   color: #fff;
   font-size: 12px;
   line-height: 1;
   padding: 4px 8px;
   border-radius: 10px;
-  z-index: 1;
+  z-index: 3;
 }
 
 .low-stock-alert {
@@ -775,7 +794,6 @@ function moveDown(row: any) {
   width: 72px;
   height: 72px;
   flex-shrink: 0;
-  border-radius: 4px;
   background: #f5f6f8;
 }
 
@@ -821,10 +839,17 @@ function moveDown(row: any) {
 
 .pay-tag {
   font-size: 12px;
+  padding: 1px 6px;
+}
+
+.pay-tag--gift {
   color: #d4af37;
   background: #fdf6e3;
-  border-radius: 4px;
-  padding: 1px 6px;
+}
+
+.pay-tag--drink-card {
+  color: #2f9e6f;
+  background: #e6f7f0;
 }
 
 .meta {
@@ -856,7 +881,6 @@ function moveDown(row: any) {
 .gallery-item .el-image {
   width: 100%;
   height: 100%;
-  border-radius: 4px;
   cursor: grab;
 }
 
@@ -876,7 +900,6 @@ function moveDown(row: any) {
   width: 72px;
   height: 72px;
   border: 1px dashed #d9d9d9;
-  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -895,5 +918,19 @@ function moveDown(row: any) {
   align-items: center;
   gap: 8px;
   margin-top: 12px;
+}
+
+:deep(.el-button) {
+  border-radius: 0;
+}
+
+:deep(.el-radio-button__inner) {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .goods-edit-drawer :deep(.el-drawer) {
+    width: 92% !important;
+  }
 }
 </style>
